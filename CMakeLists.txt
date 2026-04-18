@@ -1,12 +1,13 @@
-cmake_minimum_required(VERSION 3.0.2)
-project(ORB_DVL2)
+# cmake_minimum_required(VERSION 3.0.2)  # original
+cmake_minimum_required(VERSION 3.10...3.22)
+project(AQUA-SLAM)
 
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -w")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
-SET(ROS_BUILD_TYPE RelWithDebInfo)
+# SET(ROS_BUILD_TYPE RelWithDebInfo)  # original (temporary)
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
-MESSAGE("Build type: " ${ROS_BUILD_TYPE})
+# MESSAGE("Build type: " ${ROS_BUILD_TYPE})  # original (temporary)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_definitions(-DCOMPILEDWITHC11)
@@ -22,23 +23,27 @@ set(CMAKE_CXX_STANDARD 17)
 
 #set(OpenCV_DIR /home/da/project/Thirdparty/opencv3.2/share/OpenCV)
 #set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} /home/da/project/Thirdparty/opencv3.2)
-find_package(OpenCV 3.2 REQUIRED)
+# find_package(OpenCV 3.2 REQUIRED)  # original
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
 
-find_package(catkin REQUIRED COMPONENTS
-        geometry_msgs
-        image_transport
-        message_filters
-        nav_msgs
-#        octomap_msgs
-#        pose_graph_msgs
-        roscpp
-        sensor_msgs
-        tf
-        message_generation
-        rospy
-        std_msgs
-        waterlinked_a50_ros_driver
-        )
+# original --------------------------------------------------------------------
+# find_package(catkin REQUIRED COMPONENTS
+#         geometry_msgs
+#         image_transport
+#         message_filters
+#         nav_msgs
+# #        octomap_msgs
+# #        pose_graph_msgs
+#         roscpp
+#         sensor_msgs
+#         tf
+#         message_generation
+#         rospy
+#         std_msgs
+#         waterlinked_a50_ros_driver
+#         )
+# -----------------------------------------------------------------------------
 
 find_package(Pangolin REQUIRED)
 set(Eigen3_DIR ${PROJECT_SOURCE_DIR}/Thirdparty/eigen3.3.4)
@@ -137,12 +142,16 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBOOST_LOG_DYN_LINK")
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
-        INCLUDE_DIRS include
-        LIBRARIES lib
-        CATKIN_DEPENDS geometry_msgs image_transport message_filters nav_msgs octomap_msgs roscpp sensor_msgs tf message_runtime waterlinked_a50_ros_driver
-        #          DEPENDS system_lib
-)
+
+# original --------------------------------------------------------------------
+# find_package(catkin REQUIRED COMPONENTS
+# catkin_package(
+#         INCLUDE_DIRS include
+#         LIBRARIES lib
+#         CATKIN_DEPENDS geometry_msgs image_transport message_filters nav_msgs octomap_msgs roscpp sensor_msgs tf message_runtime waterlinked_a50_ros_driver
+#         #          DEPENDS system_lib
+# )
+# -----------------------------------------------------------------------------
 
 ###########
 ## Build ##
@@ -163,7 +172,7 @@ include_directories(
         ${Pangolin_INCLUDE_DIRS}
         ${PCL_INCLUDE_DIRS}
         /home/da/Matlab/extern/include #matlab head
-        ${catkin_INCLUDE_DIRS}
+        # ${catkin_INCLUDE_DIRS}  # original
 
 )
 
@@ -223,7 +232,7 @@ add_library(${PROJECT_NAME} SHARED
         ${PROJECT_SOURCE_DIR}/include/CameraModels/KannalaBrandt8.h
         ${PROJECT_SOURCE_DIR}/include/MLPnPsolver.h
         ${PROJECT_SOURCE_DIR}/include/TwoViewReconstruction.h
-        ${PROJECT_SOURCE_DIR}/include/RosHandling.h
+        # ${PROJECT_SOURCE_DIR}/include/RosHandling.h  # original
         ${PROJECT_SOURCE_DIR}/include/DenseMapper.h
         ${PROJECT_SOURCE_DIR}/include/LKTracker.h
         ${PROJECT_SOURCE_DIR}/src/System.cc
@@ -250,9 +259,9 @@ add_library(${PROJECT_NAME} SHARED
         ${PROJECT_SOURCE_DIR}/src/CameraModels/KannalaBrandt8.cpp
         ${PROJECT_SOURCE_DIR}/src/MLPnPsolver.cpp
         ${PROJECT_SOURCE_DIR}/src/TwoViewReconstruction.cc
-        ${PROJECT_SOURCE_DIR}/src/RosHandling.cpp
+        # ${PROJECT_SOURCE_DIR}/src/RosHandling.cpp  # original
         ${PROJECT_SOURCE_DIR}/src/DenseMapper.cpp
-        ${PROJECT_SOURCE_DIR}/src/cv_bridge.cpp
+        # ${PROJECT_SOURCE_DIR}/src/cv_bridge.cpp  # original
         ${PROJECT_SOURCE_DIR}/src/rgb_colors.cpp
         ${PROJECT_SOURCE_DIR}/src/LKTracker.cpp src/FrameKLT.cpp src/FrameKLT.h src/Integrator.cpp src/Integrator.h)
 add_library(${PROJECT_NAME}_Optmization SHARED
@@ -276,7 +285,7 @@ target_link_libraries(${PROJECT_NAME}_Optmization
         DBoW2
         g2o
 
-        ${catkin_LIBRARIES}
+        # ${catkin_LIBRARIES}  # original
         )
 target_link_libraries(${PROJECT_NAME}
         ${OpenCV_LIBS}
@@ -286,7 +295,7 @@ target_link_libraries(${PROJECT_NAME}
         fmt::fmt-header-only
         DBoW2
         octomap
-        ${catkin_LIBRARIES}
+        # ${catkin_LIBRARIES}  # original
         -lboost_serialization
         -lboost_system
         -lboost_filesystem
@@ -303,10 +312,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/dvl1_node.cpp)
-add_executable(stereo_dvl2 ${PROJECT_SOURCE_DIR}/src/ros_stereo_DVL_tighly.cc)
-target_link_libraries(stereo_dvl2 ${Boost_LIBRARIES} ${PROJECT_NAME} ${PROJECT_NAME}_Optmization)
-target_compile_features(stereo_dvl2 PUBLIC cxx_std_17)
-add_dependencies(stereo_dvl2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_executable(stereo_dvl2 ${PROJECT_SOURCE_DIR}/src/ros_stereo_DVL_tighly.cc)  # original
+# target_link_libraries(stereo_dvl2 ${Boost_LIBRARIES} ${PROJECT_NAME} ${PROJECT_NAME}_Optmization)  # original
+# target_compile_features(stereo_dvl2 PUBLIC cxx_std_17)  # original
+# add_dependencies(stereo_dvl2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})  # original
 
 #add_executable(align src/test/align_trajectory.cpp)
 #target_link_libraries(align ${PROJECT_NAME} ${PROJECT_NAME}_Optmization)
@@ -373,9 +382,11 @@ add_dependencies(stereo_dvl2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORT
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-install(TARGETS stereo_dvl2
-        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-        )
+# original --------------------------------------------------------------------
+# install(TARGETS stereo_dvl2
+#         # RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}  # original
+#         )
+# -----------------------------------------------------------------------------
 
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
