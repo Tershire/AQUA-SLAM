@@ -1,1 +1,51 @@
 /cmake_variables.txt
+
+# ROS 2
+build/
+install/
+log/
+colcon_test_results/
+
+# ROS 1
+devel/
+logs/
+.catkin_workspace
+build_isolated/
+devel_isolated/
+
+# SLAM, dataset
+*.bag
+*.db3
+Vocabulary/
+dataset/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# C++
+*.o
+*.so
+*.a
+*.out
+CMakeCache.txt
+CMakeFiles/
+cmake-build-debug/
+cmake-build-release/
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+.docker_id
+.docker_tmp/
+
+# OS
+.DS_Store
+Thumb.db
+*.bak
+*.swp
+

@@ -1,0 +1,27 @@
+services:
+  aqua_slam_ros2:
+    build:
+      context: ../..
+      dockerfile: docker/ros2_jazzy/Dockerfile
+
+    image: tershire/aqua-slam:ros2-jazzy-dev
+    container_name: aqua_slam_ros2_dev
+    working_dir: /root/ros2_ws
+
+    network_mode: host
+    ipc: host
+    privileged: true
+
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - ROS_DOMAIN_ID=0
+
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ../../:/root/ros2_ws/src/AQUA-SLAM
+
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+    
