@@ -1250,11 +1250,11 @@ void Optimizer::PoseOnlyOptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kf
     for (auto rit = loss_kfs.rbegin(); rit != loss_kfs.rend(); ++rit) {
         KeyFrame* pKFi = *rit;
         if (pKFi->isBad()){
-            ROS_ERROR_STREAM("bad KF");
+//             ROS_ERROR_STREAM("bad KF");  // original
             assert(-1);
         }
         if(pKFi->GetPose().empty()){
-            ROS_ERROR_STREAM("empty pose");
+//             ROS_ERROR_STREAM("empty pose");  // original
             continue;
         }
         VertexPoseDvlIMU *VP = new VertexPoseDvlIMU(pKFi);
@@ -1285,7 +1285,7 @@ void Optimizer::PoseOnlyOptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kf
         // }
         optimizer.addVertex(VP);
     }
-    // ROS_INFO_STREAM(ss.str());
+//     // ROS_INFO_STREAM(ss.str());  // original
     optimized_kf_id = maxKFid;
 
 
@@ -1293,7 +1293,7 @@ void Optimizer::PoseOnlyOptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kf
     // for (rit = loss_kfs.rbegin(); rit != loss_kfs.rend(); ++rit) {
     //     KeyFrame* pKFi = *rit;
     //     if (pKFi->isBad()){
-    //         ROS_ERROR_STREAM("bad KF");
+//     //         ROS_ERROR_STREAM("bad KF");  // original
     //         assert(-1);
     //     }
     //     VertexPoseDvlGro *VP = new VertexPoseDvlGro(pKFi);
@@ -1306,7 +1306,7 @@ void Optimizer::PoseOnlyOptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kf
     // }
     // for(auto pKFi:loss_kfs) {
     //     if (pKFi->isBad()){
-    //         ROS_ERROR_STREAM("bad KF");
+//     //         ROS_ERROR_STREAM("bad KF");  // original
     //         assert(-1);
     //     }
     //     VertexPoseDvlGro *VP = new VertexPoseDvlGro(pKFi);
@@ -1316,7 +1316,7 @@ void Optimizer::PoseOnlyOptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kf
     //         VP->setFixed(false);
     //     }
     //     optimizer.addVertex(VP);
-    //     // ROS_INFO_STREAM("opt KF: "<<pKFi->mnId);
+//     //     // ROS_INFO_STREAM("opt KF: "<<pKFi->mnId);  // original
     // }
 
     // Biases
@@ -1522,11 +1522,11 @@ void Optimizer::PoseOnlyOptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kf
     //	std::cout << "start optimization" << std::endl;
     // optimizer.setVerbose(true);
 
-    // ROS_INFO_STREAM("bias before: ");
+//     // ROS_INFO_STREAM("bias before: ");  // original
     // for(auto p:vpab){
     //     int kf_id = p->id() - (maxKFid + 1)*2;
     //     p->setFixed(false);
-    //     ROS_INFO_STREAM("KF["<<kf_id<<"] bias: "<<p->estimate().transpose());
+//     //     ROS_INFO_STREAM("KF["<<kf_id<<"] bias: "<<p->estimate().transpose());  // original
     // }
     // for(auto eg:dvlimuG_edge){
     //     eg->setLevel(0);
@@ -1537,11 +1537,11 @@ void Optimizer::PoseOnlyOptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kf
     // optimizer.setVerbose(true);
     // optimizer.initializeOptimization(0);
     // optimizer.optimize(5);
-    // ROS_INFO_STREAM("bias after: ");
+//     // ROS_INFO_STREAM("bias after: ");  // original
     // for(auto p:vpab){
     //     int kf_id = p->id() - (maxKFid + 1)*2;
     //     p->setFixed(false);
-    //     ROS_INFO_STREAM("KF["<<kf_id<<"] bias: "<<p->estimate().transpose());
+//     //     ROS_INFO_STREAM("KF["<<kf_id<<"] bias: "<<p->estimate().transpose());  // original
     // }
     //
     // for(auto p:vpab){
@@ -1587,7 +1587,7 @@ void Optimizer::PoseOnlyOptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kf
         // IMU::Bias b(v_ab->estimate().x(), v_ab->estimate().y(), v_ab->estimate().z(),
         //             v_gb->estimate().x(), v_gb->estimate().y(), v_gb->estimate().z());
         // pKFi->SetNewBias(b);
-        // ROS_INFO_STREAM("recover KF[" << pKFi->mnId << "] bias(gyros acc): " << b.bwx<<","<<b.bwy<<","<<b.bwz<<","<<b.bax<<","<<b.bay<<","<<b.baz);
+//         // ROS_INFO_STREAM("recover KF[" << pKFi->mnId << "] bias(gyros acc): " << b.bwx<<","<<b.bwy<<","<<b.bwz<<","<<b.bax<<","<<b.bay<<","<<b.baz);  // original
 
         // Pose
         VertexPoseDvlIMU *VP = dynamic_cast<VertexPoseDvlIMU *>(optimizer.vertex(pKFi->mnId));
@@ -1606,7 +1606,7 @@ void Optimizer::PoseOnlyOptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kf
         Tcw_cv.convertTo(Tcw_cv, CV_32F);
         pKFi->SetPose(Tcw_cv);
     }
-    // ROS_INFO_STREAM(ss.str());
+//     // ROS_INFO_STREAM(ss.str());  // original
 
 
 }
@@ -1635,11 +1635,11 @@ void Optimizer::OptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kfs, Atlas
     // iterate ls_kf from last to first, and add vertex to optimizer
     for (auto pKFi :loss_kfs) {
         if (pKFi->isBad()){
-            ROS_ERROR_STREAM("bad KF");
+//             ROS_ERROR_STREAM("bad KF");  // original
             assert(-1);
         }
         if(pKFi->GetPose().empty()){
-            ROS_ERROR_STREAM("empty pose");
+//             ROS_ERROR_STREAM("empty pose");  // original
             continue;
         }
         VertexPoseDvlIMU *VP = new VertexPoseDvlIMU(pKFi);
@@ -1658,7 +1658,7 @@ void Optimizer::OptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kfs, Atlas
         }
         optimizer.addVertex(VP);
     }
-    ROS_INFO_STREAM(ss.str());
+//     ROS_INFO_STREAM(ss.str());  // original
 
 
 
@@ -6145,7 +6145,7 @@ void Optimizer::GlobalVAPoseGraphOptimization(KeyFrame* pCurKF, vector<KeyFrame*
                     num_connections++;
                 }
             }
-            ROS_INFO_STREAM("add multi-map constrain for global pose graph, from ID: "<<pKFi->mnId<<"to ID: "<<pKFn->mnId);
+//             ROS_INFO_STREAM("add multi-map constrain for global pose graph, from ID: "<<pKFi->mnId<<"to ID: "<<pKFn->mnId);  // original
         }
 
         if (num_connections == 0) {
@@ -6185,7 +6185,7 @@ void Optimizer::GlobalVAPoseGraphOptimization(KeyFrame* pCurKF, vector<KeyFrame*
 
         pKFi->mTcwBefMerge = pKFi->GetPose();
         pKFi->mTwcBefMerge = pKFi->GetPoseInverse();
-        // ROS_INFO_STREAM("set KF: "<<pKFi->mnId<<" pose before merging");
+//         // ROS_INFO_STREAM("set KF: "<<pKFi->mnId<<" pose before merging");  // original
         pKFi->SetPose(Tiw);
 
         if(pKFi->GetMapPointMatches().size()==0){
@@ -6213,7 +6213,7 @@ void Optimizer::GlobalVAPoseGraphOptimization(KeyFrame* pCurKF, vector<KeyFrame*
                     pRefKF = pMPi->GetReferenceKeyFrame();
                 }
                 // if (!sIdKF.count(pRefKF->mnId)){
-                //     ROS_INFO_STREAM("skip update map point["<<pMPi->mnId<<"] refer to KF["<<pRefKF->mnId<<"]");
+//                 //     ROS_INFO_STREAM("skip update map point["<<pMPi->mnId<<"] refer to KF["<<pRefKF->mnId<<"]");  // original
                 //     continue;
                 // }
 
@@ -6263,7 +6263,7 @@ void Optimizer::GlobalVAPoseGraphOptimization(KeyFrame* pCurKF, vector<KeyFrame*
     //             pRefKF = pMPi->GetReferenceKeyFrame();
     //         }
     //         // if (!sIdKF.count(pRefKF->mnId)){
-    //         //     ROS_INFO_STREAM("skip update map point["<<pMPi->mnId<<"] refer to KF["<<pRefKF->mnId<<"]");
+//     //         //     ROS_INFO_STREAM("skip update map point["<<pMPi->mnId<<"] refer to KF["<<pRefKF->mnId<<"]");  // original
     //         //     continue;
     //         // }
     //
@@ -9469,9 +9469,11 @@ void Optimizer::LocalBundleAdjustment(KeyFrame *pMainKF,
 		if (dist > 1.0) {
 			if (bShowImages) {
 				string strNameFile = pKFi->mNameFile;
-				cv::Mat imLeft = cv::imread(strNameFile, CV_LOAD_IMAGE_UNCHANGED);
+				// cv::Mat imLeft = cv::imread(strNameFile, CV_LOAD_IMAGE_UNCHANGED);  // original
+				cv::Mat imLeft = cv::imread(strNameFile, cv::IMREAD_UNCHANGED);
 
-				cv::cvtColor(imLeft, imLeft, CV_GRAY2BGR);
+				// cv::cvtColor(imLeft, imLeft, CV_GRAY2BGR);  // original
+				cv::cvtColor(imLeft, imLeft, cv::COLOR_GRAY2BGR);
 
 				int numPointsMono = 0, numPointsStereo = 0;
 				int numPointsMonoBad = 0, numPointsStereoBad = 0;
@@ -11202,7 +11204,7 @@ int Optimizer::PoseDvlGyrosOPtimizationLastFrame(Frame *pFrame, double lamda_DVL
 		nInliers = nInliersMono + nInliersStereo;
 		nBad = nBadMono + nBadStereo;
 
-//		ROS_INFO_STREAM("track local map inlier: "<<nInliers<<" outlier: "<<nBad);
+// //		ROS_INFO_STREAM("track local map inlier: "<<nInliers<<" outlier: "<<nBad);  // original
 //		cout<<"inlier map points: "<<nInliers<<endl;
 //		cout<<"outlier map points: "<<nBad<<endl;
 
@@ -12706,7 +12708,7 @@ void Optimizer::DvlGyroInitOptimization3(Map *pMap,
 	Eigen::Vector3d err_t_gyros_c = T_gyros_c.translation() - T_gyros_c_gt.translation();
 
 	stringstream ss;
-	ss << "result_" << ros::Time::now().toNSec() << ".txt";
+// // 	ss << "result_" << ros::Time::now().toNSec() << ".txt";  // original  // original
 	ofstream f("/home/da/project/ros/orb_dvl2_ws/src/dvl2/calibration_results/" + ss.str());
 
 	if (f.is_open()) {
@@ -12991,7 +12993,7 @@ void Optimizer::DvlGyroInitOptimization5(Map *pMap, Eigen::Vector3d &bg, bool bM
 	Eigen::Vector3d err_t_gyros_c = T_gyros_c.translation() - T_gyros_c_gt.translation();
 
 	stringstream ss;
-	ss << "result_" << ros::Time::now().toNSec() << ".txt";
+// // 	ss << "result_" << ros::Time::now().toNSec() << ".txt";  // original  // original
 	ofstream f("/home/da/project/ros/orb_dvl2_ws/src/dvl2/calibration_results/" + ss.str());
 
 	if (f.is_open()) {
@@ -13250,7 +13252,7 @@ void Optimizer::DvlGyroInitOptimization6(Map *pMap, Eigen::Vector3d &bg, bool bM
 		pkf->mpDvlPreintegrationKeyFrame->v_dk_visual = v_dk;
 
 //		cout << "kf id: " << pkf->mnId << " gyros bias: " << bg.transpose() << endl;
-		ROS_INFO_STREAM("beam calibration: KeyFrame id:<<" << pkf->mnId << " dvl velocity: "
+// 		ROS_INFO_STREAM("beam calibration: KeyFrame id:<<" << pkf->mnId << " dvl velocity: "  // original
 		                                                   << pkf->mpDvlPreintegrationKeyFrame->v_dk_dvl
 		                                                   << " visual velocity: "
 		                                                   << pkf->mpDvlPreintegrationKeyFrame->v_dk_visual.transpose());
@@ -13633,7 +13635,7 @@ double Optimizer::DvlIMUInitOptimization(Map *pMap, double priori_g, double prio
             g2o::HyperGraph::Vertex *VR_w_b0 = optimizer.vertex((maxKFid + 1)*4+2);
 
 			if (!VP1 || !VP2 || !VV1 || !VV2 || !VG || !VA  || !VT_d_c || !VT_g_d || !VR_w_b0) {
-                ROS_ERROR_STREAM("DVL IMU initialzation Error, KF1 ID:"<< pKFi->mPrevKF->mnId << "KF2 ID:" << pKFi->mnId << "VP1: " << VP1 <<", VP2: " << VP2 << ", VV1: " << VV1
+//                 ROS_ERROR_STREAM("DVL IMU initialzation Error, KF1 ID:"<< pKFi->mPrevKF->mnId << "KF2 ID:" << pKFi->mnId << "VP1: " << VP1 <<", VP2: " << VP2 << ", VV1: " << VV1  // original
 								 << ", VV2: " << VV2 << ", VG: " << VG << ", VA: " << VA
 								 << ", VT_d_c: " << VT_d_c << ", VT_g_d: " << VT_g_d
 								 << ", VR_w_b0: " << VR_w_b0);
@@ -13697,8 +13699,8 @@ double Optimizer::DvlIMUInitOptimization(Map *pMap, double priori_g, double prio
 
     auto bias_g = VG->estimate();
     auto bias_a = VA->estimate();
-    ROS_INFO_STREAM("bias_g: "<< bias_g.transpose());
-    ROS_INFO_STREAM("bias_a: "<< bias_a.transpose());
+//     ROS_INFO_STREAM("bias_g: "<< bias_g.transpose());  // original
+//     ROS_INFO_STREAM("bias_a: "<< bias_a.transpose());  // original
 
     double total_dvl = 0;
     double avg_dvl = 0;
@@ -13706,8 +13708,8 @@ double Optimizer::DvlIMUInitOptimization(Map *pMap, double priori_g, double prio
         total_dvl += e->error().norm();
     }
     avg_dvl = total_dvl/dvlimu_edges.size();
-    ROS_INFO_STREAM("avg_dvl: "<< avg_dvl);
-    ROS_INFO_STREAM("total_dvl:"<< total_dvl);
+//     ROS_INFO_STREAM("avg_dvl: "<< avg_dvl);  // original
+//     ROS_INFO_STREAM("total_dvl:"<< total_dvl);  // original
     // VGDir->setFixed(true);
     // e_bias->setLevel(0);
     // e_bias_without->setLevel(1);
@@ -13717,10 +13719,10 @@ double Optimizer::DvlIMUInitOptimization(Map *pMap, double priori_g, double prio
     // update gravity direction
     // Eigen::Matrix3d R_b0_w = NormalizeRotation(VGDir->estimate().Rwg);
     // Eigen::Matrix3d R_b0_w = VGDir->estimate().Rwg;
-    // ROS_INFO_STREAM("gravity calibration result: "<< R_b0_w);
+//     // ROS_INFO_STREAM("gravity calibration result: "<< R_b0_w);  // original
     // Sophus::SO3<double> R_b0_w_SO3(R_b0_w);
     // Eigen::Vector3d R_b0_w_so3 = R_b0_w_SO3.log();
-    // ROS_INFO_STREAM("gravity calibration result: \n"<< VGDir->estimate().Rwg);
+//     // ROS_INFO_STREAM("gravity calibration result: \n"<< VGDir->estimate().Rwg);  // original
     pMap->setRGravity(VGDir->estimate().Rwg);
     // if(vpKFs.size()<200){
     // pMap->SetImuInitialized();
@@ -13928,10 +13930,10 @@ void Optimizer::DvlIMURefineOptimization(Atlas* pAtlas)
     // update gravity direction
     // Eigen::Matrix3d R_b0_w = NormalizeRotation(VGDir->estimate().Rwg);
     Eigen::Matrix3d R_b0_w = VGDir->estimate().Rwg;
-    ROS_INFO_STREAM("gravity refine");
+//     ROS_INFO_STREAM("gravity refine");  // original
     // Sophus::SO3<double> R_b0_w_SO3(R_b0_w);
     // Eigen::Vector3d R_b0_w_so3 = R_b0_w_SO3.log();
-    // ROS_INFO_STREAM("gravity calibration result: "<< R_b0_w_so3.transpose());
+//     // ROS_INFO_STREAM("gravity calibration result: "<< R_b0_w_so3.transpose());  // original
     pAtlas->setRGravity(R_b0_w);
     for(auto m:pAtlas->GetAllMaps()){
         m->setRGravity(R_b0_w);
@@ -14023,7 +14025,7 @@ void Optimizer::DvlBeamOptimization(Map *pMap)
 
 	Eigen::Matrix<double, 8, 1> r_opt = v_beam_ori->estimate();
 
-	ROS_INFO_STREAM(
+// 	ROS_INFO_STREAM(  // original
 		"DVL Calibration(visual data):\nbeam1_theta=" << r_opt(0) / M_PI * 180.0 << " beam1_phi=" << r_opt(1) / M_PI * 180.0
 		                                 << "\nbeam2_theta=" << r_opt(2) / M_PI * 180.0 << " beam2_phi="
 		                                 << r_opt(3) / M_PI * 180.0
@@ -14118,7 +14120,7 @@ void Optimizer::DvlBeamOptimization_dvl(Map *pMap)
 
 	Eigen::Matrix<double, 8, 1> r_opt = v_beam_ori->estimate();
 
-	ROS_INFO_STREAM(
+// 	ROS_INFO_STREAM(  // original
 		"DVL Calibration(DVL data):\nbeam1_theta=" << r_opt(0) / M_PI * 180.0 << " beam1_phi=" << r_opt(1) / M_PI * 180.0
 		                                 << "\nbeam2_theta=" << r_opt(2) / M_PI * 180.0 << " beam2_phi="
 		                                 << r_opt(3) / M_PI * 180.0

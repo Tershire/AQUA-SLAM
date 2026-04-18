@@ -1,6 +1,6 @@
 # cmake_minimum_required(VERSION 3.0.2)  # original
 cmake_minimum_required(VERSION 3.10...3.22)
-project(AQUA-SLAM)
+project(aqua_slam)
 
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -w")
@@ -48,10 +48,40 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 find_package(Pangolin REQUIRED)
 set(Eigen3_DIR ${PROJECT_SOURCE_DIR}/Thirdparty/eigen3.3.4)
 find_package(Eigen3 3.3 REQUIRED)
-find_package(PCL REQUIRED)
+# new -------------------------------------------------------------------------
+set(VTK_DIR "/usr/lib/x86_64-linux-gnu/cmake/vtk-9.1")  # new
+find_package(VTK REQUIRED)  # new
+find_package(PCL REQUIRED COMPONENTS common io visualization)
+# -----------------------------------------------------------------------------
+# find_package(PCL REQUIRED)
+# find_package(VTK REQUIRED)  # new
 find_package(fmt REQUIRED)
 find_package(Boost REQUIRED COMPONENTS log_setup log)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBOOST_LOG_DYN_LINK")
+
+# ROS 2 -----------------------------------------------------------------------
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+
+find_package(image_transport REQUIRED)
+find_package(cv_bridge REQUIRED)
+
+find_package(sensor_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(octomap_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
+
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_sensor_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+
+find_package(std_srvs REQUIRED)
+
+find_package(pcl_conversions REQUIRED)
+# find_package(pcl_ros REQUIRED)
+# -----------------------------------------------------------------------------
 
 
 ## System dependencies are found with CMake's conventions
@@ -170,11 +200,27 @@ include_directories(
         ${EIGEN3_INCLUDE_DIR}
         #${PROJECT_SOURCE_DIR}/Thirdparty/include/eigen3
         ${Pangolin_INCLUDE_DIRS}
+        # ${VTK_INCLUDE_DIRS}  # new
+        /usr/include/vtk-9.1
         ${PCL_INCLUDE_DIRS}
         /home/da/Matlab/extern/include #matlab head
         # ${catkin_INCLUDE_DIRS}  # original
 
 )
+
+# ROS 2 -----------------------------------------------------------------------
+include_directories(
+  include
+#   ${rclcpp_INCLUDE_DIRS}
+
+#   ${image_transport_INCLUDE_DIRS}
+#   ${cv_bridge_INCLUDE_DIRS}
+
+#   ${sensor_msgs_INCLUDE_DIRS}
+#   ${nav_msgs_INCLUDE_DIRS}
+#   ${geometry_msgs_INCLUDE_DIRS}
+)
+# -----------------------------------------------------------------------------
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -207,7 +253,8 @@ endforeach ()
 
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
-add_library(${PROJECT_NAME} SHARED
+add_library(${PROJECT_NAME} SHARED  # original
+# add_library(aqua_slam SHARED 
         ${PROJECT_SOURCE_DIR}/include/System.h
         ${PROJECT_SOURCE_DIR}/include/Tracking.h
         ${PROJECT_SOURCE_DIR}/include/LocalMapping.h
@@ -264,7 +311,32 @@ add_library(${PROJECT_NAME} SHARED
         # ${PROJECT_SOURCE_DIR}/src/cv_bridge.cpp  # original
         ${PROJECT_SOURCE_DIR}/src/rgb_colors.cpp
         ${PROJECT_SOURCE_DIR}/src/LKTracker.cpp src/FrameKLT.cpp src/FrameKLT.h src/Integrator.cpp src/Integrator.h)
-add_library(${PROJECT_NAME}_Optmization SHARED
+
+ament_target_dependencies(${PROJECT_NAME}
+  rclcpp
+
+  image_transport
+  cv_bridge
+
+  sensor_msgs
+  nav_msgs
+  geometry_msgs
+  octomap_msgs
+  visualization_msgs
+
+  tf2
+  tf2_ros
+  tf2_sensor_msgs
+  tf2_geometry_msgs
+
+  std_srvs
+
+  pcl_conversions
+)
+
+# add_library(${PROJECT_NAME}_Optmization SHARED  # original
+add_library(${PROJECT_NAME}_optimization SHARED
+# add_library(aqua_slam_optimization SHARED 
         ${PROJECT_SOURCE_DIR}/include/Optimizer.h
         ${PROJECT_SOURCE_DIR}/include/ImuTypes.h
         ${PROJECT_SOURCE_DIR}/include/DVLGroPreIntegration.h
@@ -275,11 +347,14 @@ add_library(${PROJECT_NAME}_Optmization SHARED
         ${PROJECT_SOURCE_DIR}/src/DVLGroPreIntegration.cpp
         ${PROJECT_SOURCE_DIR}/src/G2oTypes.cc
         ${PROJECT_SOURCE_DIR}/src/OptimizableTypes.cpp)
-target_link_libraries(${PROJECT_NAME}_Optmization
+# target_link_libraries(${PROJECT_NAME}_Optmization  # original
+target_link_libraries(${PROJECT_NAME}_optimization
+# target_link_libraries(aqua_slam_node_optimization
         ${OpenCV_LIBS}
         ${EIGEN3_LIBS}
         ${Boost_LIBRARIES}
         ${PCL_LIBRARIES}
+        ${VTK_LIBRARIES}  # new
         fmt::fmt-header-only
         ${Sophus_LIBRARIES}
         DBoW2
@@ -292,6 +367,7 @@ target_link_libraries(${PROJECT_NAME}
         ${EIGEN3_LIBS}
         ${Boost_LIBRARIES}
         ${PCL_LIBRARIES}
+        ${VTK_LIBRARIES}  # new
         fmt::fmt-header-only
         DBoW2
         octomap
@@ -302,6 +378,34 @@ target_link_libraries(${PROJECT_NAME}
         -lboost_iostreams
         -lcrypto
         )
+
+# ROS 2 -----------------------------------------------------------------------
+add_executable(${PROJECT_NAME}_node src/node.cpp)
+
+ament_target_dependencies(${PROJECT_NAME}_node
+  rclcpp
+
+  image_transport
+  cv_bridge
+
+  sensor_msgs
+  nav_msgs
+  geometry_msgs
+  octomap_msgs
+  visualization_msgs
+
+  tf2
+  tf2_ros
+  tf2_sensor_msgs
+  tf2_geometry_msgs
+
+  std_srvs
+
+  pcl_conversions
+#   pcl_ros
+)
+# -----------------------------------------------------------------------------
+
 #add_executable(g2o_BA src/g2o_BA.cpp)
 #target_link_libraries(g2o_BA ${PROJECT_NAME} ${PROJECT_NAME}_Optmization)
 #target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
@@ -422,3 +526,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+# ROS 2 -----------------------------------------------------------------------
+ament_package()
+# -----------------------------------------------------------------------------

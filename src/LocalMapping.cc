@@ -74,7 +74,7 @@ LocalMapping::LocalMapping(System *pSys,
     ss<<" Local Mapper Parameter Setting: "<<endl;
     ss<<" IMUInitTranslation: "<<mInitTranslationThred<<endl;
     ss<<" IMUInitRotation: "<<mInitRotationThred<<endl;
-    ROS_INFO_STREAM(ss.str());
+//     ROS_INFO_STREAM(ss.str());  // original
 
 
 	//f_lm.open("localMapping_times" + strSequence + ".txt");
@@ -172,9 +172,9 @@ void LocalMapping::Run()
                     }
                     // else{
                     //     auto loss_kf = mpTracker->getMvpLossKf();
-                    //     // ROS_INFO_STREAM("KF during loss:");
+//                     //     // ROS_INFO_STREAM("KF during loss:");  // original
                     //     // for(auto pKF:loss_kf){
-                    //     //     ROS_INFO_STREAM(fixed<<setprecision(6)<<"KF["<<pKF->mnId<<"] "<<pKF->mTimeStamp
+//                     //     //     ROS_INFO_STREAM(fixed<<setprecision(6)<<"KF["<<pKF->mnId<<"] "<<pKF->mTimeStamp  // original
                     //     //                          <<", integration duration: "<<pKF->mpDvlPreintegrationKeyFrame->dT);
                     //     // }
                     //
@@ -199,16 +199,16 @@ void LocalMapping::Run()
                         auto dis = GetTravelDistance();
                         if(!mpAtlas->isImuInitialized()){
                             if((mpAtlas->KeyFramesInMap() > 10)){
-                                ROS_INFO_STREAM("DVL-IMU init");
+//                                 ROS_INFO_STREAM("DVL-IMU init");  // original
                                 InitializeDvlIMU();
                             }
                         }
                         else if((!mpAtlas->IsIMUCalibrated())&&(dis.first>mInitTranslationThred&&dis.second>mInitRotationThred)){
-                            ROS_INFO_STREAM("try initialize IMU with sufficient motion");
+//                             ROS_INFO_STREAM("try initialize IMU with sufficient motion");  // original
                             InitializeDvlIMU();
                         }
                         // else if((mpAtlas->IsIMUCalibrated() && !mpAtlas->IsIMUCalibrated2()) && (dis.first>10&&dis.second>1)){
-                        //     ROS_INFO_STREAM("try refine IMU bias with sufficient motion");
+//                         //     ROS_INFO_STREAM("try refine IMU bias with sufficient motion");  // original
                         //     InitializeDvlIMU();
                         //     mpAtlas->SetIMUCalibrated2();
                         // }
@@ -217,12 +217,12 @@ void LocalMapping::Run()
                     else {
                         // InitializeDvlIMU();
                         if(mpAtlas->GetAllKeyFramesinAllMap().size()>200&&current_KF_num<200){
-                            ROS_INFO_STREAM("DVL-IMU refine");
+//                             ROS_INFO_STREAM("DVL-IMU refine");  // original
                             RefineGravityDvlIMU();
                             current_KF_num =  mpAtlas->GetAllKeyFramesinAllMap().size();
                         }
                         else if(mpAtlas->GetAllKeyFramesinAllMap().size()>400&&current_KF_num<400){
-                            ROS_INFO_STREAM("DVL-IMU refine");
+//                             ROS_INFO_STREAM("DVL-IMU refine");  // original
                             RefineGravityDvlIMU();
                             current_KF_num =  mpAtlas->GetAllKeyFramesinAllMap().size();
                         }
@@ -268,9 +268,9 @@ void LocalMapping::Run()
 			}
 		}
 
-		// ROS_INFO_STREAM("Local Mapping KF in queue: "<<KeyframesInQueue());
+// 		// ROS_INFO_STREAM("Local Mapping KF in queue: "<<KeyframesInQueue());  // original
 		ResetIfRequested();
-		// ROS_INFO_STREAM("Local Mapping after reset KF in queue: "<<KeyframesInQueue());
+// 		// ROS_INFO_STREAM("Local Mapping after reset KF in queue: "<<KeyframesInQueue());  // original
 
 		// Tracking will see that Local Mapping is busy
 		SetAcceptKeyFrames(true);
@@ -1689,7 +1689,7 @@ void LocalMapping::InitializeDvlIMU()
     auto all_kf = mpAtlas->GetAllKeyFrames();
     if(clib_avg_error<0.01&&(all_kf.size()>20)){
         unique_lock<shared_timed_mutex> lock(pCurMap->mMutexMapUpdate);
-        ROS_INFO_STREAM("init avg error<100, avg err < 0.01");
+//         ROS_INFO_STREAM("init avg error<100, avg err < 0.01");  // original
         pCurMap->SetImuInitialized();
         mpAtlas->SetDvlImuInitialized();
         mpAtlas->setRGravity(pCurMap->getRGravity());
@@ -1707,7 +1707,7 @@ void LocalMapping::InitializeDvlIMU()
     }
     else if (dis.first<mInitTranslationThred||dis.second<mInitRotationThred){
         unique_lock<shared_timed_mutex> lock(pCurMap->mMutexMapUpdate);
-        ROS_INFO_STREAM("init motion is not enough");
+//         ROS_INFO_STREAM("init motion is not enough");  // original
         ResetKFBias();
         pCurMap->SetImuInitialized();
         // mpAtlas->SetDvlImuInitialized();
@@ -1723,7 +1723,7 @@ void LocalMapping::InitializeDvlIMU()
     }
     else if(clib_avg_error<0.1){
         unique_lock<shared_timed_mutex> lock(pCurMap->mMutexMapUpdate);
-        ROS_INFO_STREAM("init motion is enough");
+//         ROS_INFO_STREAM("init motion is enough");  // original
         mpAtlas->SetIMUCalibrated();
         pCurMap->SetImuInitialized();
         mpAtlas->SetDvlImuInitialized();
@@ -1740,7 +1740,7 @@ void LocalMapping::InitializeDvlIMU()
         return;
         // FullBA();
     }
-    ROS_INFO_STREAM("init motion is enough, but error too large");
+//     ROS_INFO_STREAM("init motion is enough, but error too large");  // original
     unique_lock<shared_timed_mutex> lock(pCurMap->mMutexMapUpdate);
     pCurMap->SetImuInitialized();
     mpAtlas->SetDvlImuInitialized();
@@ -1807,13 +1807,13 @@ std::pair<double,double> LocalMapping::GetTravelDistance()
         R_dis += abs(R_ci_cj_so3.y());
         T_c0_ci = T_c0_cj;
     }
-    ROS_INFO_STREAM("travel distance(t R): "<<t_dis<<" "<<R_dis);
+//     ROS_INFO_STREAM("travel distance(t R): "<<t_dis<<" "<<R_dis);  // original
     return std::make_pair(t_dis,R_dis);
 }
 
 void LocalMapping::ResetKFBias()
 {
-    ROS_INFO_STREAM("reset bias");
+//     ROS_INFO_STREAM("reset bias");  // original
     auto all_kf = mpAtlas->GetAllKeyFrames();
     for(auto pkf:all_kf){
         IMU::Bias b;

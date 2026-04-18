@@ -28,7 +28,8 @@
 #include<ros/ros.h>
 #include<cv_bridge/cv_bridge.h>
 #include<sensor_msgs/Imu.h>
-#include <nav_msgs/Odometry.h>
+// #include <nav_msgs/Odometry.h>  // original
+#include <nav_msgs/msg/odometry.hpp>
 #include <ds_sensor_msgs/Dvl.h>
 
 
@@ -129,15 +130,15 @@ public:
 int main(int argc, char **argv)
 {
 	init_logging();
-	ros::init(argc, argv, "Stereo_Inertial");
-	ros::NodeHandle n("~");
-	ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info);
+// // 	ros::init(argc, argv, "Stereo_Inertial");  // original  // original
+// // 	ros::NodeHandle n("~");  // original  // original
+// // 	ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info);  // original  // original
 	bool bEqual = false;
 	if (argc < 4 || argc > 5) {
 		cerr << endl
 			 << "Usage: rosrun ORB_SLAM3 Stereo_Inertial path_to_vocabulary path_to_settings do_rectify [do_equalize]"
 			 << endl;
-		ros::shutdown();
+// // 		ros::shutdown();  // original  // original
 		return 1;
 	}
 
@@ -160,22 +161,22 @@ int main(int argc, char **argv)
 
 	// Maximum delay, 5 seconds
 	// flowave
-//	ros::Subscriber sub_imu = n.subscribe("/BlueRov2/imu/data/ENU", 100, &ImuGrabber::GrabImu, &imugb);
-////	ros::Subscriber sub_imu2 = n.subscribe("/odometry/filtered", 100, &ImuGrabber::GrabImu2, &imugb);
-//	ros::Subscriber sub_dvl = n.subscribe("/BlueRov2/DVL", 100, &DVLGrabber::GrabDVL, &dvlgb);
-//	ros::Subscriber sub_img_left = n.subscribe("/suv3d/left/rgb_rect", 100, &ImageGrabber::GrabImageLeft, &igb);
-//	ros::Subscriber sub_img_right = n.subscribe("/suv3d/right/rgb_rect", 100, &ImageGrabber::GrabImageRight, &igb);
+// // //	ros::Subscriber sub_imu = n.subscribe("/BlueRov2/imu/data/ENU", 100, &ImuGrabber::GrabImu, &imugb);  // original  // original
+// // ////	ros::Subscriber sub_imu2 = n.subscribe("/odometry/filtered", 100, &ImuGrabber::GrabImu2, &imugb);  // original  // original
+// // //	ros::Subscriber sub_dvl = n.subscribe("/BlueRov2/DVL", 100, &DVLGrabber::GrabDVL, &dvlgb);  // original  // original
+// // //	ros::Subscriber sub_img_left = n.subscribe("/suv3d/left/rgb_rect", 100, &ImageGrabber::GrabImageLeft, &igb);  // original  // original
+// // //	ros::Subscriber sub_img_right = n.subscribe("/suv3d/right/rgb_rect", 100, &ImageGrabber::GrabImageRight, &igb);  // original  // original
 
 	//rovco
-	ros::Subscriber sub_imu = n.subscribe("/kvh_1750_imu/imu", 100, &ImuGrabber::GrabImu, &imugb);
-//	ros::Subscriber sub_imu2 = n.subscribe("/odometry/filtered", 100, &ImuGrabber::GrabImu2, &imugb);
-	ros::Subscriber sub_dvl = n.subscribe("/devices/dvl/dvl", 100, &DVLGrabber::GrabDVL, &dvlgb);
-	ros::Subscriber sub_img_left = n.subscribe("/suv3d/left/rgb_rect", 100, &ImageGrabber::GrabImageLeft, &igb);
-	ros::Subscriber sub_img_right = n.subscribe("/suv3d/right/rgb_rect", 100, &ImageGrabber::GrabImageRight, &igb);
+// // 	ros::Subscriber sub_imu = n.subscribe("/kvh_1750_imu/imu", 100, &ImuGrabber::GrabImu, &imugb);  // original  // original
+// // //	ros::Subscriber sub_imu2 = n.subscribe("/odometry/filtered", 100, &ImuGrabber::GrabImu2, &imugb);  // original  // original
+// // 	ros::Subscriber sub_dvl = n.subscribe("/devices/dvl/dvl", 100, &DVLGrabber::GrabDVL, &dvlgb);  // original  // original
+// // 	ros::Subscriber sub_img_left = n.subscribe("/suv3d/left/rgb_rect", 100, &ImageGrabber::GrabImageLeft, &igb);  // original  // original
+// // 	ros::Subscriber sub_img_right = n.subscribe("/suv3d/right/rgb_rect", 100, &ImageGrabber::GrabImageRight, &igb);  // original  // original
 
 	std::thread sync_thread(&ImageGrabber::SyncWithImu, &igb);
 
-	ros::spin();
+// // 	ros::spin();  // original  // original
 
 	return 0;
 }

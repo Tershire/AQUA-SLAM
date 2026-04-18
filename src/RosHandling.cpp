@@ -16,7 +16,7 @@ using namespace std;
 RosHandling::RosHandling(System *pSys, LocalMapping *pLocal)
 	: mp_system(pSys),mp_LocalMapping(pLocal)
 {
-	ros::NodeHandle nh_;
+// // 	ros::NodeHandle nh_;  // original  // original
 	image_transport::ImageTransport it(nh_);
 
 	image_transport::Publisher img_l_pub = it.advertise("/AQUA_SLAM/left/image_raw", 10);
@@ -36,75 +36,75 @@ RosHandling::RosHandling(System *pSys, LocalMapping *pLocal)
 		boost::shared_ptr<image_transport::Publisher>(boost::make_shared<image_transport::Publisher>(img_merge_pub));
 
 
-	// ros::Publisher gt_pub = nh_.advertise<geometry_msgs::PoseStamped>("orb_dvl/gt", 10);
-	// mp_gt_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(gt_pub));
-	// ros::Publisher gt_path_pub = nh_.advertise<nav_msgs::Path>("orb_path_gt", 10);
-	// mp_gt_path_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(gt_path_pub));
+// // 	// ros::Publisher gt_pub = nh_.advertise<geometry_msgs::PoseStamped>("orb_dvl/gt", 10);  // original  // original
+// // 	// mp_gt_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(gt_pub));  // original  // original
+// // 	// ros::Publisher gt_path_pub = nh_.advertise<nav_msgs::Path>("orb_path_gt", 10);  // original  // original
+// // 	// mp_gt_path_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(gt_path_pub));  // original  // original
 
-	ros::Publisher integration_path_pub = nh_.advertise<nav_msgs::Path>("/AQUA_SLAM/integration_path", 10);
+// // 	ros::Publisher integration_path_pub = nh_.advertise<nav_msgs::Path>("/AQUA_SLAM/integration_path", 10);  // original  // original
 	mp_integration_path_pub =
-		boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(integration_path_pub));
-    ros::Publisher ref_integration_path_pub = nh_.advertise<nav_msgs::Path>("/AQUA_SLAM/ref_integration_path", 10);
+// // 		boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(integration_path_pub));  // original  // original
+// //     ros::Publisher ref_integration_path_pub = nh_.advertise<nav_msgs::Path>("/AQUA_SLAM/ref_integration_path", 10);  // original  // original
     mp_ref_integration_path_pub =
-            boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(ref_integration_path_pub));
+// //             boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(ref_integration_path_pub));  // original  // original
     // initialize mp_markers_pub
-    ros::Publisher markers_pub = nh_.advertise<visualization_msgs::MarkerArray>("/AQUA_SLAM/markers", 10);
-    mp_markers_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(markers_pub));
-	ros::Publisher pose_orb_pub = nh_.advertise<geometry_msgs::PoseStamped>("/AQUA_SLAM/orb_pose", 10);
-	mp_pose_orb_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pose_orb_pub));
-	ros::Publisher odom_orb_pub = nh_.advertise<nav_msgs::Odometry>("/AQUA_SLAM/orb_odom", 10);
-	mp_odom_orb_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(odom_orb_pub));
-	ros::Publisher path_orb_pub = nh_.advertise<nav_msgs::Path>("/AQUA_SLAM/orb_path", 10);
-	mp_path_orb_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(path_orb_pub));
-	ros::Publisher pose_orb_camera_pub = nh_.advertise<nav_msgs::Odometry>("/AQUA_SLAM/camera_pose", 10);
-	mp_pose_orb_camera_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pose_orb_camera_pub));
+// //     ros::Publisher markers_pub = nh_.advertise<visualization_msgs::MarkerArray>("/AQUA_SLAM/markers", 10);  // original  // original
+// //     mp_markers_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(markers_pub));  // original  // original
+// // 	ros::Publisher pose_orb_pub = nh_.advertise<geometry_msgs::PoseStamped>("/AQUA_SLAM/orb_pose", 10);  // original  // original
+// // 	mp_pose_orb_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pose_orb_pub));  // original  // original
+// // 	ros::Publisher odom_orb_pub = nh_.advertise<nav_msgs::Odometry>("/AQUA_SLAM/orb_odom", 10);  // original  // original
+// // 	mp_odom_orb_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(odom_orb_pub));  // original  // original
+// // 	ros::Publisher path_orb_pub = nh_.advertise<nav_msgs::Path>("/AQUA_SLAM/orb_path", 10);  // original  // original
+// // 	mp_path_orb_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(path_orb_pub));  // original  // original
+// // 	ros::Publisher pose_orb_camera_pub = nh_.advertise<nav_msgs::Odometry>("/AQUA_SLAM/camera_pose", 10);  // original  // original
+// // 	mp_pose_orb_camera_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pose_orb_camera_pub));  // original  // original
 
-	// ros::Publisher pose_ekf_pub = nh_.advertise<geometry_msgs::PoseStamped>("orb_ekf_pose", 10);
-	// mp_pose_ekf_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pose_ekf_pub));
-	ros::Publisher path_ekf_pub = nh_.advertise<nav_msgs::Path>("/AQUA_SLAM/ekf_path", 10);
-	mp_path_ekf_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(path_ekf_pub));
+// // 	// ros::Publisher pose_ekf_pub = nh_.advertise<geometry_msgs::PoseStamped>("orb_ekf_pose", 10);  // original  // original
+// // 	// mp_pose_ekf_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pose_ekf_pub));  // original  // original
+// // 	ros::Publisher path_ekf_pub = nh_.advertise<nav_msgs::Path>("/AQUA_SLAM/ekf_path", 10);  // original  // original
+// // 	mp_path_ekf_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(path_ekf_pub));  // original  // original
 
-	// ros::Publisher pose_pointcloud_pub = nh_.advertise<geometry_msgs::PoseStamped>("orb_point_pose", 10);
-	// mp_pose_pointcloud_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pose_pointcloud_pub));
+// // 	// ros::Publisher pose_pointcloud_pub = nh_.advertise<geometry_msgs::PoseStamped>("orb_point_pose", 10);  // original  // original
+// // 	// mp_pose_pointcloud_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pose_pointcloud_pub));  // original  // original
 
-//	ros::ServiceClient lost_srv = nh_.serviceClient<vehicle_interface::AlarmStoppedTracking>("/ORBSLAM3/lost");
-//	mp_lost_srv = boost::shared_ptr<ros::ServiceClient>(boost::make_shared<ros::ServiceClient>(lost_srv));
+// // //	ros::ServiceClient lost_srv = nh_.serviceClient<vehicle_interface::AlarmStoppedTracking>("/ORBSLAM3/lost");  // original  // original
+// // //	mp_lost_srv = boost::shared_ptr<ros::ServiceClient>(boost::make_shared<ros::ServiceClient>(lost_srv));  // original  // original
 
-	ros::Publisher pointcloud_pub = nh_.advertise<sensor_msgs::PointCloud2>("/AQUA_SLAM/sparse_map", 100);
-	mp_pointcloud_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pointcloud_pub));
+// // 	ros::Publisher pointcloud_pub = nh_.advertise<sensor_msgs::PointCloud2>("/AQUA_SLAM/sparse_map", 100);  // original  // original
+// // 	mp_pointcloud_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pointcloud_pub));  // original  // original
 
-	ros::Publisher octomap_pub = nh_.advertise<octomap_msgs::Octomap>("/AQUA_SLAM/octomap", 10);
-	mp_octomap_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(octomap_pub));
+// // 	ros::Publisher octomap_pub = nh_.advertise<octomap_msgs::Octomap>("/AQUA_SLAM/octomap", 10);  // original  // original
+// // 	mp_octomap_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(octomap_pub));  // original  // original
 	mp_cloud_occupied = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>);
 	mp_cloud_occupied->reserve(5000);
 	mp_cloud_free = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>);
 	mp_cloud_free->reserve(50000);
 	m_octomap_resolution = 0.1;
 	mp_octree = boost::make_shared<octomap::OcTree>(octomap::OcTree(m_octomap_resolution));
-	// ros::Publisher map_info_pub = nh_.advertise<vehicle_interface::MapInfo>("/AQUA_SLAM/map_info", 10);
-	// mp_map_info_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(map_info_pub));
+// // 	// ros::Publisher map_info_pub = nh_.advertise<vehicle_interface::MapInfo>("/AQUA_SLAM/map_info", 10);  // original  // original
+// // 	// mp_map_info_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(map_info_pub));  // original  // original
 
-	ros::Publisher
+// // 	ros::Publisher  // original  // original
 		pose_integration_ref = nh_.advertise<geometry_msgs::PoseStamped>("/AQUA_SLAM/integration_ref", 10);
 	mp_pose_integration_ref_pub =
-		boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pose_integration_ref));
+// // 		boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pose_integration_ref));  // original  // original
 
-	ros::Publisher
+// // 	ros::Publisher  // original  // original
 		pose_integration_cur = nh_.advertise<geometry_msgs::PoseStamped>("/AQUA_SLAM/integration_cur", 10);
 	mp_pose_integration_cur_pub =
-		boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pose_integration_cur));
+// // 		boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pose_integration_cur));  // original  // original
 
-	ros::ServiceServer save_srv = nh_.advertiseService("/AQUA_SLAM/save", &RosHandling::SavePose, this);
-	mp_save_srv = boost::shared_ptr<ros::ServiceServer>(boost::make_shared<ros::ServiceServer>(save_srv));
+// // 	ros::ServiceServer save_srv = nh_.advertiseService("/AQUA_SLAM/save", &RosHandling::SavePose, this);  // original  // original
+// // 	mp_save_srv = boost::shared_ptr<ros::ServiceServer>(boost::make_shared<ros::ServiceServer>(save_srv));  // original  // original
 
-	ros::ServiceServer load_srv = nh_.advertiseService("/AQUA_SLAM/load_map", &RosHandling::LoadMap, this);
-	m_load_srv = boost::shared_ptr<ros::ServiceServer>(boost::make_shared<ros::ServiceServer>(load_srv));
+// // 	ros::ServiceServer load_srv = nh_.advertiseService("/AQUA_SLAM/load_map", &RosHandling::LoadMap, this);  // original  // original
+// // 	m_load_srv = boost::shared_ptr<ros::ServiceServer>(boost::make_shared<ros::ServiceServer>(load_srv));  // original  // original
 
-	ros::ServiceServer calib_srv = nh_.advertiseService("/AQUA_SLAM/calibrate", &RosHandling::CalibrateDVLGyro, this);
-	m_calib_srv = boost::shared_ptr<ros::ServiceServer>(boost::make_shared<ros::ServiceServer>(calib_srv));
+// // 	ros::ServiceServer calib_srv = nh_.advertiseService("/AQUA_SLAM/calibrate", &RosHandling::CalibrateDVLGyro, this);  // original  // original
+// // 	m_calib_srv = boost::shared_ptr<ros::ServiceServer>(boost::make_shared<ros::ServiceServer>(calib_srv));  // original  // original
 
-    ros::ServiceServer fullBA_srv = nh_.advertiseService("/AQUA_SLAM/fullBA", &RosHandling::FullBA, this);
-    m_fullBA_srv = boost::shared_ptr<ros::ServiceServer>(boost::make_shared<ros::ServiceServer>(fullBA_srv));
+// //     ros::ServiceServer fullBA_srv = nh_.advertiseService("/AQUA_SLAM/fullBA", &RosHandling::FullBA, this);  // original  // original
+// //     m_fullBA_srv = boost::shared_ptr<ros::ServiceServer>(boost::make_shared<ros::ServiceServer>(fullBA_srv));  // original  // original
 
     mT_w_c0.setIdentity();
 }
@@ -125,7 +125,7 @@ void RosHandling::PublishImgWithInfo(const sensor_msgs::ImageConstPtr &img)
 
 void RosHandling::PublishOrb(const Eigen::Isometry3d &T_c0_cj_orb,
                              const Eigen::Isometry3d &T_d_c,
-                             const ros::Time &stamp)
+// //                              const ros::Time &stamp)  // original  // original
 {
 	//conversion from ENU to NED
 	// Eigen::AngleAxisd r_x(M_PI,Eigen::Vector3d::UnitX());
@@ -145,7 +145,7 @@ void RosHandling::PublishOrb(const Eigen::Isometry3d &T_c0_cj_orb,
 
 	geometry_msgs::PoseStamped pose_to_pub;
 	pose_to_pub.header.frame_id = "AQUA_SLAM";
-	//pose_to_pub.header.stamp=ros::Time::now();
+// // 	//pose_to_pub.header.stamp=ros::Time::now();  // original  // original
 	pose_to_pub.header.stamp = stamp;
 	pose_to_pub.pose.position.x = T_w_cj.translation().x();
 	pose_to_pub.pose.position.y = T_w_cj.translation().y();
@@ -218,7 +218,7 @@ void RosHandling::UpdateMap(ORB_SLAM3::Atlas *pAtlas)
     T_w_c0.rotate(R_w_c0);
     T_w_c0.pretranslate(T_b_c.translation());
     mT_w_c0 = T_w_c0;
-//    ROS_INFO_STREAM("pub T_w_c0: \n"<<T_w_c0.matrix());
+// //    ROS_INFO_STREAM("pub T_w_c0: \n"<<T_w_c0.matrix());  // original
 
 	vector<Map *> allMaps = pAtlas->GetAllMaps();
 	for (vector<Map *>::iterator it = allMaps.begin(); it != allMaps.end(); it++) {
@@ -354,7 +354,7 @@ void RosHandling::PublishMap(ORB_SLAM3::Atlas *pAtlas, int state)
 
 }
 void RosHandling::BroadcastTF(const Eigen::Isometry3d &T_c0_cj_orb,
-                              const ros::Time &stamp,
+// //                               const ros::Time &stamp,  // original  // original
                               const string &id,
                               const string &child_id)
 {
@@ -553,8 +553,8 @@ void RosHandling::PublishIntegration(Atlas *pAtlas)
 
                 geometry_msgs::PoseStamped pose_to_pub;
                 pose_to_pub.header.frame_id = "AQUA_SLAM";
-                //pose_to_pub.header.stamp=ros::Time::now();
-                pose_to_pub.header.stamp = ros::Time(pKF->mTimeStamp);
+// //                 //pose_to_pub.header.stamp=ros::Time::now();  // original  // original
+// //                 pose_to_pub.header.stamp = ros::Time(pKF->mTimeStamp);  // original  // original
                 pose_to_pub.pose.position.x = T_w_c1.translation().x();
                 pose_to_pub.pose.position.y = T_w_c1.translation().y();
                 pose_to_pub.pose.position.z = T_w_c1.translation().z();
@@ -612,7 +612,7 @@ void RosHandling::PublishIntegration(Atlas *pAtlas)
             T_di_dj.pretranslate(t_di_dj);
             T_di_dj.rotate(R_di_dj);
             T_d0_dj = T_d0_dj * T_di_dj;
-            // ROS_INFO_STREAM("KF ID:"<<pKF->mnId<<" integration: \n"<<T_di_dj.matrix());
+//             // ROS_INFO_STREAM("KF ID:"<<pKF->mnId<<" integration: \n"<<T_di_dj.matrix());  // original
             // todo_tightly
             // save inverse
             //		Eigen::Isometry3d T_c0_cj_integration = T_c_enu.inverse() * T_d_c.inverse() * T_d0_dj * T_d_c * T_c_enu;
@@ -621,8 +621,8 @@ void RosHandling::PublishIntegration(Atlas *pAtlas)
 
             geometry_msgs::PoseStamped pose_to_pub;
             pose_to_pub.header.frame_id = "AQUA_SLAM";
-            //pose_to_pub.header.stamp=ros::Time::now();
-            pose_to_pub.header.stamp = ros::Time(pKF->mTimeStamp);
+// //             //pose_to_pub.header.stamp=ros::Time::now();  // original  // original
+// //             pose_to_pub.header.stamp = ros::Time(pKF->mTimeStamp);  // original  // original
             pose_to_pub.pose.position.x = T_w_cj_integration.translation().x();
             pose_to_pub.pose.position.y = T_w_cj_integration.translation().y();
             pose_to_pub.pose.position.z = T_w_cj_integration.translation().z();
@@ -647,8 +647,8 @@ void RosHandling::PublishIntegration(Atlas *pAtlas)
             Eigen::Isometry3d T_w_cj_orb = T_w_c0 * T_c0_cj_orb ;
 
             pose_to_pub.header.frame_id = "AQUA_SLAM";
-            //pose_to_pub.header.stamp=ros::Time::now();
-            pose_to_pub.header.stamp = ros::Time(pKF->mTimeStamp);
+// //             //pose_to_pub.header.stamp=ros::Time::now();  // original  // original
+// //             pose_to_pub.header.stamp = ros::Time(pKF->mTimeStamp);  // original  // original
             pose_to_pub.pose.position.x = T_w_cj_orb.translation().x();
             pose_to_pub.pose.position.y = T_w_cj_orb.translation().y();
             pose_to_pub.pose.position.z = T_w_cj_orb.translation().z();
@@ -684,7 +684,7 @@ void RosHandling::PublishIntegration(Atlas *pAtlas)
                 marker.color.b = 0.0f;
             }
             marker.color.a = 1.0f;
-            marker.lifetime = ros::Duration(0);
+// //             marker.lifetime = ros::Duration(0);  // original  // original
             all_markers.markers.push_back(marker);
 
 
@@ -702,7 +702,7 @@ void RosHandling::PublishIntegration(Atlas *pAtlas)
 		Eigen::Isometry3d T_w_cj = mT_w_c0 * T_c0_cj;
 		geometry_msgs::PoseStamped pose_to_pub;
 		pose_to_pub.header.frame_id = "AQUA_SLAM";
-		pose_to_pub.header.stamp = ros::Time(pKF->mTimeStamp);
+// // 		pose_to_pub.header.stamp = ros::Time(pKF->mTimeStamp);  // original  // original
 		pose_to_pub.pose.position.x = T_w_cj.translation().x();
 		pose_to_pub.pose.position.y = T_w_cj.translation().y();
 		pose_to_pub.pose.position.z = T_w_cj.translation().z();
@@ -730,7 +730,7 @@ void RosHandling::PublishIntegration(Atlas *pAtlas)
 void RosHandling::PublishLossKF(set<KeyFrame*, KFComparator> &loss_kfs)
 {
     if (loss_kfs.empty()) {
-        ROS_INFO_STREAM("No loss KF");
+//         ROS_INFO_STREAM("No loss KF");  // original
         return;
     }
     visualization_msgs::MarkerArray all_markers;
@@ -752,7 +752,7 @@ void RosHandling::PublishLossKF(set<KeyFrame*, KFComparator> &loss_kfs)
 
         geometry_msgs::PoseStamped pose_to_pub;
         pose_to_pub.header.frame_id = "AQUA_SLAM";
-        pose_to_pub.header.stamp = ros::Time(pKF->mTimeStamp);
+// //         pose_to_pub.header.stamp = ros::Time(pKF->mTimeStamp);  // original  // original
         pose_to_pub.pose.position.x = T_w_cj_orb.translation().x();
         pose_to_pub.pose.position.y = T_w_cj_orb.translation().y();
         pose_to_pub.pose.position.z = T_w_cj_orb.translation().z();
@@ -777,7 +777,7 @@ void RosHandling::PublishLossKF(set<KeyFrame*, KFComparator> &loss_kfs)
         marker.color.g = 0.0f;
         marker.color.b = 0.0f;
         marker.color.a = 1.0f;
-        marker.lifetime = ros::Duration(0);
+// //         marker.lifetime = ros::Duration(0);  // original  // original
         all_markers.markers.push_back(marker);
     }
     mp_markers_pub->publish(all_markers);
@@ -787,7 +787,7 @@ void RosHandling::PublishLossInteration(const Eigen::Isometry3d &T_e0_er, const 
 {
 	geometry_msgs::PoseStamped pose_to_pub;
 	pose_to_pub.header.frame_id = "AQUA_SLAM";
-	pose_to_pub.header.stamp = ros::Time::now();
+// // 	pose_to_pub.header.stamp = ros::Time::now();  // original  // original
 //	pose_to_pub.header.stamp = stamp;
 	pose_to_pub.pose.position.x = T_e0_er.translation().x();
 	pose_to_pub.pose.position.y = T_e0_er.translation().y();
@@ -819,11 +819,11 @@ void RosHandling::PublishLossInteration(const Eigen::Isometry3d &T_e0_er, const 
 
 	mp_pose_integration_cur_pub->publish(pose_to_pub);
 }
-void RosHandling::PublishCamera(const Eigen::Isometry3d &T_c0_cj_orb, const ros::Time &stamp)
+// // void RosHandling::PublishCamera(const Eigen::Isometry3d &T_c0_cj_orb, const ros::Time &stamp)  // original  // original
 {
 	nav_msgs::Odometry pose_to_pub;
 	pose_to_pub.header.frame_id = "AQUA_SLAM";
-	//pose_to_pub.header.stamp=ros::Time::now();
+// // 	//pose_to_pub.header.stamp=ros::Time::now();  // original  // original
 	pose_to_pub.header.stamp = stamp;
 
 	pose_to_pub.pose.pose.position.x = T_c0_cj_orb.translation().x();
@@ -844,7 +844,7 @@ void RosHandling::PublishCamera(const Eigen::Isometry3d &T_c0_cj_orb, const ros:
 bool RosHandling::SavePose(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
 {
 	string out_path;
-	ros::param::get("/AQUA_SLAM/traj_path", out_path);
+// // 	ros::param::get("/AQUA_SLAM/traj_path", out_path);  // original  // original
 	// mp_system->SaveKeyFrameTrajectoryTUM(out_path + "KeyFrameTrajectory_TUM_Format");
     mp_system->SaveKeyFrameTrajectory(out_path);
 	// mp_system->mpDenseMapper->Save(out_path);
@@ -854,7 +854,7 @@ bool RosHandling::SavePose(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse 
 bool RosHandling::LoadMap(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
 {
 	string map_file;
-	ros::param::get("/AQUA_SLAM/map_file", map_file);
+// // 	ros::param::get("/AQUA_SLAM/map_file", map_file);  // original  // original
 	mp_system->LoadAtlas(map_file,System::TEXT_FILE);
 	return true;
 }
@@ -867,11 +867,12 @@ void RosHandling::PublishImgMergeCandidate(const cv::Mat &img)
 	cv::Mat img_to_pub;
 	img.copyTo(img_to_pub);
 	std_msgs::Header header; // empty header
-	header.stamp = ros::Time::now(); // time
+// // 	header.stamp = ros::Time::now(); // time  // original  // original
 //	cv::Mat img_with_info=mpFrameDrawer->DrawFrame(true);
 
 	if (img_to_pub.channels() < 3) {
-		cv::cvtColor(img_to_pub, img_to_pub, CV_GRAY2BGR);
+		// cv::cvtColor(img_to_pub, img_to_pub, CV_GRAY2BGR);  // original
+        cv::cvtColor(img_to_pub, img_to_pub, cv::COLOR_GRAY2BGR); 
 	}
 	cv_bridge::CvImage img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, img_to_pub);
 

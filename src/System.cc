@@ -119,9 +119,9 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
 	//mpMap = new Map();
 	mpAtlas = new Atlas(0);
 	bool bLoadMap = false;
-	ros::param::get("/ORBSLAM3_tightly/is_load_map", bLoadMap);
+// // 	ros::param::get("/ORBSLAM3_tightly/is_load_map", bLoadMap);  // original  // original
 	string out_path;
-	ros::param::get("/ORBSLAM3_tightly/out_path", out_path);
+// // 	ros::param::get("/ORBSLAM3_tightly/out_path", out_path);  // original  // original
 	out_path = out_path + "/Altlas.osa";
 	if(bLoadMap){
 		LoadAtlas(out_path,System::TEXT_FILE);
@@ -421,17 +421,17 @@ cv::Mat System::TrackStereoGroDVL(const Mat &imLeft,
         Tcw = mpTracker->GrabImageStereoDvlgyro(imLeft, imRight, timestamp, bDVL, filename);
     } catch (const cv::Exception& e) {
         // An exception occurred in the OpenCV functions
-        ROS_ERROR_STREAM("OpenCV Error: " << e.what());
+//         ROS_ERROR_STREAM("OpenCV Error: " << e.what());  // original
         // Handle the exception, e.g., by returning an error code or rethrowing
         Tcw = cv::Mat::eye(4, 4, CV_32F);
     } catch (const std::exception& e) {
         // Handle standard exceptions
-        ROS_ERROR_STREAM("Error: " << e.what());
+//         ROS_ERROR_STREAM("Error: " << e.what());  // original
         // Handle the exception
         Tcw = cv::Mat::eye(4, 4, CV_32F);
     } catch (...) {
         // Catch all other types of exceptions
-        ROS_ERROR_STREAM("Unknown Exception");
+//         ROS_ERROR_STREAM("Unknown Exception");  // original
         // Handle the exception
         Tcw = cv::Mat::eye(4, 4, CV_32F);
     }
@@ -1135,7 +1135,7 @@ cv::Mat System::TrackStereoGroDVLKLT(const Mat &imLeft,
 
 void System::SaveAtlas(const string &out_path, int type)
 {
-	ROS_INFO_STREAM("start to save Altlas");
+// 	ROS_INFO_STREAM("start to save Altlas");  // original
 //	cout << endl << "Enter the name of the file if you want to save the current Atlas session. To exit press ENTER: ";
 	string saveFileName("Altlas");
 //	getline(cin, saveFileName);

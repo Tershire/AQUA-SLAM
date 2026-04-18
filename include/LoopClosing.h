@@ -30,12 +30,15 @@
 #include <thread>
 #include <mutex>
 #include "Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h"
-#include <ros/ros.h>
-#include <image_transport/image_transport.h>
-#include <sensor_msgs/Image.h>
+// #include <ros/ros.h>  // original
+// #include <image_transport/image_transport.h>  // original
+#include <image_transport/image_transport.hpp>
+// #include <sensor_msgs/Image.h>  // original
+#include <sensor_msgs/msg/image.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <cv_bridge/cv_bridge.h>
-#include <ros/ros.h>
+// #include <cv_bridge/cv_bridge.h>  // original
+#include <cv_bridge/cv_bridge.hpp>
+// #include <ros/ros.h>  // original
 
 namespace ORB_SLAM3
 {
@@ -93,7 +96,7 @@ public:
 	void ClearQueue();
 
     // Viewer* mpViewer;
-    ros::NodeHandlePtr mpNH;
+// //     ros::NodeHandlePtr mpNH;  // original  // original
     boost::shared_ptr<image_transport::ImageTransport> mpIt;
     // publisher for current keyframe
     image_transport::Publisher mImgPub_cur_keyframe;
@@ -244,7 +247,7 @@ protected:
     int mnFullBAIdx;
 
     // service for planner
-	ros::ServiceClient mMergingSrv;
+// // 	ros::ServiceClient mMergingSrv;  // original  // original
 	int mMergingThreshold;
 	int mTargetMapID;
 

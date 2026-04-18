@@ -85,14 +85,14 @@ VertexGDir* v_GDir = nullptr;
 g2o::VertexSE3Expmap* v_Tbd = nullptr;
 g2o::VertexSE3Expmap* v_Tdc = nullptr;
 // publisher pointer
-boost::shared_ptr<ros::Publisher> p_markers_pub;
+// // boost::shared_ptr<ros::Publisher> p_markers_pub;  // original  // original
 
 void DeleteGraphRviz()
 {
     visualization_msgs::MarkerArray marker_delete;
     visualization_msgs::Marker marker_d;
     marker_d.header.frame_id = "AQUA_SLAM";
-    marker_d.header.stamp = ros::Time();
+// //     marker_d.header.stamp = ros::Time();  // original  // original
     marker_d.action = visualization_msgs::Marker::DELETEALL;
     marker_delete.markers.push_back(marker_d);
     p_markers_pub->publish(marker_delete);
@@ -116,7 +116,7 @@ void PublishGraph()
     for (auto v: vertex_pose) {
         visualization_msgs::Marker marker;
         marker.header.frame_id = "AQUA_SLAM";
-        marker.header.stamp = ros::Time();
+// //         marker.header.stamp = ros::Time();  // original  // original
         marker.ns = "vertex";
         marker.id = v->id();
         marker.type = visualization_msgs::Marker::CUBE;
@@ -135,7 +135,7 @@ void PublishGraph()
     for (auto v: vertex_point) {
         visualization_msgs::Marker marker;
         marker.header.frame_id = "AQUA_SLAM";
-        marker.header.stamp = ros::Time();
+// //         marker.header.stamp = ros::Time();  // original  // original
         marker.ns = "vertex";
         marker.id = v->id();
         marker.type = visualization_msgs::Marker::SPHERE;
@@ -158,7 +158,7 @@ void PublishGraph()
     for (auto e: edge_mono) {
         visualization_msgs::Marker marker;
         marker.header.frame_id = "AQUA_SLAM";
-        marker.header.stamp = ros::Time();
+// //         marker.header.stamp = ros::Time();  // original  // original
         marker.ns = "edge";
         marker.id = e->id();
         marker.type = visualization_msgs::Marker::LINE_LIST;
@@ -185,7 +185,7 @@ void PublishGraph()
     for (auto e: edge_stereo) {
         visualization_msgs::Marker marker;
         marker.header.frame_id = "AQUA_SLAM";
-        marker.header.stamp = ros::Time();
+// //         marker.header.stamp = ros::Time();  // original  // original
         marker.ns = "edge";
         marker.id = e->id();
         marker.type = visualization_msgs::Marker::LINE_LIST;
@@ -215,7 +215,7 @@ void PublishGraph()
 bool OptimizeBA(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
 {
     if (!optimizer) {
-        ROS_ERROR_STREAM("Optimizer is not initialized.");
+//         ROS_ERROR_STREAM("Optimizer is not initialized.");  // original
         return false;
     }
     for (auto v: vertex_pose) {
@@ -257,7 +257,7 @@ bool OptimizeBA(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
     for (auto e: edge_se3) {
         e->setLevel(1);
     }
-    ROS_INFO_STREAM("Before optimization, visual chi2: " << visual_chi2 << ", dvl chi2: " << dvl_chi2);
+//     ROS_INFO_STREAM("Before optimization, visual chi2: " << visual_chi2 << ", dvl chi2: " << dvl_chi2);  // original
     //optimize the graph
 
 
@@ -283,10 +283,10 @@ bool OptimizeBA(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
         dvl_chi2 += e->chi2();
     }
     for (auto v: vertex_acc_bias) {
-        ROS_INFO_STREAM("acc bias: " << v->estimate().transpose());
+//         ROS_INFO_STREAM("acc bias: " << v->estimate().transpose());  // original
 
     }
-    ROS_INFO_STREAM("After optimization " << " visual chi2: " << visual_chi2 << ", dvl chi2: " << dvl_chi2);
+//     ROS_INFO_STREAM("After optimization " << " visual chi2: " << visual_chi2 << ", dvl chi2: " << dvl_chi2);  // original
 
     return true;
 }
@@ -294,7 +294,7 @@ bool OptimizeBA(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
 bool OptimizeBAWithoutBias(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
 {
     if (!optimizer) {
-        ROS_ERROR_STREAM("Optimizer is not initialized.");
+//         ROS_ERROR_STREAM("Optimizer is not initialized.");  // original
         return false;
     }
     for (auto v: vertex_pose) {
@@ -337,7 +337,7 @@ bool OptimizeBAWithoutBias(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse 
         e->setLevel(1);
     }
     optimizer->computeActiveErrors();
-    ROS_INFO_STREAM("Before optimization, total chi2:<<"<<optimizer->chi2() <<" visual chi2: " << visual_chi2 << ", dvl chi2: " << dvl_chi2);
+//     ROS_INFO_STREAM("Before optimization, total chi2:<<"<<optimizer->chi2() <<" visual chi2: " << visual_chi2 << ", dvl chi2: " << dvl_chi2);  // original
     //optimize the graph
 
 
@@ -362,7 +362,7 @@ bool OptimizeBAWithoutBias(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse 
         e->computeError();
         dvl_chi2 += e->chi2();
     }
-    ROS_INFO_STREAM("After optimization " << " visual chi2: " << visual_chi2 << ", dvl chi2: " << dvl_chi2);
+//     ROS_INFO_STREAM("After optimization " << " visual chi2: " << visual_chi2 << ", dvl chi2: " << dvl_chi2);  // original
 
     return true;
 }
@@ -370,7 +370,7 @@ bool OptimizeBAWithoutBias(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse 
 bool OptimizePoseGraph(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
 {
     if (!optimizer) {
-        ROS_ERROR_STREAM("Optimizer is not initialized.");
+//         ROS_ERROR_STREAM("Optimizer is not initialized.");  // original
         return false;
     }
     /************************first pose graph optimization************************/
@@ -395,8 +395,8 @@ bool OptimizePoseGraph(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res
         e->bprior=Eigen::Vector3d::Zero();
         VertexAccBias* va = dynamic_cast<VertexAccBias*>(e->vertices()[0]);
         va->setEstimate(Eigen::Vector3d::Zero());
-        ROS_INFO_STREAM("initial acc [" <<va->id()<< "]: " << va->estimate().transpose());
-        ROS_INFO_STREAM("prior acc: " << e->bprior.transpose());
+//         ROS_INFO_STREAM("initial acc [" <<va->id()<< "]: " << va->estimate().transpose());  // original
+//         ROS_INFO_STREAM("prior acc: " << e->bprior.transpose());  // original
     }
     for(auto e: edge_dvl_velocity){
         e->setLevel(0);
@@ -439,7 +439,7 @@ bool OptimizePoseGraph(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res
     }
     PublishGraph();
     for (auto v: vertex_acc_bias) {
-        ROS_INFO_STREAM("acc bias: " << v->estimate().transpose());
+//         ROS_INFO_STREAM("acc bias: " << v->estimate().transpose());  // original
 
     }
     // sleep this thread for 1 second
@@ -565,7 +565,7 @@ bool OptimizePoseGraph(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res
 bool OptimizePoseGraphWithout(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
 {
     if (!optimizer) {
-        ROS_ERROR_STREAM("Optimizer is not initialized.");
+//         ROS_ERROR_STREAM("Optimizer is not initialized.");  // original
         return false;
     }
     /************************first pose graph optimization************************/
@@ -590,8 +590,8 @@ bool OptimizePoseGraphWithout(std_srvs::EmptyRequest &req, std_srvs::EmptyRespon
         e->bprior=Eigen::Vector3d::Zero();
         VertexAccBias* va = dynamic_cast<VertexAccBias*>(e->vertices()[0]);
         va->setEstimate(Eigen::Vector3d::Zero());
-        ROS_INFO_STREAM("initial acc [" <<va->id()<< "]: " << va->estimate().transpose());
-        ROS_INFO_STREAM("prior acc: " << e->bprior.transpose());
+//         ROS_INFO_STREAM("initial acc [" <<va->id()<< "]: " << va->estimate().transpose());  // original
+//         ROS_INFO_STREAM("prior acc: " << e->bprior.transpose());  // original
     }
     map_pose_original.clear();
     for (auto v: vertex_pose) {
@@ -748,7 +748,7 @@ bool OptimizePoseGraphWithout(std_srvs::EmptyRequest &req, std_srvs::EmptyRespon
     optimizer->initializeOptimization(0);
     optimizer->optimize(50);
     for (auto v: vertex_acc_bias) {
-        ROS_INFO_STREAM("acc bias: " << v->estimate().transpose());
+//         ROS_INFO_STREAM("acc bias: " << v->estimate().transpose());  // original
 
     }
     PublishGraph();
@@ -788,9 +788,9 @@ bool OptimizeExtrinsic(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res
     Eigen::Isometry3d T_b_d = v_Tbd->estimate();
     Eigen::Isometry3d T_d_c = v_Tdc->estimate();
     Eigen::Isometry3d T_b_c = T_b_d * T_d_c;
-    ROS_INFO_STREAM("Tbd: \n" << T_b_d.matrix());
-    ROS_INFO_STREAM("Tdc: \n" << T_d_c.matrix());
-    ROS_INFO_STREAM("Tbc: \n" << T_b_c.matrix());
+//     ROS_INFO_STREAM("Tbd: \n" << T_b_d.matrix());  // original
+//     ROS_INFO_STREAM("Tdc: \n" << T_d_c.matrix());  // original
+//     ROS_INFO_STREAM("Tbc: \n" << T_b_c.matrix());  // original
     return true;
 }
 
@@ -904,7 +904,7 @@ bool ReloadGraph(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
             e_se3->setLevel(0);
             edge_se3.push_back(e_se3);
             e_se3->setId(edge_id++);
-            ROS_INFO_STREAM("add EdgeSE3DVLIMU ID:" << e_se3->id() << ", error:" << e_se3->chi2());
+//             ROS_INFO_STREAM("add EdgeSE3DVLIMU ID:" << e_se3->id() << ", error:" << e_se3->chi2());  // original
         }
     }
 
@@ -927,7 +927,7 @@ bool ReloadGraph(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
         T_c0_cj.pretranslate(v->estimate().twc);
         map_pose_original.insert(std::pair<VertexPoseDvlIMU*, Eigen::Isometry3d>(v, T_c0_cj));
     }
-    ROS_INFO_STREAM("Load graph done, vertex_pose size: " << vertex_pose.size() << ", vertex_point size: "
+//     ROS_INFO_STREAM("Load graph done, vertex_pose size: " << vertex_pose.size() << ", vertex_point size: "  // original
                                                           << vertex_point.size() << ", edge_mono size: "
                                                           << edge_mono.size() << ", edge_stereo size: "
                                                           << edge_stereo.size() << ", edge_dvl_imu size: "
@@ -936,7 +936,7 @@ bool ReloadGraph(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
                                                           << edge_prior_gyro.size()
                                                           << ", edge_dvl_velocity size: "
                                                           << edge_dvl_velocity.size());
-    ROS_INFO_STREAM("graph chi2: " << optimizer->chi2());
+//     ROS_INFO_STREAM("graph chi2: " << optimizer->chi2());  // original
     PublishGraph();
     return true;
 }
@@ -956,7 +956,7 @@ bool SaveResult(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
              << " " << t.z() << " " << q.x() << " " << q.y() << " " << q.z() << " " << q.w() << endl;
     }
     fout.close();
-    ROS_INFO_STREAM("Save result done");
+//     ROS_INFO_STREAM("Save result done");  // original
     return true;
 }
 
@@ -976,26 +976,26 @@ bool SetInfor(ORB_DVL2::SetInfofRequest &req, ORB_DVL2::SetInfofResponse &res)
     // }
     visual_weight = req.Visual_Infor;
     dvl_imu_weight = req.DVL_Infor;
-    ROS_INFO_STREAM(
+//     ROS_INFO_STREAM(  // original
             "Set information done, DVL Infor: " << req.DVL_Infor << ", Visual Infor: " << req.Visual_Infor);
     return true;
 }
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "BAg2o");
-    ros::NodeHandle nh;
-    ros::ServiceServer service = nh.advertiseService("/g2oGraph/SetInfor", SetInfor);
-    ros::ServiceServer service2 = nh.advertiseService("/g2oGraph/Reload", ReloadGraph);
-    ros::ServiceServer service3 = nh.advertiseService("/g2oGraph/OptimizeBA", OptimizeBA);
-    ros::ServiceServer service4 = nh.advertiseService("/g2oGraph/OptimizePose", OptimizePoseGraph);
-    ros::ServiceServer service5 = nh.advertiseService("/g2oGraph/OptimizeExtrinsicAndG", OptimizeExtrinsic);
-    ros::ServiceServer service6 = nh.advertiseService("/g2oGraph/saveResult", SaveResult);
-    ros::ServiceServer service7 = nh.advertiseService("/g2oGraph/OptimizeBAWithoutBias", OptimizeBAWithoutBias);
-    ros::ServiceServer service8 = nh.advertiseService("/g2oGraph/OptimizePoseGraphWithout",
+// //     ros::init(argc, argv, "BAg2o");  // original  // original
+// //     ros::NodeHandle nh;  // original  // original
+// //     ros::ServiceServer service = nh.advertiseService("/g2oGraph/SetInfor", SetInfor);  // original  // original
+// //     ros::ServiceServer service2 = nh.advertiseService("/g2oGraph/Reload", ReloadGraph);  // original  // original
+// //     ros::ServiceServer service3 = nh.advertiseService("/g2oGraph/OptimizeBA", OptimizeBA);  // original  // original
+// //     ros::ServiceServer service4 = nh.advertiseService("/g2oGraph/OptimizePose", OptimizePoseGraph);  // original  // original
+// //     ros::ServiceServer service5 = nh.advertiseService("/g2oGraph/OptimizeExtrinsicAndG", OptimizeExtrinsic);  // original  // original
+// //     ros::ServiceServer service6 = nh.advertiseService("/g2oGraph/saveResult", SaveResult);  // original  // original
+// //     ros::ServiceServer service7 = nh.advertiseService("/g2oGraph/OptimizeBAWithoutBias", OptimizeBAWithoutBias);  // original  // original
+// //     ros::ServiceServer service8 = nh.advertiseService("/g2oGraph/OptimizePoseGraphWithout",  // original  // original
                                                       OptimizePoseGraphWithout);
-    ros::Publisher markers_pub = nh.advertise<visualization_msgs::MarkerArray>("/g2oGraph/GraphMarker", 10);
-    p_markers_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(markers_pub));
+// //     ros::Publisher markers_pub = nh.advertise<visualization_msgs::MarkerArray>("/g2oGraph/GraphMarker", 10);  // original  // original
+// //     p_markers_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(markers_pub));  // original  // original
 
     optimizer = new g2o::SparseOptimizer();
     linearSolver = new g2o::LinearSolverEigen<g2o::BlockSolverX::PoseMatrixType>();
@@ -1005,6 +1005,6 @@ int main(int argc, char** argv)
     optimizer->setVerbose(true);
 
 
-    ros::spin();
+// //     ros::spin();  // original  // original
     return 0;
 }

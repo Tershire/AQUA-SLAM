@@ -14,7 +14,7 @@ namespace ORB_SLAM3
 {
 LKTracker::LKTracker()
 {
-	ros::NodeHandle n;
+// // 	ros::NodeHandle n;  // original  // original
 	image_transport::ImageTransport it(n);
 	image_transport::Publisher track_pub = it.advertise("/lk_tracker/track_img", 10);
 	pTrack_img_pub =
@@ -23,7 +23,7 @@ LKTracker::LKTracker()
 LKTracker::LKTracker(bool bStereo)
 	: stereo_cam(bStereo)
 {
-	ros::NodeHandle n;
+// // 	ros::NodeHandle n;  // original  // original
 	image_transport::ImageTransport it(n);
 	image_transport::Publisher track_pub = it.advertise("/lk_tracker/track_img", 10);
 	pTrack_img_pub =
@@ -81,7 +81,7 @@ void LKTracker::drawTrack(const cv::Mat &imLeft,
 	//cv::Mat imCur2Compress;
 	//cv::resize(imCur2, imCur2Compress, cv::Size(cols, rows / 2));
 	std_msgs::Header header; // empty header
-	header.stamp = ros::Time::now();
+// // 	header.stamp = ros::Time::now();  // original  // original
 	cv_bridge::CvImage img_bridge(header, sensor_msgs::image_encodings::BGR8, imTrack);
 	pTrack_img_pub->publish(img_bridge.toImageMsg());
 }
@@ -456,7 +456,7 @@ bool LKTracker::trackFrame(Frame &cur_frame, const Frame &prev_frame)
 		cv::cv2eigen(Tcw, T_cj_c0.matrix());
 	}
 	else {
-		ROS_ERROR_STREAM('LK_Tracker: cannot get current camera pose!');
+// 		ROS_ERROR_STREAM('LK_Tracker: cannot get current camera pose!');  // original
 		return false;
 	}
 	T_c0_cj = T_cj_c0.inverse();
@@ -465,7 +465,7 @@ bool LKTracker::trackFrame(Frame &cur_frame, const Frame &prev_frame)
 		cv::cv2eigen(Tlw, T_ci_c0.matrix());
 	}
 	else {
-		ROS_ERROR_STREAM('LK_Tracker: cannot get previous camera pose!');
+// 		ROS_ERROR_STREAM('LK_Tracker: cannot get previous camera pose!');  // original
 		return false;
 	}
 	T_c0_ci = T_ci_c0.inverse();
@@ -541,7 +541,7 @@ bool LKTracker::trackFrame(Frame &cur_frame, const Frame &prev_frame)
 		                         cv::Size(21, 21),
 		                         3);
 	}
-//	ROS_INFO_STREAM("LKTracker: first tracked points =" << succ_num);
+// //	ROS_INFO_STREAM("LKTracker: first tracked points =" << succ_num);  // original
 
 	if (FLOW_BACK) {
 		vector<uchar> reverse_status;
@@ -563,10 +563,10 @@ bool LKTracker::trackFrame(Frame &cur_frame, const Frame &prev_frame)
 //				succ_num++;
 //			}
 //		}
-//		ROS_INFO_STREAM("LKTracker: BackFlow tracked points =" << succ_num);
+// //		ROS_INFO_STREAM("LKTracker: BackFlow tracked points =" << succ_num);  // original
 		for (size_t i = 0; i < status.size(); i++) {
 			double dis = distance(prev_pts[i], reverse_pts[i]);
-//			ROS_INFO_STREAM("LKTracker: BackFlow tracked points distance=" << dis);
+// //			ROS_INFO_STREAM("LKTracker: BackFlow tracked points distance=" << dis);  // original
 			if (status[i] && reverse_status[i] && dis <= 1.0) {
 				status[i] = 1;
 			}
@@ -580,7 +580,7 @@ bool LKTracker::trackFrame(Frame &cur_frame, const Frame &prev_frame)
 //				succ_num++;
 //			}
 //		}
-//		ROS_INFO_STREAM("LKTracker: Foward-BackFlow tracked points =" << succ_num);
+// //		ROS_INFO_STREAM("LKTracker: Foward-BackFlow tracked points =" << succ_num);  // original
 	}
 
 	//3. link orb feature points extracted on current image to tracked points
@@ -615,12 +615,12 @@ bool LKTracker::trackFrame(Frame &cur_frame, const Frame &prev_frame)
 			nmatches++;
 		}
 	}
-//	ROS_INFO_STREAM("LKTracker: final tracked points =" << nmatches);
+// //	ROS_INFO_STREAM("LKTracker: final tracked points =" << nmatches);  // original
 
 	// draw and publish track result
 //	drawTrackFrame(cur_frame, prev_frame, imTrack);
 //	std_msgs::Header header; // empty header
-//	header.stamp = ros::Time::now();
+// // //	header.stamp = ros::Time::now();  // original  // original
 //	cv_bridge::CvImage img_bridge(header, sensor_msgs::image_encodings::BGR8, imTrack);
 //	pTrack_img_pub->publish(img_bridge.toImageMsg());
 
@@ -639,10 +639,12 @@ void LKTracker::drawTrackFrame(Frame &cur_frame, const Frame &prev_frame, cv::Ma
 	cv::Mat result_cur = cur_frame.imgLeft.clone();
 	cv::Mat result_prev = prev_frame.imgLeft.clone();
 	if (result_cur.channels() == 1) {
-		cv::cvtColor(result_cur, result_cur, CV_GRAY2BGR);
+		// cv::cvtColor(result_cur, result_cur, CV_GRAY2BGR);  // original
+		cv::cvtColor(result_cur, result_cur, cv::COLOR_GRAY2BGR);
 	}
 	if (result_prev.channels() == 1) {
-		cv::cvtColor(result_prev, result_prev, CV_GRAY2BGR);
+		// cv::cvtColor(result_prev, result_prev, CV_GRAY2BGR);  // original
+		cv::cvtColor(result_prev, result_prev, cv::COLOR_GRAY2BGR);
 	}
 
 	for (int i = 0; i < cur_frame.N; i++) {
@@ -709,7 +711,7 @@ bool LKTracker::TrackReferenceKeyFrameKLT(KeyFrame *pKF, const Frame &cur_frame)
 		cv::cv2eigen(Tcw, T_cj_c0.matrix());
 	}
 	else {
-		ROS_ERROR_STREAM('LK_Tracker: cannot get current camera pose!');
+// 		ROS_ERROR_STREAM('LK_Tracker: cannot get current camera pose!');  // original
 		return false;
 	}
 	T_c0_cj = T_cj_c0.inverse();
@@ -718,7 +720,7 @@ bool LKTracker::TrackReferenceKeyFrameKLT(KeyFrame *pKF, const Frame &cur_frame)
 		cv::cv2eigen(Tlw, T_ci_c0.matrix());
 	}
 	else {
-		ROS_ERROR_STREAM('LK_Tracker: cannot get previous camera pose!');
+// 		ROS_ERROR_STREAM('LK_Tracker: cannot get previous camera pose!');  // original
 		return false;
 	}
 	T_c0_ci = T_ci_c0.inverse();
@@ -794,7 +796,7 @@ bool LKTracker::TrackReferenceKeyFrameKLT(KeyFrame *pKF, const Frame &cur_frame)
 		                         cv::Size(21, 21),
 		                         3);
 	}
-//	ROS_INFO_STREAM("LKTracker: first tracked points =" << succ_num);
+// //	ROS_INFO_STREAM("LKTracker: first tracked points =" << succ_num);  // original
 
 	if (FLOW_BACK) {
 		vector<uchar> reverse_status;
@@ -816,10 +818,10 @@ bool LKTracker::TrackReferenceKeyFrameKLT(KeyFrame *pKF, const Frame &cur_frame)
 //				succ_num++;
 //			}
 //		}
-//		ROS_INFO_STREAM("LKTracker: BackFlow tracked points =" << succ_num);
+// //		ROS_INFO_STREAM("LKTracker: BackFlow tracked points =" << succ_num);  // original
 		for (size_t i = 0; i < status.size(); i++) {
 			double dis = distance(prev_pts[i], reverse_pts[i]);
-//			ROS_INFO_STREAM("LKTracker: BackFlow tracked points distance=" << dis);
+// //			ROS_INFO_STREAM("LKTracker: BackFlow tracked points distance=" << dis);  // original
 			if (status[i] && reverse_status[i] && dis <= 1.0) {
 				status[i] = 1;
 			}
@@ -833,7 +835,7 @@ bool LKTracker::TrackReferenceKeyFrameKLT(KeyFrame *pKF, const Frame &cur_frame)
 //				succ_num++;
 //			}
 //		}
-//		ROS_INFO_STREAM("LKTracker: Foward-BackFlow tracked points =" << succ_num);
+// //		ROS_INFO_STREAM("LKTracker: Foward-BackFlow tracked points =" << succ_num);  // original
 	}
 
 	//3. link orb feature points extracted on current image to tracked points
@@ -869,12 +871,12 @@ bool LKTracker::TrackReferenceKeyFrameKLT(KeyFrame *pKF, const Frame &cur_frame)
 //		}
 //	}
 
-//	ROS_INFO_STREAM("LKTracker: final tracked points =" << nmatches);
+// //	ROS_INFO_STREAM("LKTracker: final tracked points =" << nmatches);  // original
 
 	// draw and publish track result
 //	drawTrackFrame(cur_frame, prev_frame, imTrack);
 //	std_msgs::Header header; // empty header
-//	header.stamp = ros::Time::now();
+// // //	header.stamp = ros::Time::now();  // original  // original
 //	cv_bridge::CvImage img_bridge(header, sensor_msgs::image_encodings::BGR8, imTrack);
 //	pTrack_img_pub->publish(img_bridge.toImageMsg());
 

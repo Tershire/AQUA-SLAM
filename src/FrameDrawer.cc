@@ -96,7 +96,8 @@ cv::Mat FrameDrawer::DrawFrame(bool bOldFeatures)
     }
 
     if(im.channels()<3) //this should be always true
-        cvtColor(im,im,CV_GRAY2BGR);
+        // cvtColor(im,im,CV_GRAY2BGR);  // original
+        cvtColor(im,im,cv::COLOR_GRAY2BGR);
 
     //Draw
     if(state==Tracking::NOT_INITIALIZED)
@@ -307,7 +308,8 @@ cv::Mat FrameDrawer::DrawRightFrame()
     } // destroy scoped mutex -> release mutex
 
     if(im.channels()<3) //this should be always true
-        cvtColor(im,im,CV_GRAY2BGR);
+        // cvtColor(im,im,CV_GRAY2BGR);  // original
+        cvtColor(im,im,cv::COLOR_GRAY2BGR);
 
     //Draw
     if(state==Tracking::NOT_INITIALIZED) //INITIALIZING

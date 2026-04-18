@@ -36,9 +36,11 @@
 #ifndef CV_BRIDGE_CV_BRIDGE_H
 #define CV_BRIDGE_CV_BRIDGE_H
 
-#include <sensor_msgs/Image.h>
+// #include <sensor_msgs/Image.h>  // original
+#include <sensor_msgs/msg/image.hpp>
 #include <sensor_msgs/CompressedImage.h>
-#include <sensor_msgs/image_encodings.h>
+// #include <sensor_msgs/image_encodings.h>  // original
+#include <sensor_msgs/image_encodings.hpp>
 #include <ros/static_assert.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -347,7 +349,7 @@ template<> struct Definition<cv_bridge::CvImage>
 
 template<> struct HasHeader<cv_bridge::CvImage> : TrueType {};
 
-} // namespace ros::message_traits
+// // } // namespace ros::message_traits  // original  // original
 
 namespace serialization {
 
@@ -397,7 +399,7 @@ template<> struct Serializer<cv_bridge::CvImage>
   }
 };
 
-} // namespace ros::serialization
+// // } // namespace ros::serialization  // original  // original
 
 namespace message_operations {
 
@@ -410,7 +412,7 @@ template<> struct Printer<cv_bridge::CvImage>
   }
 };
 
-} // namespace ros::message_operations
+// // } // namespace ros::message_operations  // original  // original
 
 } // namespace ros
 
@@ -418,7 +420,7 @@ namespace cv_bridge {
 
 inline std::ostream& operator<<(std::ostream& s, const CvImage& m)
 {
-  ros::message_operations::Printer<CvImage>::stream(s, "", m);
+// //   ros::message_operations::Printer<CvImage>::stream(s, "", m);  // original  // original
   return s;
 }
 

@@ -29,8 +29,8 @@ void img_callback(const sensor_msgs::ImageConstPtr &left, const sensor_msgs::Ima
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "LKTrcker");
-	ros::NodeHandle n("~");
+// // 	ros::init(argc, argv, "LKTrcker");  // original  // original
+// // 	ros::NodeHandle n("~");  // original  // original
 	image_transport::ImageTransport it(n);
 	tracker = new LKTracker();
 
@@ -42,6 +42,6 @@ int main(int argc, char **argv)
 	typedef sync_policies::ApproximateTime<Image, Image> Img_sync;
 	Synchronizer<Img_sync> img_sync(Img_sync(50), img_l_sub, img_r_sub);
 	img_sync.registerCallback(boost::bind(&img_callback, _1, _2));
-	ros::spin();
+// // 	ros::spin();  // original  // original
 	return 0;
 }

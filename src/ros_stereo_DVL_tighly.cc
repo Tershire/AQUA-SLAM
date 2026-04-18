@@ -28,9 +28,11 @@
 #include<ros/ros.h>
 #include<cv_bridge/cv_bridge.h>
 #include<sensor_msgs/Imu.h>
-#include <nav_msgs/Odometry.h>
+// #include <nav_msgs/Odometry.h>  // original
+#include <nav_msgs/msg/odometry.hpp>
 //#include <ds_sensor_msgs/Dvl.h>
-#include <image_transport/image_transport.h>
+// #include <image_transport/image_transport.h>  // original
+#include <image_transport/image_transport.hpp>
 #include <waterlinked_a50_ros_driver/DVL.h>
 #include <waterlinked_a50_ros_driver/DVLBeam.h>
 
@@ -58,8 +60,8 @@ namespace src = boost::log::sources;
 namespace sinks = boost::log::sinks;
 namespace keywords = boost::log::keywords;
 
-//	ros::Publisher img_test_pub = nh.advertise<sensor_msgs::Image>("/ORBSLAM3_tightlt/test_img", 10);
-boost::shared_ptr<ros::Publisher> pimg_test_pub;
+// // //	ros::Publisher img_test_pub = nh.advertise<sensor_msgs::Image>("/ORBSLAM3_tightlt/test_img", 10);  // original  // original
+// // boost::shared_ptr<ros::Publisher> pimg_test_pub;  // original  // original
 
 void init_logging()
 {
@@ -140,15 +142,15 @@ public:
 int main(int argc, char **argv)
 {
 	init_logging();
-	ros::init(argc, argv, "Stereo_Inertial");
-	ros::NodeHandle n("~");
-	ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info);
+// // 	ros::init(argc, argv, "Stereo_Inertial");  // original  // original
+// // 	ros::NodeHandle n("~");  // original  // original
+// // 	ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info);  // original  // original
 	bool bEqual = false;
 	if (argc < 4 || argc > 5) {
 		cerr << endl
 		     << "Usage: rosrun ORB_SLAM3 Stereo_Inertial path_to_vocabulary path_to_settings do_rectify [do_equalize]"
 		     << endl;
-		ros::shutdown();
+// // 		ros::shutdown();  // original  // original
 		return 1;
 	}
 
@@ -175,13 +177,13 @@ int main(int argc, char **argv)
 	string dvl_topic = fsSettings["DvlTopic"];
 	string img_l_topic = fsSettings["LeftImgTopic"];
 	string img_r_topic = fsSettings["RightImgTopic"];
-//	ros::Subscriber sub_imu = n.subscribe("/BlueRov2/imu/data/ENU", 100, &ImuGrabber::GrabImu, &imugb);
-	ros::Subscriber sub_imu = n.subscribe(imu_topic, 100, &ImuGrabber::GrabImu, &imugb);
+// // //	ros::Subscriber sub_imu = n.subscribe("/BlueRov2/imu/data/ENU", 100, &ImuGrabber::GrabImu, &imugb);  // original  // original
+// // 	ros::Subscriber sub_imu = n.subscribe(imu_topic, 100, &ImuGrabber::GrabImu, &imugb);  // original  // original
 	// flowave/falcon DVL
-	//  ros::Subscriber sub_dvl = n.subscribe(dvl_topic, 100, &DVLGrabber::GrabDVL, &dvlgb);
-	ros::Subscriber sub_dvl2 = n.subscribe("/dvl/data", 100, &DVLGrabber::GrabDVL2, &dvlgb);
+// // 	//  ros::Subscriber sub_dvl = n.subscribe(dvl_topic, 100, &DVLGrabber::GrabDVL, &dvlgb);  // original  // original
+// // 	ros::Subscriber sub_dvl2 = n.subscribe("/dvl/data", 100, &DVLGrabber::GrabDVL2, &dvlgb);  // original  // original
 	// rovco DVL
-//	ros::Subscriber sub_dvl = n.subscribe(dvl_topic, 100, &DVLGrabber::GrabDVL2, &dvlgb);
+// // //	ros::Subscriber sub_dvl = n.subscribe(dvl_topic, 100, &DVLGrabber::GrabDVL2, &dvlgb);  // original  // original
 	image_transport::ImageTransport it(n);
 	auto it_sub_l = it.subscribe(img_l_topic,
 	                             100,
@@ -194,15 +196,15 @@ int main(int argc, char **argv)
 	                             &igb,
 	                             image_transport::TransportHints("compressed"));
 
-	// ros::Publisher img_test_pub = n.advertise<sensor_msgs::Image>("/ORBSLAM3_tightly/img_test", 10);
-	// pimg_test_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(img_test_pub));
-//	ros::Subscriber sub_img_left = n.subscribe("/suv3d/left/rgb_rect", 100, &ImageGrabber::GrabImageLeft, &igb);
-//	ros::Subscriber sub_img_right = n.subscribe("/suv3d/right/rgb_rect", 100, &ImageGrabber::GrabImageRight, &igb);
+// // 	// ros::Publisher img_test_pub = n.advertise<sensor_msgs::Image>("/ORBSLAM3_tightly/img_test", 10);  // original  // original
+// // 	// pimg_test_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(img_test_pub));  // original  // original
+// // //	ros::Subscriber sub_img_left = n.subscribe("/suv3d/left/rgb_rect", 100, &ImageGrabber::GrabImageLeft, &igb);  // original  // original
+// // //	ros::Subscriber sub_img_right = n.subscribe("/suv3d/right/rgb_rect", 100, &ImageGrabber::GrabImageRight, &igb);  // original  // original
 
 //	std::thread sync_thread(&ImageGrabber::SyncWithImu, &igb);
 	std::thread sync_thread(&ImageGrabber::SyncWithImu2, &igb);
 
-	ros::spin();
+// // 	ros::spin();  // original  // original
 
 	return 0;
 }
@@ -259,8 +261,8 @@ cv::Mat ImageGrabber::GetImage(const sensor_msgs::ImageConstPtr &img_msg)
 void ImageGrabber::SyncWithImu()
 {
 	const double maxTimeDiff = 0.1;
-	ros::NodeHandle nh;
-	// ros::Publisher img_test_pub = nh.advertise<sensor_msgs::Image>("/ORBSLAM3_tightlt/test_img", 10);
+// // 	ros::NodeHandle nh;  // original  // original
+// // 	// ros::Publisher img_test_pub = nh.advertise<sensor_msgs::Image>("/ORBSLAM3_tightlt/test_img", 10);  // original  // original
 	while (1) {
 		cv::Mat imLeft, imRight;
 		double tImLeft = 0, tImRight = 0;
@@ -410,7 +412,7 @@ void ImageGrabber::SyncWithImu()
 			mpSLAM->TrackStereoGroDVL(imLeft, imRight, tImLeft, vImuMeas, !vDVLMeas.empty());
 //			mpSLAM->TrackStereo(imLeft,imRight,tImLeft);
 			std_msgs::Header header;
-			header.stamp = ros::Time::now();
+// // 			header.stamp = ros::Time::now();  // original  // original
 			cv_bridge::CvImage cv_ptr_test(header, "bgr8", imLeft);
 			// pimg_test_pub->publish(cv_ptr_test.toImageMsg());
 
@@ -425,8 +427,8 @@ void ImageGrabber::SyncWithImu()
 void ImageGrabber::SyncWithImu2()
 {
 	const double maxTimeDiff = 0.1;
-	ros::NodeHandle nh;
-	// ros::Publisher img_test_pub = nh.advertise<sensor_msgs::Image>("/ORBSLAM3_tightlt/test_img", 10);
+// // 	ros::NodeHandle nh;  // original  // original
+// // 	// ros::Publisher img_test_pub = nh.advertise<sensor_msgs::Image>("/ORBSLAM3_tightlt/test_img", 10);  // original  // original
 	while (1) {
 		cv::Mat imLeft, imRight;
 		double tImLeft = 0, tImRight = 0;
@@ -661,7 +663,7 @@ void ImageGrabber::SyncWithImu2()
 			mpSLAM->TrackStereoGroDVL(imLeft, imRight, tImLeft, vGyroDVLMeas, !vDVLMeas.empty());
 //			mpSLAM->TrackStereo(imLeft,imRight,tImLeft);
 			std_msgs::Header header;
-			header.stamp = ros::Time::now();
+// // 			header.stamp = ros::Time::now();  // original  // original
 			cv_bridge::CvImage cv_ptr_test(header, "bgr8", imLeft);
 			// pimg_test_pub->publish(cv_ptr_test.toImageMsg());
 

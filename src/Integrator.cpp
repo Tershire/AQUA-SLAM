@@ -5,7 +5,7 @@
 #include "Integrator.h"
 #include "Frame.h"
 #include "KeyFrame.h"
-#include <ros/ros.h>
+// #include <ros/ros.h>  // original
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 
@@ -128,7 +128,7 @@ void Integrator::IntegrateMeasurements(Frame &cur_F, std::list<IMU::GyroDvlPoint
     //check pointer
     // KF
     if (!mpIntFromKF_C2C) {
-        ROS_ERROR_STREAM("null poniter mpIntFromKF_C2C");
+//         ROS_ERROR_STREAM("null poniter mpIntFromKF_C2C");  // original
         assert(0);
     }
 
@@ -166,7 +166,7 @@ void Integrator::IntegrateMeasurements(Frame &cur_F, std::list<IMU::GyroDvlPoint
 
 
     if (mpIntFromF_C2C->dV.at<double>(0) == 0) {
-        ROS_ERROR_STREAM("Velocity is not initiialzed!");
+//         ROS_ERROR_STREAM("Velocity is not initiialzed!");  // original
         assert(mpIntFromF_C2C->dV.at<double>(0) != 0);
     }
 
@@ -332,7 +332,7 @@ bool Integrator::GetDoLossIntegration()
 
 void Integrator::SetLossRefKF(KeyFrame* pKF)
 {
-    ROS_INFO_STREAM(fixed<<setprecision(6)<<"set Loss Ref KF["<<pKF->mnId<<"] "<<pKF->mTimeStamp);
+//     ROS_INFO_STREAM(fixed<<setprecision(6)<<"set Loss Ref KF["<<pKF->mnId<<"] "<<pKF->mTimeStamp);  // original
     mpLossRefKF = pKF;
 }
 

@@ -24,7 +24,7 @@
 #include<opencv2/features2d/features2d.hpp>
 #include <opencv2/video/tracking.hpp>
 
-#include <ros/ros.h>
+// #include <ros/ros.h>  // original
 #include"Frame.h"
 #include "ORBVocabulary.h"
 #include"KeyFrameDatabase.h"
@@ -468,8 +468,8 @@ protected:
 	cv::Mat mTlr;
 
 	// ros pose publisher
-	ros::Publisher mPose_pub;
-	ros::Publisher mEKFPose_pub;
+// // 	ros::Publisher mPose_pub;  // original  // original
+// // 	ros::Publisher mEKFPose_pub;  // original  // original
 
 	float mKF_init_step;
 	float mImageScale = 1.0f;

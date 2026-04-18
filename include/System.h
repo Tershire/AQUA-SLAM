@@ -23,25 +23,32 @@
 //#define SAVE_TIMES
 
 #include <unistd.h>
-#include<stdio.h>
-#include<stdlib.h>
-#include<string>
-#include<thread>
-#include<opencv2/core/core.hpp>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <thread>
+#include <opencv2/core/core.hpp>
 
 // include ros
-#include <ros/ros.h>
-#include <image_transport/image_transport.h>
-#include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <nav_msgs/Odometry.h>
+// #include <ros/ros.h>  // original
+// #include <image_transport/image_transport.h>  // original
+#include <image_transport/image_transport.hpp>
+// #include <cv_bridge/cv_bridge.h>  // original
+#include <cv_bridge/cv_bridge.hpp>
+// #include <sensor_msgs/image_encodings.h>  // original
+#include <sensor_msgs/image_encodings.hpp>
+// #include <geometry_msgs/PoseStamped.h>  // original
+#include <geometry_msgs/msg/pose_stamped.hpp>
+// #include <nav_msgs/Odometry.h>  // original
+#include <nav_msgs/msg/odometry.hpp>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/Imu.h>
+// #include <sensor_msgs/Image.h>  // original
+#include <sensor_msgs/msg/image.hpp>
+// #include <sensor_msgs/Imu.h>  // original
+#include <sensor_msgs/msg/imu.hpp>
 
 
 #include "RosHandling.h"
@@ -271,7 +278,7 @@ private:
 
     image_transport::Publisher* mImg_l_pub=NULL;
     image_transport::Publisher* mImg_r_pub=NULL;
-    ros::Publisher* mGt_pub=NULL;
+// //     ros::Publisher* mGt_pub=NULL;  // original  // original
     RosHandling* mRosHandler;
 
 

@@ -1224,7 +1224,7 @@ DvlGyroOptimizer::LocalDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool
         T_c0_cj.rotate(VP->estimate().Rwc);
         T_c0_cj.pretranslate(VP->estimate().twc);
         map_pose_original.insert(std::pair<VertexPoseDvlIMU*, Eigen::Isometry3d>(VP, T_c0_cj));
-        // ROS_INFO_STREAM("opt KF: "<<pKFi->mnId);
+//         // ROS_INFO_STREAM("opt KF: "<<pKFi->mnId);  // original
 
         // DVLGroPreIntegration *pDVLGroPreIntegration2 = new DVLGroPreIntegration();
         // boost::archive::text_iarchive ia1(i_file1);
@@ -1242,7 +1242,7 @@ DvlGyroOptimizer::LocalDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool
         VP->setId(pKFi->mnId);
         VP->setFixed(true);
         optimizer.addVertex(VP);
-        // ROS_INFO_STREAM("fixed KF: "<<pKFi->mnId);
+//         // ROS_INFO_STREAM("fixed KF: "<<pKFi->mnId);  // original
     }
 
     // Biases
@@ -1453,7 +1453,7 @@ DvlGyroOptimizer::LocalDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool
             }
         }
     }
-    // ROS_INFO_STREAM("visual edge size: "<<(mono_edges.size()+stereo_edges.size()));
+//     // ROS_INFO_STREAM("visual edge size: "<<(mono_edges.size()+stereo_edges.size()));  // original
 
 
     // Graph edges
@@ -1510,7 +1510,7 @@ DvlGyroOptimizer::LocalDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool
             //				cout<<"VP2: twc"<<VP2->estimate().twc<<endl;
 
             if (!VP1|| !VP2 || !VV1 || !VV2 || !VG1 || !VG2 || !VA1 || !VA2 || !VT_d_c || !VT_g_d || !VR_b0_w) {
-                ROS_ERROR_STREAM("LocalVAIBA Error");
+//                 ROS_ERROR_STREAM("LocalVAIBA Error");  // original
                 assert(0);
             }
             EdgeAccRW* e_bias = new EdgeAccRW();
@@ -1539,7 +1539,7 @@ DvlGyroOptimizer::LocalDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool
             if(i==0){
                 //set robust kernel
                 eg_bias->setInformation(info_gyro_bias * 1e-2);
-//                ROS_INFO_STREAM("first KF:"<<pKFi->mnId);
+// //                ROS_INFO_STREAM("first KF:"<<pKFi->mnId);  // original
 //                 g2o::RobustKernelHuber* rk = new g2o::RobustKernelHuber;
 //                 rk->setDelta(sqrt(16.92));
             }
@@ -1605,7 +1605,7 @@ DvlGyroOptimizer::LocalDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool
             }
             // info(0,0) = info(0,0)*lamda_DVL * 5e3; // 10_24
             // info_DI(1,1) = 1e10; // before 10_24
-            // ROS_INFO_STREAM("info: "<<info_DI);
+//             // ROS_INFO_STREAM("info: "<<info_DI);  // original
             eG->setInformation(info_DI);
             ROS_DEBUG_STREAM("IMU edge info:\n"<<info_DI);
             dvlimu_edges.push_back(eG);
@@ -1650,7 +1650,7 @@ DvlGyroOptimizer::LocalDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool
             e->setLevel(0);
         }
     }
-    // ROS_INFO_STREAM(ss_v_chi2.str());
+//     // ROS_INFO_STREAM(ss_v_chi2.str());  // original
     for(int i=0;i<4;i++){
         if(pbStopFlag){
             if(*pbStopFlag){
@@ -1765,8 +1765,8 @@ DvlGyroOptimizer::LocalDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool
         pMP->UpdateNormalAndDepth();
     }
     pMap->IncreaseChangeIndex();
-    // ROS_INFO_STREAM("Map change after BA: "<<pMap->GetMapChangeIndex());
-    // ROS_INFO_STREAM("Local BA upto KF done: " << pKF->mnId);
+//     // ROS_INFO_STREAM("Map change after BA: "<<pMap->GetMapChangeIndex());  // original
+//     // ROS_INFO_STREAM("Local BA upto KF done: " << pKF->mnId);  // original
 }
 
 void DvlGyroOptimizer::LocalDVLIMUBundleAdjustment2(Atlas* pAtlas, KeyFrame* pKF, bool* pbStopFlag, Map* pMap,
@@ -1916,7 +1916,7 @@ void DvlGyroOptimizer::LocalDVLIMUBundleAdjustment2(Atlas* pAtlas, KeyFrame* pKF
         T_c0_cj.rotate(VP->estimate().Rwc);
         T_c0_cj.pretranslate(VP->estimate().twc);
         map_pose_original.insert(std::pair<VertexPoseDvlIMU*, Eigen::Isometry3d>(VP, T_c0_cj));
-        // ROS_INFO_STREAM("opt KF: "<<pKFi->mnId);
+//         // ROS_INFO_STREAM("opt KF: "<<pKFi->mnId);  // original
 
         // DVLGroPreIntegration *pDVLGroPreIntegration2 = new DVLGroPreIntegration();
         // boost::archive::text_iarchive ia1(i_file1);
@@ -1934,7 +1934,7 @@ void DvlGyroOptimizer::LocalDVLIMUBundleAdjustment2(Atlas* pAtlas, KeyFrame* pKF
         VP->setId(pKFi->mnId);
         VP->setFixed(true);
         optimizer.addVertex(VP);
-        // ROS_INFO_STREAM("fixed KF: "<<pKFi->mnId);
+//         // ROS_INFO_STREAM("fixed KF: "<<pKFi->mnId);  // original
     }
 
     // Biases
@@ -2129,7 +2129,7 @@ void DvlGyroOptimizer::LocalDVLIMUBundleAdjustment2(Atlas* pAtlas, KeyFrame* pKF
             }
         }
     }
-    ROS_INFO_STREAM("visual edge size: "<<(mono_edges.size()+stereo_edges.size()));
+//     ROS_INFO_STREAM("visual edge size: "<<(mono_edges.size()+stereo_edges.size()));  // original
 
 
     // Graph edges
@@ -2186,7 +2186,7 @@ void DvlGyroOptimizer::LocalDVLIMUBundleAdjustment2(Atlas* pAtlas, KeyFrame* pKF
             //				cout<<"VP2: twc"<<VP2->estimate().twc<<endl;
 
             if (!VP1|| !VP2 || !VV1 || !VV2 || !VG1 || !VG2 || !VA1 || !VA2 || !VT_d_c || !VT_g_d || !VR_b0_w) {
-                ROS_ERROR_STREAM("LocalVAIBA Error");
+//                 ROS_ERROR_STREAM("LocalVAIBA Error");  // original
                 return;
             }
             EdgeAccRW* e_bias = new EdgeAccRW();
@@ -2366,11 +2366,11 @@ void DvlGyroOptimizer::LocalDVLIMUBundleAdjustment2(Atlas* pAtlas, KeyFrame* pKF
             e->setLevel(0);
         }
     }
-    // ROS_INFO_STREAM(ss_v_chi2.str());
+//     // ROS_INFO_STREAM(ss_v_chi2.str());  // original
     for(int i=0;i<4;i++){
         if(pbStopFlag){
             if(*pbStopFlag){
-                ROS_INFO_STREAM("stop BA");
+//                 ROS_INFO_STREAM("stop BA");  // original
                 break;
             }
         }
@@ -2419,7 +2419,7 @@ void DvlGyroOptimizer::LocalDVLIMUBundleAdjustment2(Atlas* pAtlas, KeyFrame* pKF
         IMU::Bias b(v_ab->estimate().x(), v_ab->estimate().y(), v_ab->estimate().z(),
                     v_gb->estimate().x(), v_gb->estimate().y(), v_gb->estimate().z());
         pKFi->SetNewBias(b);
-//        ROS_INFO_STREAM("KF["<<pKFi->mnId<<"] bias[acc gyros]: "<<v_ab->estimate().transpose()<<" "<<v_gb->estimate().transpose());
+// //        ROS_INFO_STREAM("KF["<<pKFi->mnId<<"] bias[acc gyros]: "<<v_ab->estimate().transpose()<<" "<<v_gb->estimate().transpose());  // original
         // ss<<"KF["<<pKFi->mnId<<"] bias[acc gyros]: "<<v_ab->estimate().transpose()<<" "<<v_gb->estimate().transpose()<<"\n";
 
         //recover dvl_velocity of pKFi
@@ -2448,7 +2448,7 @@ void DvlGyroOptimizer::LocalDVLIMUBundleAdjustment2(Atlas* pAtlas, KeyFrame* pKF
         pMP->UpdateNormalAndDepth();
     }
     pMap->IncreaseChangeIndex();
-    // ROS_INFO_STREAM("Map change after BA: "<<pMap->GetMapChangeIndex());
+//     // ROS_INFO_STREAM("Map change after BA: "<<pMap->GetMapChangeIndex());  // original
 }
 
 void DvlGyroOptimizer::FullDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool* pbStopFlag, Map* pMap,
@@ -2535,7 +2535,7 @@ void DvlGyroOptimizer::FullDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, 
         }
     }
     int N_map_points = LocalMapPoints.size();
-    ROS_INFO_STREAM("map point to optimize: "<<N_map_points);
+//     ROS_INFO_STREAM("map point to optimize: "<<N_map_points);  // original
     //	cout << "map point to optimize: " << N_map_points << endl;
 
     // const int maxFixedKF = 30;
@@ -2585,7 +2585,7 @@ void DvlGyroOptimizer::FullDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, 
         VP->setId(pKFi->mnId);
         VP->setFixed(true);
         optimizer.addVertex(VP);
-        // ROS_INFO_STREAM("opt KF: "<<pKFi->mnId);
+//         // ROS_INFO_STREAM("opt KF: "<<pKFi->mnId);  // original
 
         // DVLGroPreIntegration *pDVLGroPreIntegration2 = new DVLGroPreIntegration();
         // boost::archive::text_iarchive ia1(i_file1);
@@ -2603,7 +2603,7 @@ void DvlGyroOptimizer::FullDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, 
         VP->setId(pKFi->mnId);
         VP->setFixed(true);
         optimizer.addVertex(VP);
-        ROS_INFO_STREAM("fixed KF: "<<pKFi->mnId);
+//         ROS_INFO_STREAM("fixed KF: "<<pKFi->mnId);  // original
     }
 
     // Biases
@@ -2805,7 +2805,7 @@ void DvlGyroOptimizer::FullDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, 
             }
         }
     }
-    ROS_INFO_STREAM("visual edge size: "<<(mono_edges.size()+stereo_edges.size()));
+//     ROS_INFO_STREAM("visual edge size: "<<(mono_edges.size()+stereo_edges.size()));  // original
 
 
     // Graph edges
@@ -2862,7 +2862,7 @@ void DvlGyroOptimizer::FullDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, 
             //				cout<<"VP2: twc"<<VP2->estimate().twc<<endl;
 
             if (!VP1|| !VP2 || !VV1 || !VV2 || !VG1 || !VG2 || !VA1 || !VA2 || !VT_d_c || !VT_g_d || !VR_b0_w) {
-                ROS_ERROR_STREAM("LocalVAIBA Error");
+//                 ROS_ERROR_STREAM("LocalVAIBA Error");  // original
                 assert(0);
             }
             EdgeAccRW* e_bias = new EdgeAccRW();
@@ -2891,7 +2891,7 @@ void DvlGyroOptimizer::FullDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, 
             if(i==0){
                 //set robust kernel
                 eg_bias->setInformation(info_gyro_bias * 1e-2);
-                //                ROS_INFO_STREAM("first KF:"<<pKFi->mnId);
+//                 //                ROS_INFO_STREAM("first KF:"<<pKFi->mnId);  // original
                 //                 g2o::RobustKernelHuber* rk = new g2o::RobustKernelHuber;
                 //                 rk->setDelta(sqrt(16.92));
             }
@@ -2954,7 +2954,7 @@ void DvlGyroOptimizer::FullDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, 
             }
             // info(0,0) = info(0,0)*lamda_DVL * 5e3; // 10_24
             // info_DI(1,1) = 1e10; // before 10_24
-            // ROS_INFO_STREAM("info: "<<info_DI);
+//             // ROS_INFO_STREAM("info: "<<info_DI);  // original
             eG->setInformation(info_DI);
             ROS_DEBUG_STREAM("IMU edge info:\n"<<info_DI);
             dvlimu_edges.push_back(eG);
@@ -2999,7 +2999,7 @@ void DvlGyroOptimizer::FullDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, 
     //         e->setLevel(0);
     //     }
     // }
-    // // ROS_INFO_STREAM(ss_v_chi2.str());
+//     // // ROS_INFO_STREAM(ss_v_chi2.str());  // original
     // for(int i=0;i<4;i++){
     //     if(pbStopFlag){
     //         if(*pbStopFlag){
@@ -3114,8 +3114,8 @@ void DvlGyroOptimizer::FullDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, 
         pMP->UpdateNormalAndDepth();
     }
     pMap->IncreaseChangeIndex();
-    // ROS_INFO_STREAM("Map change after BA: "<<pMap->GetMapChangeIndex());
-    ROS_INFO_STREAM("Full BA upto KF["<<pKF->mnId<<"] done");
+//     // ROS_INFO_STREAM("Map change after BA: "<<pMap->GetMapChangeIndex());  // original
+//     ROS_INFO_STREAM("Full BA upto KF["<<pKF->mnId<<"] done");  // original
 }
 
 void DvlGyroOptimizer::LocalDVLIMUPoseGraph(Atlas* pAtlas, KeyFrame* pKF, Map* pMap)
@@ -3203,7 +3203,7 @@ void DvlGyroOptimizer::LocalDVLIMUPoseGraph(Atlas* pAtlas, KeyFrame* pKF, Map* p
         VP->setId(pKFi->mnId);
         VP->setFixed(false);
         optimizer.addVertex(VP);
-        // ROS_INFO_STREAM("opt KF: "<<pKFi->mnId);
+//         // ROS_INFO_STREAM("opt KF: "<<pKFi->mnId);  // original
     }
     for (int i = 0; i < FixedKFs.size(); i++) {
         KeyFrame *pKFi = FixedKFs[i];
@@ -3214,7 +3214,7 @@ void DvlGyroOptimizer::LocalDVLIMUPoseGraph(Atlas* pAtlas, KeyFrame* pKF, Map* p
         VP->setId(pKFi->mnId);
         VP->setFixed(true);
         optimizer.addVertex(VP);
-        // ROS_INFO_STREAM("fixed KF: "<<pKFi->mnId);
+//         // ROS_INFO_STREAM("fixed KF: "<<pKFi->mnId);  // original
     }
 
     // Biases
@@ -3425,7 +3425,7 @@ void DvlGyroOptimizer::LocalDVLIMUPoseGraph(Atlas* pAtlas, KeyFrame* pKF, Map* p
             //     eG1->setVertex(8, dynamic_cast<g2o::OptimizableGraph::Vertex *>(VR_b0_w));
             //     eG1->setInformation(Eigen::Matrix<double, 9, 9>::Identity() * lamda_DVL * (stereo_edges.size()+mono_edges.size()));
             //     optimizer.addEdge(eG1);
-            //     // ROS_INFO_STREAM("add bias refine edge, KF: "<<pKFi->mnId);
+//             //     // ROS_INFO_STREAM("add bias refine edge, KF: "<<pKFi->mnId);  // original
             // }
 
 
@@ -3505,7 +3505,7 @@ void DvlGyroOptimizer::LocalDVLIMUPoseGraph(Atlas* pAtlas, KeyFrame* pKF, Map* p
 
 
     }
-    // ROS_INFO_STREAM(ss.str());
+//     // ROS_INFO_STREAM(ss.str());  // original
 
     // for (int i = 0; i < N_map_points; i++) {
     //     MapPoint *pMP = LocalMapPoints[i];

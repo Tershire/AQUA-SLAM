@@ -2,7 +2,7 @@
 #include <mutex>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <ros/ros.h>
+// #include <ros/ros.h>  // original
 #include <waterlinked_a50_ros_driver/DVL.h>
 #include <waterlinked_a50_ros_driver/DVLBeam.h>
 #include <Thirdparty/g2o/g2o/core/base_binary_edge.h>
@@ -521,7 +521,7 @@ void dvl_cb(const waterlinked_a50_ros_driver::DVL &msg)
 	vb_z.push_back(d.mVelocityFromBeam.z());
 }
 
-void OptimizeBeam(const ros::TimerEvent &)
+// // void OptimizeBeam(const ros::TimerEvent &)  // original  // original
 {
 
 	{
@@ -587,11 +587,11 @@ void OptimizeBeam(const ros::TimerEvent &)
 
 	Eigen::Vector2d r_opt = v->estimate();
 
-	ROS_INFO_STREAM("DVL Calibration: alpha=" << r_opt(0) / M_PI * 180.0 << " beta=" << r_opt[1] / M_PI * 180.0);
+// 	ROS_INFO_STREAM("DVL Calibration: alpha=" << r_opt(0) / M_PI * 180.0 << " beta=" << r_opt[1] / M_PI * 180.0);  // original
 
 }
 
-void OptimizeBeamSphere(const ros::TimerEvent &)
+// // void OptimizeBeamSphere(const ros::TimerEvent &)  // original  // original
 {
 	g2o::SparseOptimizer optimizer;
 	g2o::BlockSolverX::LinearSolverType *linearSolver;
@@ -635,7 +635,7 @@ void OptimizeBeamSphere(const ros::TimerEvent &)
 
 	Eigen::Matrix<double, 8, 1> r_opt = v->estimate();
 
-	ROS_INFO_STREAM(
+// 	ROS_INFO_STREAM(  // original
 		"DVL Calibration:\nbeam1_theta=" << r_opt(0) / M_PI * 180.0 << " beam1_phi=" << r_opt(1) / M_PI * 180.0
 		                                 << "\nbeam2_theta=" << r_opt(2) / M_PI * 180.0 << " beam2_phi="
 		                                 << r_opt(3) / M_PI * 180.0
@@ -646,7 +646,7 @@ void OptimizeBeamSphere(const ros::TimerEvent &)
 
 }
 
-void OptimizeBeam2(const ros::TimerEvent &)
+// // void OptimizeBeam2(const ros::TimerEvent &)  // original  // original
 {
 	{
 		std::lock_guard<std::mutex> lock(dvl_mutex);
@@ -718,7 +718,7 @@ void OptimizeBeam2(const ros::TimerEvent &)
 
 	Eigen::Matrix<double, 8, 1> r_opt = v->estimate();
 
-	ROS_INFO_STREAM(
+// 	ROS_INFO_STREAM(  // original
 		"DVL Calibration:\nbeam1_theta=" << r_opt(0) / M_PI * 180.0 << " beam1_phi=" << r_opt(1) / M_PI * 180.0
 		                                 << "\nbeam2_theta=" << r_opt(2) / M_PI * 180.0 << " beam2_phi="
 		                                 << r_opt(3) / M_PI * 180.0
@@ -731,13 +731,13 @@ void OptimizeBeam2(const ros::TimerEvent &)
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "dvl_model");
-	ros::NodeHandle n;
+// // 	ros::init(argc, argv, "dvl_model");  // original  // original
+// // 	ros::NodeHandle n;  // original  // original
 
-	ros::Subscriber dvl_sub = n.subscribe("/dvl/data", 100, dvl_cb);
-//	ros::Timer opt_timer = n.createTimer(ros::Duration(3.0), OptimizeBeamSphere);
-	ros::Timer opt_timer = n.createTimer(ros::Duration(3.0), OptimizeBeam2);
-	ros::spin();
+// // 	ros::Subscriber dvl_sub = n.subscribe("/dvl/data", 100, dvl_cb);  // original  // original
+// // //	ros::Timer opt_timer = n.createTimer(ros::Duration(3.0), OptimizeBeamSphere);  // original  // original
+// // 	ros::Timer opt_timer = n.createTimer(ros::Duration(3.0), OptimizeBeam2);  // original  // original
+// // 	ros::spin();  // original  // original
 	return 0;
 }
 

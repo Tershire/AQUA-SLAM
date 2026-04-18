@@ -4,7 +4,8 @@
 #include<chrono>
 
 #include<ros/ros.h>
-#include <cv_bridge/cv_bridge.h>
+// #include <cv_bridge/cv_bridge.h>  // original
+#include <cv_bridge/cv_bridge.hpp>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
@@ -29,13 +30,13 @@ public:
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "dvl_stereo");
-    ros::start();
+// //     ros::init(argc, argv, "dvl_stereo");  // original  // original
+// //     ros::start();  // original  // original
 
     if(argc != 4)
     {
         cerr << endl << "Usage: rosrun ORB_SLAM3 Stereo path_to_vocabulary path_to_settings do_rectify" << endl;
-        ros::shutdown();
+// //         ros::shutdown();  // original  // original
         return 1;
     }    
 
@@ -87,7 +88,7 @@ int main(int argc, char **argv)
     //     cv::initUndistortRectifyMap(K_r,D_r,R_r,P_r.rowRange(0,3).colRange(0,3),cv::Size(cols_r,rows_r),CV_32F,igb.M1r,igb.M2r);
     // }
 
-    // ros::NodeHandle nh;
+// //     // ros::NodeHandle nh;  // original  // original
 
     // message_filters::Subscriber<sensor_msgs::Image> left_sub(nh, "suv3d/left/rgb_rect", 1);
     // message_filters::Subscriber<sensor_msgs::Image> right_sub(nh, "suv3d/right/rgb_rect", 1);
@@ -95,7 +96,7 @@ int main(int argc, char **argv)
     // message_filters::Synchronizer<sync_pol> sync(sync_pol(10), left_sub,right_sub);
     // sync.registerCallback(boost::bind(&ImageGrabber::GrabStereo,&igb,_1,_2));
 
-    // ros::spin();
+// //     // ros::spin();  // original  // original
 
     // run SLAM
     SLAM.runRos();
@@ -108,7 +109,7 @@ int main(int argc, char **argv)
     SLAM.SaveTrajectoryTUM("FrameTrajectory_TUM_Format.txt");
     SLAM.SaveTrajectoryKITTI("FrameTrajectory_KITTI_Format.txt");
 
-    ros::shutdown();
+// //     ros::shutdown();  // original  // original
 
     return 0;
 }

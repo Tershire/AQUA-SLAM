@@ -1,15 +1,22 @@
 #include <Eigen/Core>
-#include <ros/ros.h>
-#include <std_srvs/Empty.h>
-#include <sensor_msgs/Image.h>
-#include <nav_msgs/Path.h>
-#include <visualization_msgs/Marker.h>
-#include <geometry_msgs/Point.h>
+// #include <ros/ros.h>  // original
+// #include <std_srvs/Empty.h>  // original
+#include <std_srvs/srv/empty.hpp>
+// #include <sensor_msgs/Image.h>  // original
+#include <sensor_msgs/msg/image.hpp>
+// #include <nav_msgs/Path.h>  // original
+#include <nav_msgs/msg/path.hpp>
+// #include <visualization_msgs/Marker.h>  // original
+#include <visualization_msgs/msg/marker.hpp>
+// #include <geometry_msgs/Point.h>  // original
+#include <geometry_msgs/msg/point.hpp>
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
-#include <stereo_msgs/DisparityImage.h>
-#include <cv_bridge/cv_bridge.h>
+// #include <stereo_msgs/DisparityImage.h>  // original
+#include <stereo_msgs/msg/disparity_image.hpp>
+// #include <cv_bridge/cv_bridge.h>  // original
+#include <cv_bridge/cv_bridge.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
 #include <pcl_conversions/pcl_conversions.h>
@@ -31,11 +38,11 @@
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "image_listener");
+// //     ros::init(argc, argv, "image_listener");  // original  // original
 
-    ros::NodeHandle nh;
-    ros::Publisher pointcloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/dense_viewer/pointcloud", 1);
-    ros::Publisher trajectory_pub = nh.advertise<nav_msgs::Path>("/dense_viewer/trajectory", 1);
+// //     ros::NodeHandle nh;  // original  // original
+// //     ros::Publisher pointcloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/dense_viewer/pointcloud", 1);  // original  // original
+// //     ros::Publisher trajectory_pub = nh.advertise<nav_msgs::Path>("/dense_viewer/trajectory", 1);  // original  // original
 
     std::map<double, Eigen::Isometry3d> estimation_traj;
     std::string pose_path = "/home/da/project/ros/orb_dvl2_ws/src/dvl2/dvl2_results/dense/WholeTank_Medium_traj.txt";
@@ -89,7 +96,7 @@ int main(int argc, char** argv)
     }
     pcl::io::loadPCDFile(pcd_file,*global_map);
     //oupt point cloud info
-    ROS_INFO_STREAM("Loaded "
+//     ROS_INFO_STREAM("Loaded "  // original
                     << global_map->width * global_map->height
                     << " data points from pcd with the following fields: "
                     << pcl::getFieldsList(*global_map));
@@ -112,7 +119,7 @@ int main(int argc, char** argv)
 
     nav_msgs::Path traj_msg;
     traj_msg.header.frame_id = "map";
-    traj_msg.header.stamp = ros::Time::now();
+// //     traj_msg.header.stamp = ros::Time::now();  // original  // original
 
     for(auto it:estimation_traj){
        Eigen::Isometry3d T_c0_cj = it.second;
@@ -139,17 +146,17 @@ int main(int argc, char** argv)
 
 
     // set ros spin to publish at 10 hz
-    ros::Rate loop_rate(5);
-    while (ros::ok())
+// //     ros::Rate loop_rate(5);  // original  // original
+// //     while (ros::ok())  // original  // original
     {
         pointcloud_msg.header.frame_id = "map";
-        pointcloud_msg.header.stamp = ros::Time::now();
+// //         pointcloud_msg.header.stamp = ros::Time::now();  // original  // original
         pointcloud_pub.publish(pointcloud_msg);
         traj_msg.header.frame_id = "map";
-        traj_msg.header.stamp = ros::Time::now();
+// //         traj_msg.header.stamp = ros::Time::now();  // original  // original
         trajectory_pub.publish(traj_msg);
-        ROS_INFO_STREAM("pub map and traj");
-//        ros::spinOnce();
+//         ROS_INFO_STREAM("pub map and traj");  // original
+// // //        ros::spinOnce();  // original  // original
         loop_rate.sleep();
     }
 

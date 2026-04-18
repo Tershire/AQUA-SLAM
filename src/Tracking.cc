@@ -80,7 +80,7 @@ Tracking::Tracking(System *pSys,
     mpDvlPreintegratedFromLastKF(nullptr)
 {
 	// initialize the pose pulisher
-	ros::NodeHandle n;
+// // 	ros::NodeHandle n;  // original  // original
 	// mPose_pub = n.advertise<geometry_msgs::PoseStamped>("/AQUA_SLAM/orb_pose", 10);
 	// mEKFPose_pub = n.advertise<geometry_msgs::PoseStamped>("/AQUA_SLAM/preintegrated_pose", 10);
 	// Load camera parameters from settings file
@@ -1004,7 +1004,7 @@ cv::Mat Tracking::GrabImageStereoDvl(const cv::Mat &imRectLeft,
 		                      GetExtrinsicPara());
 	}
 	else {
-		ROS_ERROR_STREAM("Wrong Mode!");
+// 		ROS_ERROR_STREAM("Wrong Mode!");  // original
         assert(0);
 	}
 
@@ -1073,7 +1073,7 @@ cv::Mat Tracking::GrabImageStereoDvlgyro(const Mat &imRectLeft,
 		                      GetExtrinsicPara());
 	}
 	else {
-		ROS_ERROR_STREAM("Wrong Mode!");
+// 		ROS_ERROR_STREAM("Wrong Mode!");  // original
         assert(0);
 	}
 
@@ -1223,7 +1223,7 @@ void Tracking::PreintegrateDvlGro()
 	//cout << "start preintegration" << endl;
 
 	if (mCurrentFrame.mpPrevFrame->mTimeStamp == 0) {
-		ROS_INFO_STREAM("non prev frame ");
+// 		ROS_INFO_STREAM("non prev frame ");  // original
 //		Verbose::PrintMess(, Verbose::VERBOSITY_NORMAL);
 		mCurrentFrame.setIntegrated();
 		return;
@@ -1369,7 +1369,7 @@ void Tracking::PreintegrateDvlGro()
 				pDvlPreintegratedFromLastKFBeforeLost->IntegrateGroMeasurement(angVel, tstep);
 			}
 //			else{
-//				ROS_INFO_STREAM("pDvlPreintegratedFromLastKFBeforeLost do not exits");
+// //				ROS_INFO_STREAM("pDvlPreintegratedFromLastKFBeforeLost do not exits");  // original
 //			}
 		}
 
@@ -1380,17 +1380,17 @@ void Tracking::PreintegrateDvlGro()
 		if (acc.x != 0 && acc.y != 0 && acc.z != 0) {
 //			cout<<"velocity measurement: "<<acc<<endl;
 			mpDvlPreintegratedFromLastKF->IntegrateDVLMeasurement(acc, tstep);
-//			ROS_INFO_STREAM("add kf velocity measurement:"<<acc);
+// //			ROS_INFO_STREAM("add kf velocity measurement:"<<acc);  // original
 			pDvlGroPreIntegratedFromLastFrame->IntegrateDVLMeasurement(acc, tstep);
 			{
 				DVLGroPreIntegration *pDvlPreintegratedFromLastKFBeforeLost = getLossIntegrationRef();
 				std::lock_guard<std::mutex> lock(mLossIntegrationRefMutex);
 				if (mDoLossIntegration) {
 					pDvlPreintegratedFromLastKFBeforeLost->IntegrateDVLMeasurement(acc, tstep);
-//					ROS_INFO_STREAM("add loss ref velocity measurement:"<<acc);
+// //					ROS_INFO_STREAM("add loss ref velocity measurement:"<<acc);  // original
 				}
 //				else{
-//					ROS_INFO_STREAM("pDvlPreintegratedFromLastKFBeforeLost do not exits");
+// //					ROS_INFO_STREAM("pDvlPreintegratedFromLastKFBeforeLost do not exits");  // original
 //				}
 			}
 		}
@@ -1411,7 +1411,7 @@ void Tracking::PreintegrateDvlGro2()
 	//cout << "start preintegration" << endl;
 
 	if (mCurrentFrame.mpPrevFrame->mTimeStamp == 0) {
-		ROS_INFO_STREAM("non prev frame ");
+// 		ROS_INFO_STREAM("non prev frame ");  // original
 //		Verbose::PrintMess(, Verbose::VERBOSITY_NORMAL);
 		mCurrentFrame.setIntegrated();
 		return;
@@ -1574,7 +1574,7 @@ void Tracking::PreintegrateDvlGro2()
 					pDvlPreintegratedFromLastKFBeforeLost->IntegrateGroMeasurement(angVel, tstep);
 				}
 //			else{
-//				ROS_INFO_STREAM("pDvlPreintegratedFromLastKFBeforeLost do not exits");
+// //				ROS_INFO_STREAM("pDvlPreintegratedFromLastKFBeforeLost do not exits");  // original
 //			}
 			}
 			pDvlGroPreIntegratedFromLastFrame->IntegrateGroMeasurement(angVel, tstep);
@@ -1584,7 +1584,7 @@ void Tracking::PreintegrateDvlGro2()
 			mpDvlPreintegratedFromLastKF->IntegrateDVLMeasurement2(v_beam, tstep);
 			mpDvlPreintegratedFromLastKF->v_dk_dvl = v_d;
 			mpDvlPreintegratedFromLastKF->SetDVLDebugVelocity(v_d);
-//			ROS_INFO_STREAM("add kf velocity measurement:"<<acc);
+// //			ROS_INFO_STREAM("add kf velocity measurement:"<<acc);  // original
 			pDvlGroPreIntegratedFromLastFrame->IntegrateDVLMeasurement2(v_beam, tstep);
 			pDvlGroPreIntegratedFromLastFrame->v_dk_dvl = v_d;
 			pDvlGroPreIntegratedFromLastFrame->SetDVLDebugVelocity(v_d);
@@ -1597,10 +1597,10 @@ void Tracking::PreintegrateDvlGro2()
 					pDvlPreintegratedFromLastKFBeforeLost->IntegrateDVLMeasurement2(v_beam, tstep);
 					pDvlPreintegratedFromLastKFBeforeLost->v_dk_dvl = v_d;
 					pDvlPreintegratedFromLastKFBeforeLost->SetDVLDebugVelocity(v_d);
-//					ROS_INFO_STREAM("add loss ref velocity measurement:"<<acc);
+// //					ROS_INFO_STREAM("add loss ref velocity measurement:"<<acc);  // original
 				}
 //				else{
-//					ROS_INFO_STREAM("pDvlPreintegratedFromLastKFBeforeLost do not exits");
+// //					ROS_INFO_STREAM("pDvlPreintegratedFromLastKFBeforeLost do not exits");  // original
 //				}
 			}
 		}
@@ -1701,16 +1701,16 @@ bool Tracking::PredictStateDvlGro()
 
             // KeyFrame* pKF =mpIntegrator->mpLossRefKF;
             // DVLGroPreIntegration *pDvlPreintegratedFromKF = mpIntegrator->mpIntFromKFBeforeLost_C2C;
-            // ROS_INFO_STREAM(fixed<<setprecision(9)<<"loss KF timestamp: "<<pKF->mTimeStamp);
-            // ROS_INFO_STREAM(fixed<<setprecision(9)<<"intgeration expected time: "<<pKF->mTimeStamp+pDvlPreintegratedFromKF->dT);
-            // ROS_INFO_STREAM(fixed<<setprecision(9)<<"current frame time: "<<mCurrentFrame.mTimeStamp);
+//             // ROS_INFO_STREAM(fixed<<setprecision(9)<<"loss KF timestamp: "<<pKF->mTimeStamp);  // original
+//             // ROS_INFO_STREAM(fixed<<setprecision(9)<<"intgeration expected time: "<<pKF->mTimeStamp+pDvlPreintegratedFromKF->dT);  // original
+//             // ROS_INFO_STREAM(fixed<<setprecision(9)<<"current frame time: "<<mCurrentFrame.mTimeStamp);  // original
             KeyFrame* pKF =*getMvpLossKf().rbegin();
 //            KeyFrame* pKF_loss_end =*getMvpLossKf().rbegin();
 //            KeyFrame* pKF_loss_start =*getMvpLossKf().begin();
-//            ROS_INFO_STREAM("loss kf start:"<<pKF_loss_start->mnId<<" end:"<<pKF_loss_end->mnId);
+// //            ROS_INFO_STREAM("loss kf start:"<<pKF_loss_start->mnId<<" end:"<<pKF_loss_end->mnId);  // original
             Eigen::Matrix3d R_b0_w = mpAtlas->getRGravity();
             DVLGroPreIntegration *pDvlPreintegratedFromKF = mpIntegrator->mpIntFromKF_C2C;
-//            ROS_INFO_STREAM("loss bias: x:"<<
+// //            ROS_INFO_STREAM("loss bias: x:"<<  // original
 //            pDvlPreintegratedFromKF->mb.bwx<<" y:"<<pDvlPreintegratedFromKF->mb.bwy<<" z:"<<
 //            pDvlPreintegratedFromKF->mb.bwz);
             cv::Mat T_c0_cf_cv = pKF->GetPoseInverse();
@@ -1772,15 +1772,15 @@ bool Tracking::PredictStateDvlGro()
             // Eigen::Isometry3d T_c0_c1 = T_b_c.inverse() * T_b0_b1 * T_b_c;
             // Eigen::Isometry3d T_c0_c1_dvl = T_b_c.inverse() * T_b0_b1_dvl * T_b_c;
             // Eigen::Isometry3d T_c0_c1_acc_v = T_b_c.inverse() * T_b0_b1_acc_v * T_b_c;
-			// // ROS_INFO_STREAM("Gravity: \n" << R_b0_w);
-			// ROS_INFO_STREAM(fixed<<setprecision(6)<<"Loss KF[" << pKF->mnId << "]"<< " time: " << pKF->mTimeStamp);
-			// ROS_INFO_STREAM(fixed<<setprecision(6)<<"Loss integration time: "
+// 			// // ROS_INFO_STREAM("Gravity: \n" << R_b0_w);  // original
+// 			// ROS_INFO_STREAM(fixed<<setprecision(6)<<"Loss KF[" << pKF->mnId << "]"<< " time: " << pKF->mTimeStamp);  // original
+// 			// ROS_INFO_STREAM(fixed<<setprecision(6)<<"Loss integration time: "  // original
             // << pDvlPreintegratedFromKF->dT<<" v_d: "<<pDvlPreintegratedFromKF->mVelocity.t());
-			// ROS_INFO_STREAM(fixed<<setprecision(6)<<"current frame time: " << mCurrentFrame.mTimeStamp);
-            // ROS_INFO_STREAM("t_c0_c1:" << T_c0_c1.translation().transpose());
-            // ROS_INFO_STREAM("t_c0_c1_dvl:" << T_c0_c1_dvl.translation().transpose());
-            // ROS_INFO_STREAM("t_c0_c1_acc_v:" << T_c0_c1_acc_v.translation().transpose());
-            // // ROS_INFO_STREAM("Dt_bf_b1: " << Dt_bf_b1.transpose());
+// 			// ROS_INFO_STREAM(fixed<<setprecision(6)<<"current frame time: " << mCurrentFrame.mTimeStamp);  // original
+//             // ROS_INFO_STREAM("t_c0_c1:" << T_c0_c1.translation().transpose());  // original
+//             // ROS_INFO_STREAM("t_c0_c1_dvl:" << T_c0_c1_dvl.translation().transpose());  // original
+//             // ROS_INFO_STREAM("t_c0_c1_acc_v:" << T_c0_c1_acc_v.translation().transpose());  // original
+//             // // ROS_INFO_STREAM("Dt_bf_b1: " << Dt_bf_b1.transpose());  // original
             cv::Mat T_c1_c0_cv(4,4,CV_32F);
             cv::eigen2cv(T_c0_c1.inverse().matrix(),T_c1_c0_cv);
             T_c1_c0_cv.convertTo(T_c1_c0_cv,CV_32F);
@@ -2012,8 +2012,8 @@ void Tracking::topicPublishDVLOnly()
 	Eigen::Isometry3d T_c0_cj_orb = mT_c_cm * T_c0_cj * mT_c_cm.inverse();
 	Eigen::Isometry3d T_d0_cj = T_d_c * T_c0_cj;
 
-	mpRosHandler->PublishOrb(T_c0_cj, T_d_c, ros::Time(mCurrentFrame.mTimeStamp));
-	mpRosHandler->PublishCamera(T_c0_cj_camera, ros::Time(mCurrentFrame.mTimeStamp));
+// // 	mpRosHandler->PublishOrb(T_c0_cj, T_d_c, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
+// // 	mpRosHandler->PublishCamera(T_c0_cj_camera, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
 	// EKF pose
 	Eigen::Isometry3d T_e0_ej_ekf = mCurrentFrame.mT_e0_ej;
 
@@ -2022,7 +2022,7 @@ void Tracking::topicPublishDVLOnly()
     mpFrameDrawer->Update(this);
 	cv::Mat img_with_info = mpFrameDrawer->DrawFrame(true);
 	std_msgs::Header header; // empty header
-	header.stamp = ros::Time::now(); // time
+// // 	header.stamp = ros::Time::now(); // time  // original  // original
 	cv_bridge::CvImage img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, img_with_info);
 	mpRosHandler->PublishImgWithInfo(img_bridge.toImageMsg());
 
@@ -2506,12 +2506,12 @@ void Tracking::Track()
 			cv::cv2eigen(T_d_c_cv, T_d_c.matrix());
 			Eigen::Isometry3d T_d0_cj = T_d_c * T_c0_cj;
 
-			mpRosHandler->PublishOrb(T_c0_cj, T_d_c, ros::Time(mCurrentFrame.mTimeStamp));
-			mpRosHandler->PublishCamera(T_c0_cj_camera, ros::Time(mCurrentFrame.mTimeStamp));
+// // 			mpRosHandler->PublishOrb(T_c0_cj, T_d_c, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
+// // 			mpRosHandler->PublishCamera(T_c0_cj_camera, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
 //			mpRosHandler->UpdateMap(mpAtlas);
 			cv::Mat img_with_info = mpFrameDrawer->DrawFrame(true);
 			std_msgs::Header header; // empty header
-			header.stamp = ros::Time::now(); // time
+// // 			header.stamp = ros::Time::now(); // time  // original  // original
 			cv_bridge::CvImage
 				img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, img_with_info);
 			mpRosHandler->PublishImgWithInfo(img_bridge.toImageMsg());
@@ -2703,7 +2703,7 @@ void Tracking::TrackDVLGyro()
 	// set mbMapUpdated to update map later
 	int nCurMapChangeIndex = pCurrentMap->GetMapChangeIndex();
 	int nMapChangeIndex = pCurrentMap->GetLastMapChange();
-    // ROS_INFO_STREAM("Map change check in tracking: "<<nCurMapChangeIndex);
+//     // ROS_INFO_STREAM("Map change check in tracking: "<<nCurMapChangeIndex);  // original
 	if (nCurMapChangeIndex > nMapChangeIndex) {
 		// cout << "Map update detected" << endl;
 		pCurrentMap->SetLastMapChange(nCurMapChangeIndex);
@@ -2722,14 +2722,14 @@ void Tracking::TrackDVLGyro()
 		{
             // topicPublishDVLOnly();
 			mLastFrame = Frame(mCurrentFrame);
-            ROS_INFO_STREAM(fixed<<setprecision(6)<<"fail to initialize, Frame["<<mCurrentFrame.mnId<<"], "<<mCurrentFrame.mTimeStamp);
+//             ROS_INFO_STREAM(fixed<<setprecision(6)<<"fail to initialize, Frame["<<mCurrentFrame.mnId<<"], "<<mCurrentFrame.mTimeStamp);  // original
 			return;
 		}
 //        cout<<"initialization success"<<endl;
 		if (mpAtlas->GetAllMaps().size() == 1) {
 			mnFirstFrameId = mCurrentFrame.mnId;
 		}
-        ROS_INFO_STREAM(fixed<<setprecision(6)<<"initialization is done, Frame["<<mCurrentFrame.mnId<<"], "<<mCurrentFrame.mTimeStamp);
+//         ROS_INFO_STREAM(fixed<<setprecision(6)<<"initialization is done, Frame["<<mCurrentFrame.mnId<<"], "<<mCurrentFrame.mTimeStamp);  // original
         mLastFrame = Frame(mCurrentFrame);
 	}
 		// after Initialization
@@ -2767,7 +2767,7 @@ void Tracking::TrackDVLGyro()
 				if (!bOK) {
                     bOK = TrackReferenceKeyFrame();
 
-                    ROS_INFO_STREAM("Fail to track with motion model!");
+//                     ROS_INFO_STREAM("Fail to track with motion model!");  // original
 					// cout << "Fail to track with motion model!" << endl;
                     if(!OK){
                         PredictStateDvlGro();
@@ -2827,7 +2827,7 @@ void Tracking::TrackDVLGyro()
                 // PredictStateDvlGro();
             // }
             if (!bOK) {
-                ROS_INFO_STREAM("Fail to track local map!");
+//                 ROS_INFO_STREAM("Fail to track local map!");  // original
                 PredictStateDvlGro();
             }
 		}
@@ -2875,12 +2875,12 @@ void Tracking::TrackDVLGyro()
 			cv::cv2eigen(T_d_c_cv, T_d_c.matrix());
 			Eigen::Isometry3d T_d0_cj = T_d_c * T_c0_cj;
 
-			mpRosHandler->PublishOrb(T_c0_cj, T_d_c, ros::Time(mCurrentFrame.mTimeStamp));
-			mpRosHandler->PublishCamera(T_c0_cj_camera, ros::Time(mCurrentFrame.mTimeStamp));
+// // 			mpRosHandler->PublishOrb(T_c0_cj, T_d_c, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
+// // 			mpRosHandler->PublishCamera(T_c0_cj_camera, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
 //			mpRosHandler->UpdateMap(mpAtlas);
 			cv::Mat img_with_info = mpFrameDrawer->DrawFrame(true);
 			std_msgs::Header header; // empty header
-			header.stamp = ros::Time::now(); // time
+// // 			header.stamp = ros::Time::now(); // time  // original  // original
 			cv_bridge::CvImage
 				img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, img_with_info);
 			mpRosHandler->PublishImgWithInfo(img_bridge.toImageMsg());
@@ -2964,7 +2964,7 @@ void Tracking::TrackDVLGyro()
                         mCurrentFrame.mpDvlPreintegrationLossRefKF = mpIntegrator->mpIntFromKFBeforeLost_C2C;
                         mCurrentFrame.mpLossRefKF = mpIntegrator->mpLossRefKF;
                         CreateNewKeyFrame();
-                        ROS_INFO_STREAM(fixed<<setprecision(6)<<"KF["<<mpLastKeyFrame->mnId
+//                         ROS_INFO_STREAM(fixed<<setprecision(6)<<"KF["<<mpLastKeyFrame->mnId  // original
                                              <<"] "<<mpLastKeyFrame->mTimeStamp<<" Loss Reference has beed set to KF["
                                              <<mpLastKeyFrame->mpLossRefKF->mnId<<"] "<<mpLastKeyFrame->mpLossRefKF->mTimeStamp);
                         KeyFrame* pkf = mpLastKeyFrame;
@@ -3315,12 +3315,12 @@ void Tracking::TrackKLT()
 			cv::cv2eigen(T_d_c_cv, T_d_c.matrix());
 			Eigen::Isometry3d T_d0_cj = T_d_c * T_c0_cj;
 
-			mpRosHandler->PublishOrb(T_c0_cj, T_d_c, ros::Time(mCurrentFrame.mTimeStamp));
-			mpRosHandler->PublishCamera(T_c0_cj_camera, ros::Time(mCurrentFrame.mTimeStamp));
+// // 			mpRosHandler->PublishOrb(T_c0_cj, T_d_c, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
+// // 			mpRosHandler->PublishCamera(T_c0_cj_camera, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
 //			mpRosHandler->UpdateMap(mpAtlas);
 			cv::Mat img_with_info = mpFrameDrawer->DrawFrame(true);
 			std_msgs::Header header; // empty header
-			header.stamp = ros::Time::now(); // time
+// // 			header.stamp = ros::Time::now(); // time  // original  // original
 			cv_bridge::CvImage
 				img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, img_with_info);
 			mpRosHandler->PublishImgWithInfo(img_bridge.toImageMsg());
@@ -3464,7 +3464,7 @@ void Tracking::TrackKLT()
 
 void Tracking::StereoInitialization()
 {
-    ROS_INFO_STREAM("try to initialize");
+//     ROS_INFO_STREAM("try to initialize");  // original
 	if (mCurrentFrame.N > 500) {
 		if (mSensor == System::DVL_STEREO) {
             if (mpIntegrator->GetDoLossIntegration()) {
@@ -3480,12 +3480,12 @@ void Tracking::StereoInitialization()
             {
                 std::shared_lock<std::shared_mutex> lock(mBiasMutex);
                 mpIntegrator->CreateNewIntFromKF_C2C(mLastBias, GetExtrinsicPara(), mAlpha, mBeta);
-                ROS_INFO_STREAM("create new preintegration from KF with bias: " << mLastBias.bax << " "
+//                 ROS_INFO_STREAM("create new preintegration from KF with bias: " << mLastBias.bax << " "  // original
                                                                                 << mLastBias.bay << " " << mLastBias.baz << " " << mLastBias.bwx << " " << mLastBias.bwy
                                                                                 << " " << mLastBias.bwz);
             }
             else{
-				ROS_INFO_STREAM("create new preintegration from KF with 0 bias");
+// 				ROS_INFO_STREAM("create new preintegration from KF with 0 bias");  // original
                 mpIntegrator->CreateNewIntFromKF_C2C(IMU::Bias(), GetExtrinsicPara(), mAlpha, mBeta);
             }
             if(!mlQueueDVLGyroData.empty()){
@@ -3510,7 +3510,7 @@ void Tracking::StereoInitialization()
             pKFini->SetNewBias(pKFini->mpDvlPreintegrationKeyFrame->mb);
         }
         else if(pKFini->mnId != 0){
-            ROS_ERROR_STREAM("mpLastKeyFrame is NULL");
+//             ROS_ERROR_STREAM("mpLastKeyFrame is NULL");  // original
             assert(mpLastKeyFrame);
         }
 
@@ -3972,7 +3972,7 @@ void Tracking::CreateMapInAtlas()
         mpIntegrator->CreateNewIntFromKFBeforeLoss_D2D(mpIntegrator->mpIntFromKF_C2C);
         mpIntegrator->SetLossRefKF(mpLastKeyFrame);
         mpIntegrator->SetDoLossIntegration(true);
-        ROS_INFO_STREAM("Create new DVL preintegration before loss, bias: "
+//         ROS_INFO_STREAM("Create new DVL preintegration before loss, bias: "  // original
         <<mpIntegrator->mpIntFromKFBeforeLost_C2C->mb.bax<<", "
         <<mpIntegrator->mpIntFromKFBeforeLost_C2C->mb.bay<<", "
         <<mpIntegrator->mpIntFromKFBeforeLost_C2C->mb.baz);
@@ -3983,7 +3983,7 @@ void Tracking::CreateMapInAtlas()
         mLossLastOptID = mpLastKeyFrame->mnId;
         // remember to change in optimization, if change the number if KF inserted
 		while(mvpLossKF.size() < 5 && pkf){
-			ROS_INFO_STREAM("pKF["<<pkf->mnId<<"] inserted");
+// 			ROS_INFO_STREAM("pKF["<<pkf->mnId<<"] inserted");  // original
 			mvpLossKF.insert(pkf);
             pkf = pkf->mPrevKF;
 		}
@@ -4855,8 +4855,10 @@ void Tracking::drawOptimizationResult()
 	mCurrentFrame.imgLeft.copyTo(img_orb);
 
 	if (mCurrentFrame.imgLeft.channels() < 3) {
-		cv::cvtColor(img_dvl_gyro, img_dvl_gyro, CV_GRAY2BGR);
-		cv::cvtColor(img_orb, img_orb, CV_GRAY2BGR);
+		// cv::cvtColor(img_dvl_gyro, img_dvl_gyro, CV_GRAY2BGR);  // original
+		// cv::cvtColor(img_orb, img_orb, CV_GRAY2BGR);  // original
+		cv::cvtColor(img_dvl_gyro, img_dvl_gyro, cv::COLOR_GRAY2BGR);
+		cv::cvtColor(img_orb, img_orb, cv::COLOR_GRAY2BGR);
 	}
 
 	int inlier_dvl_gyro = 0;
@@ -4931,11 +4933,12 @@ void Tracking::drawOptimizationResult()
 		                                                                                         + img_orb_withinfo
 			                                                                                         .cols));
 	std_msgs::Header header; // empty header
-	header.stamp = ros::Time::now(); // time
+// // 	header.stamp = ros::Time::now(); // time  // original  // original
 //	cv::Mat img_with_info=mpFrameDrawer->DrawFrame(true);
 
 	if (img_with_debuginfo.channels() < 3) {
-		cv::cvtColor(img_with_debuginfo, img_with_debuginfo, CV_GRAY2BGR);
+		// cv::cvtColor(img_with_debuginfo, img_with_debuginfo, CV_GRAY2BGR);  // original
+		cv::cvtColor(img_with_debuginfo, img_with_debuginfo, cv::COLOR_GRAY2BGR);
 	}
 	cv_bridge::CvImage img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::BGR8, img_with_debuginfo);
 	mpRosHandler->PublishImgWithInfo(img_bridge.toImageMsg());
@@ -5066,7 +5069,7 @@ bool Tracking::TrackLocalMap()
     if(mnMatchesInliers < mpORBextractorLeft->nfeatures * 0.10){
         mCurrentFrame.mPoorVision = true;
     }
-    // ROS_INFO_STREAM("Matching Inliers: "<<mnMatchesInliers);
+//     // ROS_INFO_STREAM("Matching Inliers: "<<mnMatchesInliers);  // original
 	// if (mCurrentFrame.mnId < mnLastRelocFrameId + mMaxFrames && mnMatchesInliers < 50) {
 	// 	return false;
 	// }
@@ -5296,7 +5299,7 @@ bool Tracking::NeedNewKeyFrame()
 		// If the mapping accepts keyframes, insert keyframe.
 		// Otherwise send a signal to interrupt BA
 		if (bLocalMappingIdle) {
-//            ROS_INFO_STREAM("Idle BA");
+// //            ROS_INFO_STREAM("Idle BA");  // original
 			return true;
 		}
 		else {
@@ -5358,7 +5361,7 @@ void Tracking::CreateNewKeyFrame()
         mpLastKeyFrame->mNextKF = pKF;
     }
     else {
-        ROS_ERROR_STREAM("mpLastKeyFrame is NULL! when create new KF!");
+//         ROS_ERROR_STREAM("mpLastKeyFrame is NULL! when create new KF!");  // original
         assert(-1);
     }
     // //Optimize bias of new KF
@@ -5371,14 +5374,14 @@ void Tracking::CreateNewKeyFrame()
     //         UpdateFrameDVLGyro(pKF->GetImuBias(),pKF);
     //     }
     //     else{
-    //         ROS_ERROR_STREAM("Only one KF in spKFs, cannot optimize bias!");
+//     //         ROS_ERROR_STREAM("Only one KF in spKFs, cannot optimize bias!");  // original
     //         assert(-1);
     //     }
     // }
     // else{
     //     pKF->SetNewBias(mpLastKeyFrame->GetImuBias());
     // }
-    // ROS_INFO_STREAM(fixed<<setprecision(6)<<"New KF["<<pKF->mnId<<"] time"<<pKF->mTimeStamp<<"dvl: "<<pKF->mbDVL);
+//     // ROS_INFO_STREAM(fixed<<setprecision(6)<<"New KF["<<pKF->mnId<<"] time"<<pKF->mTimeStamp<<"dvl: "<<pKF->mbDVL);  // original
 
 
 	// // pKF->SetNewBias(mpLastKeyFrame->GetImuBias());
@@ -5386,7 +5389,7 @@ void Tracking::CreateNewKeyFrame()
     // while(pLastKF && pLastKF->mnId>0){
     //     if(pLastKF->GetImuBias().bax!=0 || pLastKF->GetImuBias().bay!=0 || pLastKF->GetImuBias().baz!=0){
     //         pKF->SetNewBias(pLastKF->GetImuBias());
-    //         ROS_INFO_STREAM("New KF["<<pKF->mnId<<"] bias: "<<pKF->GetImuBias().bax<<","<<pKF->GetImuBias().bay
+//     //         ROS_INFO_STREAM("New KF["<<pKF->mnId<<"] bias: "<<pKF->GetImuBias().bax<<","<<pKF->GetImuBias().bay  // original
     //                                  <<","<<pKF->GetImuBias().baz);
     //         break;
     //     }
@@ -5405,7 +5408,7 @@ void Tracking::CreateNewKeyFrame()
 		// mpDvlPreintegratedFromLastKF = new DVLGroPreIntegration(pKF->GetImuBias(), pKF->mImuCalib);
         mpIntegrator->CreateNewIntFromKF_C2C(mLastBias, GetExtrinsicPara(),mAlpha,mBeta);
         pKF->SetNewBias(mLastBias);
-        ROS_INFO_STREAM("create new KF["<<pKF->mnId<<"]"<<" bias(acc gyros):"<<mLastBias.bax<<","<<mLastBias.bay<<","<<mLastBias.baz<<","<<mLastBias.bwx<<","<<mLastBias.bwy<<","<<mLastBias.bwz);
+//         ROS_INFO_STREAM("create new KF["<<pKF->mnId<<"]"<<" bias(acc gyros):"<<mLastBias.bax<<","<<mLastBias.bay<<","<<mLastBias.baz<<","<<mLastBias.bwx<<","<<mLastBias.bwy<<","<<mLastBias.bwz);  // original
         // mpIntegrator->CreateNewIntFromKF_D2D(pKF->GetImuBias(), pKF->mImuCalib,mAlpha,mBeta);
 	}
 
@@ -5514,14 +5517,14 @@ void Tracking::CreateNewKeyFrame()
     //     DVLGroPreIntegration* pDVLGroPreIntegration2 = new DVLGroPreIntegration();
     //     boost::archive::text_iarchive ia1(i_file1);
     //     ia1 >> pDVLGroPreIntegration2;
-    //     ROS_INFO_STREAM("pInt1 dR: \n"<<pDVLGroPreIntegration->GetDeltaRotation(pDVLGroPreIntegration->mb));
-    //     ROS_INFO_STREAM("pInt2 dR: \n"<<pDVLGroPreIntegration2->GetDeltaRotation(pDVLGroPreIntegration2->mb));
-    //     ROS_INFO_STREAM("pInt1 dV: \n"<<pDVLGroPreIntegration->GetDeltaVelocity(pDVLGroPreIntegration->mb));
-    //     ROS_INFO_STREAM("pInt2 dV: \n"<<pDVLGroPreIntegration2->GetDeltaVelocity(pDVLGroPreIntegration2->mb));
-    //     ROS_INFO_STREAM("pInt1 dP_dvl: \n"<<pDVLGroPreIntegration->GetDVLPosition(pDVLGroPreIntegration->mb));
-    //     ROS_INFO_STREAM("pInt2 dP_dvl: \n"<<pDVLGroPreIntegration2->GetDVLPosition(pDVLGroPreIntegration2->mb));
-    //     ROS_INFO_STREAM("pInt1 dP_imu: \n"<<pDVLGroPreIntegration->GetDeltaPosition(pDVLGroPreIntegration->mb));
-    //     ROS_INFO_STREAM("pInt2 dP_imu: \n"<<pDVLGroPreIntegration2->GetDeltaPosition(pDVLGroPreIntegration2->mb));
+//     //     ROS_INFO_STREAM("pInt1 dR: \n"<<pDVLGroPreIntegration->GetDeltaRotation(pDVLGroPreIntegration->mb));  // original
+//     //     ROS_INFO_STREAM("pInt2 dR: \n"<<pDVLGroPreIntegration2->GetDeltaRotation(pDVLGroPreIntegration2->mb));  // original
+//     //     ROS_INFO_STREAM("pInt1 dV: \n"<<pDVLGroPreIntegration->GetDeltaVelocity(pDVLGroPreIntegration->mb));  // original
+//     //     ROS_INFO_STREAM("pInt2 dV: \n"<<pDVLGroPreIntegration2->GetDeltaVelocity(pDVLGroPreIntegration2->mb));  // original
+//     //     ROS_INFO_STREAM("pInt1 dP_dvl: \n"<<pDVLGroPreIntegration->GetDVLPosition(pDVLGroPreIntegration->mb));  // original
+//     //     ROS_INFO_STREAM("pInt2 dP_dvl: \n"<<pDVLGroPreIntegration2->GetDVLPosition(pDVLGroPreIntegration2->mb));  // original
+//     //     ROS_INFO_STREAM("pInt1 dP_imu: \n"<<pDVLGroPreIntegration->GetDeltaPosition(pDVLGroPreIntegration->mb));  // original
+//     //     ROS_INFO_STREAM("pInt2 dP_imu: \n"<<pDVLGroPreIntegration2->GetDeltaPosition(pDVLGroPreIntegration2->mb));  // original
     //
     //     DvlImuCamPose pose_test(mpLastKeyFrame);
     //     boost::archive::text_oarchive oa3(o_file2);
@@ -5530,34 +5533,34 @@ void Tracking::CreateNewKeyFrame()
     //     DvlImuCamPose pose_test2;
     //     boost::archive::text_iarchive ia2(i_file2);
     //     ia2 >> pose_test2;
-    //     ROS_INFO_STREAM("Pose1 Rwc: \n"<<pose_test.Rwc);
-    //     ROS_INFO_STREAM("Pose2 Rwc: \n"<<pose_test2.Rwc);
-    //     ROS_INFO_STREAM("Pose1 twc: \n"<<pose_test.twc);
-    //     ROS_INFO_STREAM("Pose2 twc: \n"<<pose_test2.twc);
-    //     ROS_INFO_STREAM("Pose1 Rcw: \n"<<pose_test.Rcw[0]);
-    //     ROS_INFO_STREAM("Pose2 Rcw: \n"<<pose_test2.Rcw[0]);
-    //     ROS_INFO_STREAM("Pose1 tcw: \n"<<pose_test.tcw[0]);
-    //     ROS_INFO_STREAM("Pose2 tcw: \n"<<pose_test2.tcw[0]);
-    //     ROS_INFO_STREAM("Pose1 Rgc: \n"<<pose_test.R_gyro_c[0]);
-    //     ROS_INFO_STREAM("Pose2 Rgc: \n"<<pose_test2.R_gyro_c[0]);
-    //     ROS_INFO_STREAM("Pose1 tgc: \n"<<pose_test.t_gyro_c[0]);
-    //     ROS_INFO_STREAM("Pose2 tgc: \n"<<pose_test2.t_gyro_c[0]);
-    //     ROS_INFO_STREAM("Pose1 Rdc: \n"<<pose_test.R_dvl_c[0]);
-    //     ROS_INFO_STREAM("Pose2 Rdc: \n"<<pose_test2.R_dvl_c[0]);
-    //     ROS_INFO_STREAM("Pose1 tdc: \n"<<pose_test.t_dvl_c[0]);
-    //     ROS_INFO_STREAM("Pose2 tdc: \n"<<pose_test2.t_dvl_c[0]);
-    //     ROS_INFO_STREAM("Pose1 Rcd: \n"<<pose_test.R_c_dvl[0]);
-    //     ROS_INFO_STREAM("Pose2 Rcd: \n"<<pose_test2.R_c_dvl[0]);
-    //     ROS_INFO_STREAM("Pose1 tcd: \n"<<pose_test.t_c_dvl[0]);
-    //     ROS_INFO_STREAM("Pose2 tcd: \n"<<pose_test2.t_c_dvl[0]);
-    //     ROS_INFO_STREAM("Pose1 Rcg: \n"<<pose_test.R_c_gyro[0]);
-    //     ROS_INFO_STREAM("Pose2 Rcg: \n"<<pose_test2.R_c_gyro[0]);
-    //     ROS_INFO_STREAM("Pose1 tcg: \n"<<pose_test.t_c_gyro[0]);
-    //     ROS_INFO_STREAM("Pose2 tcg: \n"<<pose_test2.t_c_gyro[0]);
+//     //     ROS_INFO_STREAM("Pose1 Rwc: \n"<<pose_test.Rwc);  // original
+//     //     ROS_INFO_STREAM("Pose2 Rwc: \n"<<pose_test2.Rwc);  // original
+//     //     ROS_INFO_STREAM("Pose1 twc: \n"<<pose_test.twc);  // original
+//     //     ROS_INFO_STREAM("Pose2 twc: \n"<<pose_test2.twc);  // original
+//     //     ROS_INFO_STREAM("Pose1 Rcw: \n"<<pose_test.Rcw[0]);  // original
+//     //     ROS_INFO_STREAM("Pose2 Rcw: \n"<<pose_test2.Rcw[0]);  // original
+//     //     ROS_INFO_STREAM("Pose1 tcw: \n"<<pose_test.tcw[0]);  // original
+//     //     ROS_INFO_STREAM("Pose2 tcw: \n"<<pose_test2.tcw[0]);  // original
+//     //     ROS_INFO_STREAM("Pose1 Rgc: \n"<<pose_test.R_gyro_c[0]);  // original
+//     //     ROS_INFO_STREAM("Pose2 Rgc: \n"<<pose_test2.R_gyro_c[0]);  // original
+//     //     ROS_INFO_STREAM("Pose1 tgc: \n"<<pose_test.t_gyro_c[0]);  // original
+//     //     ROS_INFO_STREAM("Pose2 tgc: \n"<<pose_test2.t_gyro_c[0]);  // original
+//     //     ROS_INFO_STREAM("Pose1 Rdc: \n"<<pose_test.R_dvl_c[0]);  // original
+//     //     ROS_INFO_STREAM("Pose2 Rdc: \n"<<pose_test2.R_dvl_c[0]);  // original
+//     //     ROS_INFO_STREAM("Pose1 tdc: \n"<<pose_test.t_dvl_c[0]);  // original
+//     //     ROS_INFO_STREAM("Pose2 tdc: \n"<<pose_test2.t_dvl_c[0]);  // original
+//     //     ROS_INFO_STREAM("Pose1 Rcd: \n"<<pose_test.R_c_dvl[0]);  // original
+//     //     ROS_INFO_STREAM("Pose2 Rcd: \n"<<pose_test2.R_c_dvl[0]);  // original
+//     //     ROS_INFO_STREAM("Pose1 tcd: \n"<<pose_test.t_c_dvl[0]);  // original
+//     //     ROS_INFO_STREAM("Pose2 tcd: \n"<<pose_test2.t_c_dvl[0]);  // original
+//     //     ROS_INFO_STREAM("Pose1 Rcg: \n"<<pose_test.R_c_gyro[0]);  // original
+//     //     ROS_INFO_STREAM("Pose2 Rcg: \n"<<pose_test2.R_c_gyro[0]);  // original
+//     //     ROS_INFO_STREAM("Pose1 tcg: \n"<<pose_test.t_c_gyro[0]);  // original
+//     //     ROS_INFO_STREAM("Pose2 tcg: \n"<<pose_test2.t_c_gyro[0]);  // original
     //     auto pc1 = static_cast<Pinhole*>(pose_test.pCamera[0]);
     //     auto pc2 = static_cast<Pinhole*>(pose_test2.pCamera[0]);
-    //     ROS_INFO_STREAM("Pose1 camera: param"<<pc1->mvParameters[0]<<","<<pc1->mvParameters[1]<<","<<pc1->mvParameters[2]<<","<<pc1->mvParameters[3]<<", type:"<<pc1->mnType<<", ID:"<<pc1->mnId);
-    //     ROS_INFO_STREAM("Pose2 camera: param"<<pc2->mvParameters[0]<<","<<pc2->mvParameters[1]<<","<<pc2->mvParameters[2]<<","<<pc2->mvParameters[3]<<", type:"<<pc2->mnType<<", ID:"<<pc2->mnId);
+//     //     ROS_INFO_STREAM("Pose1 camera: param"<<pc1->mvParameters[0]<<","<<pc1->mvParameters[1]<<","<<pc1->mvParameters[2]<<","<<pc1->mvParameters[3]<<", type:"<<pc1->mnType<<", ID:"<<pc1->mnId);  // original
+//     //     ROS_INFO_STREAM("Pose2 camera: param"<<pc2->mvParameters[0]<<","<<pc2->mvParameters[1]<<","<<pc2->mvParameters[2]<<","<<pc2->mvParameters[3]<<", type:"<<pc2->mnType<<", ID:"<<pc2->mnId);  // original
     //
     // }
 }
@@ -6170,7 +6173,7 @@ void Tracking::Reset(bool bLocMap)
 
 
 	Verbose::PrintMess("   End reseting! ", Verbose::VERBOSITY_NORMAL);
-    ROS_INFO_STREAM("reset done");
+//     ROS_INFO_STREAM("reset done");  // original
 }
 
 void Tracking::ResetActiveMap(bool bLocMap)
@@ -6464,7 +6467,7 @@ void Tracking::UpdateFrameDVLGyro(const IMU::Bias &b, KeyFrame *pCurrentKeyFrame
         cv::eigen2cv(T_c0_c1.inverse().matrix(),T_c1_c0_cv);
         T_c1_c0_cv.convertTo(T_c1_c0_cv,CV_32F);
         mLastFrame.SetPose(T_c1_c0_cv);
-        // ROS_INFO_STREAM("update last frame pose");
+//         // ROS_INFO_STREAM("update last frame pose");  // original
     }
 
 
@@ -6494,7 +6497,7 @@ void Tracking::UpdateFrameDVLGyro(const IMU::Bias &b, KeyFrame *pCurrentKeyFrame
         cv::eigen2cv(T_c0_c1.inverse().matrix(),T_c1_c0_cv);
         T_c1_c0_cv.convertTo(T_c1_c0_cv,CV_32F);
         mCurrentFrame.SetPose(T_c1_c0_cv);
-        // ROS_INFO_STREAM("update current frame pose");
+//         // ROS_INFO_STREAM("update current frame pose");  // original
     }
     // PredictStateDvlGro();
 

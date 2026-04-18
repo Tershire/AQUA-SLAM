@@ -43,7 +43,7 @@ LoopClosing::LoopClosing(Atlas *pAtlas, KeyFrameDatabase *pDB, ORBVocabulary *pV
 {
     mnCovisibilityConsistencyTh = mMergingThreshold;
     mpLastCurrentKF = static_cast<KeyFrame*>(NULL);
-    mpNH=boost::make_shared<ros::NodeHandle>();
+// //     mpNH=boost::make_shared<ros::NodeHandle>();  // original  // original
     mpIt=boost::make_shared<image_transport::ImageTransport>(*mpNH);
     mImgPub_cur_keyframe=mpIt->advertise("/AQUA_SLAM/loop/cur_img",10);
     mImgPub_map_keyframe=mpIt->advertise("AQUA_SLAM/loop/map_img",10);
@@ -509,7 +509,7 @@ bool LoopClosing::NewDetectCommonRegions()
         // Search in BoW
         mpKeyFrameDB->DetectNBestCandidates(mpCurrentKF, vpLoopBowCand, vpMergeBowCand,3);
     }
-	//ROS_INFO_STREAM("find "<<vpMergeBowCand.size()<<" merge Candidate");
+// 	//ROS_INFO_STREAM("find "<<vpMergeBowCand.size()<<" merge Candidate");  // original
 	if (!vpMergeBowCand.empty()){
 		mpRosHandler->PublishImgMergeCandidate(vpMergeBowCand[0]->imgLeft);
 	}
@@ -729,7 +729,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
             }
         }
 
-       //ROS_INFO_STREAM("numBoWMatches:"<<numBoWMatches<<" threshold:"<<nBoWMatches);
+//        //ROS_INFO_STREAM("numBoWMatches:"<<numBoWMatches<<" threshold:"<<nBoWMatches);  // original
         if(!bAbortByNearKF && numBoWMatches >= nBoWMatches) // TODO pick a good threshold
         {
 
@@ -744,7 +744,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
             Sim3Solver solver = Sim3Solver(mpCurrentKF, pMostBoWMatchesKF, vpMatchedPoints, bFixedScale, vpKeyFrameMatchedMP);
             solver.SetRansacParameters(0.99, nBoWInliers, 300); // at least 15 inliers
 			cout<<"set Ransac solver: "<<endl;
-			//ROS_INFO_STREAM("set Ransac solver");
+// 			//ROS_INFO_STREAM("set Ransac solver");  // original
 
             bool bNoMore = false;
             vector<bool> vbInliers;
@@ -810,7 +810,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                 vpMatchedKF.resize(mpCurrentKF->GetMapPointMatches().size(), static_cast<KeyFrame*>(NULL));
                 int numProjMatches = matcher.SearchByProjection(mpCurrentKF, mScw, vpMapPoints, vpKeyFrames, vpMatchedMP, vpMatchedKF, 8, 1.5);
 //                cout <<"BoW: " << numProjMatches << " matches between " << vpMapPoints.size() << " points with coarse Sim3" << endl;
-				ROS_INFO_STREAM("re-projection matched points: "<<numProjMatches<<" threshold: "<<nProjMatches);
+// 				ROS_INFO_STREAM("re-projection matched points: "<<numProjMatches<<" threshold: "<<nProjMatches);  // original
 
                 if(numProjMatches >= nProjMatches)
                 {
@@ -822,7 +822,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                         bFixedScale=false;
 
                     int numOptMatches = Optimizer::OptimizeSim3(mpCurrentKF, pKFi, vpMatchedMP, gScm, 20, true, mHessian7x7, true);
-                    ROS_INFO_STREAM("Optimize Sim3: "<<numOptMatches<<" inliers, threshold: "<<nSim3Inliers);
+//                     ROS_INFO_STREAM("Optimize Sim3: "<<numOptMatches<<" inliers, threshold: "<<nSim3Inliers);  // original
                     if(numOptMatches >= nSim3Inliers)
                     {
 						// gSmw: Similarity transformation from world to the keyframe candidate(previous keyframe in the map) which may have loop
@@ -839,7 +839,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
                         vpMatchedMP.resize(mpCurrentKF->GetMapPointMatches().size(), static_cast<MapPoint*>(NULL));
                         int numProjOptMatches = matcher.SearchByProjection(mpCurrentKF, mScw, vpMapPoints, vpMatchedMP, 5, 1.0);
                         //cout <<"BoW: " << numProjOptMatches << " matches after of the Sim3 optimization" << endl;
-						ROS_INFO_STREAM(numProjOptMatches << " matches after of the Sim3 optimization"<<", threshold: "<<numProjOptMatches);
+// 						ROS_INFO_STREAM(numProjOptMatches << " matches after of the Sim3 optimization"<<", threshold: "<<numProjOptMatches);  // original
 
                         /**
                          * if the inliers are more than a threshold
@@ -964,7 +964,7 @@ bool LoopClosing::DetectCommonRegionsFromBoW(std::vector<KeyFrame*> &vpBowCand, 
         index++;
     }
 
-	//ROS_INFO_STREAM("KF Coindicendes: "<<nBestNumCoindicendes<<", threshold: "<<3);
+// 	//ROS_INFO_STREAM("KF Coindicendes: "<<nBestNumCoindicendes<<", threshold: "<<3);  // original
     if(nBestMatchesReproj > 0)
     {
         pLastCurrentKF = mpCurrentKF;
@@ -1413,7 +1413,7 @@ void LoopClosing::MergeLocal()
 
     //stop if try to merge inactive map
     if (pCurrentMap != mpAtlas->GetCurrentMap()) {
-        ROS_ERROR_STREAM("try to merge inactive map, stop");
+//         ROS_ERROR_STREAM("try to merge inactive map, stop");  // original
         mpLocalMapper->Release();
         return;
     }
@@ -1585,7 +1585,7 @@ void LoopClosing::MergeLocal()
         if(!pKFi || pKFi->isBad())
         {
 //            Verbose::PrintMess("Bad KF in correction", Verbose::VERBOSITY_DEBUG);
-			ROS_ERROR_STREAM("Bad KF in correction");
+// 			ROS_ERROR_STREAM("Bad KF in correction");  // original
 			mpLocalMapper->Release();
 			return;
         }
@@ -1593,9 +1593,9 @@ void LoopClosing::MergeLocal()
         if(pKFi->GetMap() != pCurrentMap){
 //			Verbose::PrintMess("Other map KF, this should't happen", Verbose::VERBOSITY_DEBUG);
 			if(pKFi->GetMap()==nullptr||pKFi->GetMap()->IsBad())
-				ROS_ERROR_STREAM("try to merge null map KF, this should't happen");
+// 				ROS_ERROR_STREAM("try to merge null map KF, this should't happen");  // original
 			else
-				ROS_ERROR_STREAM("try to merge KF in map: "<<pKFi->GetMap()->GetId()<<", this should't happen");
+// 				ROS_ERROR_STREAM("try to merge KF in map: "<<pKFi->GetMap()->GetId()<<", this should't happen");  // original
 			mpLocalMapper->Release();
 			return;
 		}
@@ -1675,7 +1675,7 @@ void LoopClosing::MergeLocal()
         //
 		// //stop if try to merge inactive map
 		// if (pCurrentMap != mpAtlas->GetCurrentMap()) {
-		// 	ROS_ERROR_STREAM("try to merge inactive map, stop");
+// 		// 	ROS_ERROR_STREAM("try to merge inactive map, stop");  // original
 		// 	mpLocalMapper->Release();
 		// 	return;
 		// }
@@ -1684,12 +1684,12 @@ void LoopClosing::MergeLocal()
 		for (auto it: vCorrectedSim3) {
 
 			if (!(it.first) || (it.first->isBad())) {
-				ROS_ERROR_STREAM("Bad KF in correction");
+// 				ROS_ERROR_STREAM("Bad KF in correction");  // original
 				mpLocalMapper->Release();
 				return;
 			}
 			else if (!(it.first->GetMap()) || (it.first->GetMap()->IsBad())) {
-				ROS_ERROR_STREAM("Bad Map in correction");
+// 				ROS_ERROR_STREAM("Bad Map in correction");  // original
 				mpLocalMapper->Release();
 				return;
 			}
@@ -2295,15 +2295,15 @@ void LoopClosing::SearchAndFuse(const KeyFrameAndPose &CorrectedPosesMap, vector
         KeyFrame* pKFi = mit->first;
         Map* pMap = pKFi->GetMap();
 		if (pKFi==NULL||pMap==NULL){
-			ROS_ERROR_STREAM("fail to fuse map point because of NULL pointer");
+// 			ROS_ERROR_STREAM("fail to fuse map point because of NULL pointer");  // original
 			continue;
 		}
 		else if(pKFi->isBad()){
-			ROS_ERROR_STREAM("fail to fuse map points, because of bad KF");
+// 			ROS_ERROR_STREAM("fail to fuse map points, because of bad KF");  // original
 			continue;
 		}
 		else if(pMap->IsBad()){
-			ROS_ERROR_STREAM("fail to fuse map points, because of bad Map");
+// 			ROS_ERROR_STREAM("fail to fuse map points, because of bad Map");  // original
 			continue;
 		}
 

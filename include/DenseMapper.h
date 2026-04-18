@@ -4,15 +4,20 @@
 #ifndef DENSEMAPPER_H
 #define DENSEMAPPER_H
 
-#include <ros/ros.h>
+// #include <ros/ros.h>  // original
 // #include <rosbag/bag.h>
 // #include <rosbag/view.h>
-#include <sensor_msgs/Image.h>
-#include <image_transport/image_transport.h>
-#include <image_transport/subscriber_filter.h>
+// #include <sensor_msgs/Image.h>  // original
+#include <sensor_msgs/msg/image.hpp>
+// #include <image_transport/image_transport.h>  // original
+#include <image_transport/image_transport.hpp>
+// #include <image_transport/subscriber_filter.h>  // original
+#include <image_transport/subscriber_filter.hpp>
 #include <message_filters/sync_policies/approximate_time.h>
-#include <cv_bridge/cv_bridge.h>
-#include <std_srvs/Empty.h>
+// #include <cv_bridge/cv_bridge.h>  // original
+#include <cv_bridge/cv_bridge.hpp>
+// #include <std_srvs/Empty.h>  // original
+#include <std_srvs/srv/empty.hpp>
 
 
 #include <pcl/common/common_headers.h>
@@ -121,7 +126,7 @@ public:
 	//ros publisher
 	boost::shared_ptr<image_transport::Publisher> mDepthPub;
 	boost::shared_ptr<image_transport::Publisher> mDepthConfPub;
-	boost::shared_ptr<ros::Publisher> mMapPub;
+// // 	boost::shared_ptr<ros::Publisher> mMapPub;  // original  // original
 
 	bool mStop = false;
 	bool mEnable = true;

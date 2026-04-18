@@ -17,7 +17,7 @@
 */
 
 #include "Atlas.h"
-#include <ros/ros.h>
+// #include <ros/ros.h>  // original
 // #include "Viewer.h"
 
 #include "GeometricCamera.h"
@@ -105,7 +105,7 @@ void Atlas::ChangeMap(Map *pMapFrom, Map *pMapTo)
 		mpCurrentMap->SetCurrentMap();
 	}
 	else{
-		ROS_ERROR_STREAM("try to merge inactive maps!!");
+// 		ROS_ERROR_STREAM("try to merge inactive maps!!");  // original
 	}
 
 }
@@ -257,7 +257,7 @@ Map* Atlas::GetCurrentMap()
 	{
 		lock.unlock();
 		CreateNewMap();
-		ROS_ERROR_STREAM("current map bad");
+// 		ROS_ERROR_STREAM("current map bad");  // original
 	}
 
 //    while(mpCurrentMap->IsBad())
@@ -454,7 +454,7 @@ void Atlas::clearMap(Map *pMap)
 		cout<<"clear map: "<<pMap->GetId()<<endl;
 	}
 	else
-		ROS_ERROR_STREAM("fail to clear map!!!");
+// 		ROS_ERROR_STREAM("fail to clear map!!!");  // original
 }
 bool Atlas::isDvlImuInitialized()
 {

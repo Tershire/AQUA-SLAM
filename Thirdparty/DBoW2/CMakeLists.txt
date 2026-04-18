@@ -24,15 +24,18 @@ set(SRCS_DUTILS
   DUtils/Random.cpp
   DUtils/Timestamp.cpp)
 
-set(OpenCV_DIR /home/da/project/Thirdparty/opencv3.2/share)
-set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} /home/da/project/Thirdparty/opencv3.2)
-find_package(OpenCV 3.0 QUIET)
-if(NOT OpenCV_FOUND)
-   find_package(OpenCV 2.4.3 QUIET)
-   if(NOT OpenCV_FOUND)
-      message(FATAL_ERROR "OpenCV > 2.4.3 not found.")
-   endif()
-endif()
+# original --------------------------------------------------------------------
+# set(OpenCV_DIR /home/da/project/Thirdparty/opencv3.2/share)
+# set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} /home/da/project/Thirdparty/opencv3.2)
+# find_package(OpenCV 3.0 QUIET)
+# if(NOT OpenCV_FOUND)
+#    find_package(OpenCV 2.4.3 QUIET)
+#    if(NOT OpenCV_FOUND)
+#       message(FATAL_ERROR "OpenCV > 2.4.3 not found.")
+#    endif()
+# endif()
+# -----------------------------------------------------------------------------
+find_package(OpenCV REQUIRED)
 
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 

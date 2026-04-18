@@ -5,13 +5,15 @@
 #include "KeyFrame.h"
 #include "Map.h"
 
-#include <sensor_msgs/PointCloud2.h>
+// #include <sensor_msgs/PointCloud2.h>  // original
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/radius_outlier_removal.h>
 // #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CompressedImage.h>
-#include <cv_bridge/cv_bridge.h>
+// #include <cv_bridge/cv_bridge.h>  // original
+#include <cv_bridge/cv_bridge.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <algorithm>
 #include <iterator>
@@ -24,7 +26,7 @@ namespace ORB_SLAM3
 {
     DenseMapper::DenseMapper(string settingFile)
     {
-        ros::NodeHandle nh_;
+// //         ros::NodeHandle nh_;  // original  // original
         image_transport::ImageTransport it(nh_);
         image_transport::Publisher depth_pub = it.advertise("/AQUA_SLAM/dense_mapper/depth", 10);
         mDepthPub = boost::shared_ptr<image_transport::Publisher>(
@@ -33,9 +35,9 @@ namespace ORB_SLAM3
                 "/AQUA_SLAM/dense_mapper/depth_cpnfidence", 10);
         mDepthConfPub = boost::shared_ptr<image_transport::Publisher>(
                 boost::make_shared<image_transport::Publisher>(depth_conf_pub));
-        ros::Publisher pointcloud_pub = nh_.advertise<sensor_msgs::PointCloud2>("/AQUA_SLAM/dense_map",
+// //         ros::Publisher pointcloud_pub = nh_.advertise<sensor_msgs::PointCloud2>("/AQUA_SLAM/dense_map",  // original  // original
                                                                                 10);
-        mMapPub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pointcloud_pub));
+// //         mMapPub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pointcloud_pub));  // original  // original
 
         FileStorage fs(settingFile, FileStorage::READ);
         FileNode node = fs["DenseMapper"];
@@ -115,7 +117,7 @@ namespace ORB_SLAM3
         //		return;
         //	}
         if (param._correlation_window_size <= 0 || param._correlation_window_size % 2 != 1) {
-            ROS_ERROR_STREAM("DenseMapper: Incorrect window_size value: it should be positive and odd");
+//             ROS_ERROR_STREAM("DenseMapper: Incorrect window_size value: it should be positive and odd");  // original
             return;
         }
 
@@ -262,7 +264,7 @@ namespace ORB_SLAM3
         disp_conf.convertTo(disp_conf, CV_8UC1);
 
         sensor_msgs::Image::_header_type header;
-        header.stamp = ros::Time::now();
+// //         header.stamp = ros::Time::now();  // original  // original
 
         cv_bridge::CvImage img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, disp);
         mDepthPub->publish(img_bridge.toImageMsg());
@@ -505,8 +507,8 @@ namespace ORB_SLAM3
         // rosbag::View view(bag, rosbag::TopicQuery(topics));
         //
         // // Create multimaps to store the messages for each topic, keyed by their timestamps
-        // std::multimap<ros::Time, sensor_msgs::CompressedImage::ConstPtr> left_topic_images;
-        // std::multimap<ros::Time, sensor_msgs::CompressedImage::ConstPtr> right_topic_images;
+// //         // std::multimap<ros::Time, sensor_msgs::CompressedImage::ConstPtr> left_topic_images;  // original  // original
+// //         // std::multimap<ros::Time, sensor_msgs::CompressedImage::ConstPtr> right_topic_images;  // original  // original
         //
         // // Iterate over the messages in the topics
         // for (const rosbag::MessageInstance &m: view) {
@@ -523,7 +525,7 @@ namespace ORB_SLAM3
         //
         // // Iterate over the left images and find the corresponding right images based on the closest timestamp
         // for (const auto &left_pair: left_topic_images) {
-        //     ros::Time left_time = left_pair.first;
+// //         //     ros::Time left_time = left_pair.first;  // original  // original
         //     sensor_msgs::CompressedImage::ConstPtr left_img_msg = left_pair.second;
         //
         //     auto lower = right_topic_images.lower_bound(left_time);

@@ -139,12 +139,16 @@ Frame::Frame(const cv::Mat &imLeft,
 	cv::Mat imgLeftGray = imLeft.clone();
 	cv::Mat imgRightGray = imRight.clone();
 	if (imgLeftGray.channels() == 3) {
-		cv::cvtColor(imgLeftGray, imgLeftGray, CV_BGR2GRAY);
-		cv::cvtColor(imgRightGray, imgRightGray, CV_BGR2GRAY);
+		// cv::cvtColor(imgLeftGray, imgLeftGray, CV_BGR2GRAY);  // original
+		// cv::cvtColor(imgRightGray, imgRightGray, CV_BGR2GRAY);  // original
+		cv::cvtColor(imgLeftGray, imgLeftGray, cv::COLOR_BGR2GRAY);
+		cv::cvtColor(imgRightGray, imgRightGray, cv::COLOR_BGR2GRAY);
 	}
 	else if (imgLeftGray.channels() == 4) {
-		cv::cvtColor(imgLeftGray, imgLeftGray, CV_BGRA2GRAY);
-		cv::cvtColor(imgRightGray, imgRightGray, CV_BGRA2GRAY);
+		// cv::cvtColor(imgLeftGray, imgLeftGray, CV_BGRA2GRAY);  // original
+		// cv::cvtColor(imgRightGray, imgRightGray, CV_BGRA2GRAY);  // original
+		cv::cvtColor(imgLeftGray, imgLeftGray, cv::COLOR_BGRA2GRAY);
+		cv::cvtColor(imgRightGray, imgRightGray, cv::COLOR_BGRA2GRAY);
 	}
 
 	// Scale Level Info

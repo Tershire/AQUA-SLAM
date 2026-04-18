@@ -5,7 +5,7 @@
 #include "DVLGroPreIntegration.h"
 #include<iostream>
 #include <opencv2/core/eigen.hpp>
-#include <ros/ros.h>
+// #include <ros/ros.h>  // original
 #include <boost/serialization/export.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
@@ -236,9 +236,9 @@ void DVLGroPreIntegration::ReintegrateWithBiasAndRotation(const Bias &b, const c
 {
     std::lock_guard<std::mutex> lock(mMutex);
     const std::vector<integrable> aux = mvMeasurements;
-    //	ROS_INFO_STREAM("reintegration measurment: "<<aux.size()<<endl);
+//     //	ROS_INFO_STREAM("reintegration measurment: "<<aux.size()<<endl);  // original
     //	cout<<"reintegration measurment: "<<aux.size()<<endl;
-    //	ROS_INFO_STREAM("R_g_d reintegration: "<<R_g_d);
+//     //	ROS_INFO_STREAM("R_g_d reintegration: "<<R_g_d);  // original
     cv::Mat v = dV.clone();
     Initialize(bu);
     //	dV=v.clone();
@@ -266,9 +266,9 @@ void DVLGroPreIntegration::ReintegrateWithVelocity(const Eigen::Vector3d &veloci
     std::lock_guard<std::mutex> lock(mMutex);
     const std::vector<integrable> aux = mvMeasurements;
     const std::vector<integrable> aux2 = mvMeasurements2;
-    //	ROS_INFO_STREAM("reintegration measurment: "<<aux.size()<<endl);
+//     //	ROS_INFO_STREAM("reintegration measurment: "<<aux.size()<<endl);  // original
     //	cout<<"reintegration measurment: "<<aux.size()<<endl;
-    //	ROS_INFO_STREAM("velocity reintegration, v: "<<velocity.transpose());
+//     //	ROS_INFO_STREAM("velocity reintegration, v: "<<velocity.transpose());  // original
     cv::Mat v;
     cv::eigen2cv(velocity, v);
     v.convertTo(v, CV_64F);
@@ -325,7 +325,7 @@ void DVLGroPreIntegration::ReintegrateWithBiasRotationBeamOri(const Bias &b, con
 void DVLGroPreIntegration::IntegrateGroMeasurement(const cv::Point3d &angVel, const double &dt)
 {
     // if (dV.at<double>(0) == 0 && dV.at<double>(1) == 0 && dV.at<double>(2) == 0) {
-    //     ROS_ERROR_STREAM("velocity is not initialized");
+//     //     ROS_ERROR_STREAM("velocity is not initialized");  // original
     //     exit(-1);
     // }
     mvMeasurements.push_back(integrable(cv::Point3d(0, 0, 0), angVel, dt));
@@ -479,7 +479,7 @@ void DVLGroPreIntegration::IntegrateDVLMeasurement(const cv::Point3d &v_dk, cons
         mVelocity = v.clone();
         //		cout<<"dR:"<<dR<<endl;
         //		cout<<"dV:"<<dV<<endl;
-        ROS_INFO_STREAM("reintegration with velocity");
+//         ROS_INFO_STREAM("reintegration with velocity");  // original
         ReintegrateWithVelocity();
     }
     else {
@@ -566,7 +566,7 @@ void DVLGroPreIntegration::IntegrateDVLMeasurement2(const Eigen::Vector4d &veloc
         mVelocity = v.clone();
         //		cout<<"dR:"<<dR<<endl;
         //		cout<<"dV:"<<dV<<endl;
-        ROS_INFO_STREAM("reintegration with velocity");
+//         ROS_INFO_STREAM("reintegration with velocity");  // original
         ReintegrateWithVelocity();
     }
     else {
@@ -819,7 +819,7 @@ cv::Mat DVLGroPreIntegration::GetDVLPosition(const Bias &b_, const Eigen::Vector
     cv::Mat dbg = (cv::Mat_<double>(3, 1) << b_.bwx - mb.bwx, b_.bwy - mb.bwy, b_.bwz - mb.bwz);
     cv::Mat dba = (cv::Mat_<double>(3, 1) << b_.bax - mb.bax, b_.bay - mb.bay, b_.baz - mb.baz);
     cv::Mat P = dP_dvl.clone()  + JPv*v_delta;
-    // ROS_INFO_STREAM("current v: "<<dV<<" new v: "<<v_new<<"delta p"<<JPv*v_delta);
+//     // ROS_INFO_STREAM("current v: "<<dV<<" new v: "<<v_new<<"delta p"<<JPv*v_delta);  // original
     P.convertTo(P, CV_32F);
     return P;
 }
@@ -927,7 +927,7 @@ void DVLGroPreIntegration::output()
     Eigen::Matrix3d R_gi_gj;
     cv::cv2eigen(dR, R_gi_gj);
     Eigen::Quaterniond q(R_gi_gj);
-    //	ROS_INFO_STREAM("integrated oritentation: x:"<<q.x()<<" y:"<<q.y()<<" z:"<<q.z()<<" w:"<<q.w());
+//     //	ROS_INFO_STREAM("integrated oritentation: x:"<<q.x()<<" y:"<<q.y()<<" z:"<<q.z()<<" w:"<<q.w());  // original
 }
 
 Eigen::Isometry3d DVLGroPreIntegration::getDVLPose()

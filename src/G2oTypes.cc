@@ -2691,7 +2691,7 @@ bool VertexGDir::write(ostream &os) const
     return true;
 }
 
-bool EdgeMonoBA_DvlGyros::read(istream &is)
+// // bool EdgeMonoBA_DvlGyros::read(istream &is)  // original  // original
 {
     Eigen::Vector2d obs;
     is>>obs[0]>>obs[1];
@@ -2708,7 +2708,7 @@ bool EdgeMonoBA_DvlGyros::read(istream &is)
     return true;
 }
 
-bool EdgeMonoBA_DvlGyros::write(ostream &os) const
+// // bool EdgeMonoBA_DvlGyros::write(ostream &os) const  // original  // original
 {
     Eigen::Vector2d obs = _measurement;
     os<<obs[0]<<" "<<obs[1]<<" ";
@@ -2723,7 +2723,7 @@ bool EdgeMonoBA_DvlGyros::write(ostream &os) const
     return true;
 }
 
-bool EdgeStereoBA_DvlGyros::read(istream &is)
+// // bool EdgeStereoBA_DvlGyros::read(istream &is)  // original  // original
 {
     Eigen::Vector3d obs;
     is>>obs[0]>>obs[1]>>obs[2];
@@ -2740,7 +2740,7 @@ bool EdgeStereoBA_DvlGyros::read(istream &is)
     return true;
 }
 
-bool EdgeStereoBA_DvlGyros::write(ostream &os) const
+// // bool EdgeStereoBA_DvlGyros::write(ostream &os) const  // original  // original
 {
     Eigen::Vector3d obs = _measurement;
     os<<obs[0]<<" "<<obs[1]<<" "<<obs[2]<<" ";

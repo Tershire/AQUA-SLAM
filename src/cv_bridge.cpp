@@ -43,7 +43,8 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include <sensor_msgs/image_encodings.h>
+// #include <sensor_msgs/image_encodings.h>  // original
+#include <sensor_msgs/image_encodings.hpp>
 
 #include "cv_bridge.h"
 #include "rgb_colors.h"
