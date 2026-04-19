@@ -43,8 +43,15 @@ RUN apt-get update && apt-get install -y \
     libboost-all-dev \
     && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y \
+    libepoxy-dev \
+    libglew-dev \
+    libgl1-mesa-dev \
+    libxkbcommon-x11-0 \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
 # install source build libraries
-# ROS 1 버전 Dockerfile에서 썼던 방식 그대로 가져오되 경로만 정리합니다.
 WORKDIR /tmp
 
 # Pangolin
