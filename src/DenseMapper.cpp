@@ -507,12 +507,12 @@ namespace ORB_SLAM3
         // rosbag::View view(bag, rosbag::TopicQuery(topics));
         //
         // // Create multimaps to store the messages for each topic, keyed by their timestamps
-// //         // std::multimap<ros::Time, sensor_msgs::CompressedImage::ConstPtr> left_topic_images;  // original  // original
-// //         // std::multimap<ros::Time, sensor_msgs::CompressedImage::ConstPtr> right_topic_images;  // original  // original
+// //         // std::multimap<ros::Time, sensor_msgs::CompressedImage::::ConstSharedPtr> left_topic_images;  // original  // original
+// //         // std::multimap<ros::Time, sensor_msgs::CompressedImage::::ConstSharedPtr> right_topic_images;  // original  // original
         //
         // // Iterate over the messages in the topics
         // for (const rosbag::MessageInstance &m: view) {
-        //     sensor_msgs::CompressedImage::ConstPtr img_msg = m.instantiate<sensor_msgs::CompressedImage>();
+        //     sensor_msgs::CompressedImage::::ConstSharedPtr img_msg = m.instantiate<sensor_msgs::CompressedImage>();
         //     if (img_msg != NULL) {
         //         if (m.getTopic() == "/camera/left/image_dehazed/compressed") {
         //             left_topic_images.insert(std::make_pair(img_msg->header.stamp, img_msg));
@@ -526,7 +526,7 @@ namespace ORB_SLAM3
         // // Iterate over the left images and find the corresponding right images based on the closest timestamp
         // for (const auto &left_pair: left_topic_images) {
 // //         //     ros::Time left_time = left_pair.first;  // original  // original
-        //     sensor_msgs::CompressedImage::ConstPtr left_img_msg = left_pair.second;
+        //     sensor_msgs::CompressedImage::::ConstSharedPtr left_img_msg = left_pair.second;
         //
         //     auto lower = right_topic_images.lower_bound(left_time);
         //     auto upper = right_topic_images.upper_bound(left_time);

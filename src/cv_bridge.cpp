@@ -390,7 +390,7 @@ void CvImage::toImageMsg(sensor_msgs::Image& ros_image) const
 }
 
 // Deep copy data, returnee is mutable
-CvImagePtr toCvCopy(const sensor_msgs::ImageConstPtr& source,
+CvImagePtr toCvCopy(const sensor_msgs::Image::ConstSharedPtr& source,
                     const std::string& encoding)
 {
   return toCvCopy(*source, encoding);
@@ -404,13 +404,13 @@ CvImagePtr toCvCopy(const sensor_msgs::Image& source,
 }
 
 // Share const data, returnee is immutable
-CvImageConstPtr toCvShare(const sensor_msgs::ImageConstPtr& source,
+CvImage::ConstSharedPtr toCvShare(const sensor_msgs::Image::ConstSharedPtr& source,
                           const std::string& encoding)
 {
   return toCvShare(*source, source, encoding);
 }
 
-CvImageConstPtr toCvShare(const sensor_msgs::Image& source,
+CvImage::ConstSharedPtr toCvShare(const sensor_msgs::Image& source,
                           const boost::shared_ptr<void const>& tracked_object,
                           const std::string& encoding)
 {
@@ -427,7 +427,7 @@ CvImageConstPtr toCvShare(const sensor_msgs::Image& source,
   return ptr;
 }
 
-CvImagePtr cvtColor(const CvImageConstPtr& source,
+CvImagePtr cvtColor(const CvImage::ConstSharedPtr& source,
                     const std::string& encoding)
 {
   return toCvCopyImpl(source->image, source->header, source->encoding, encoding);
@@ -507,7 +507,7 @@ void CvImage::toCompressedImageMsg(sensor_msgs::CompressedImage& ros_image, cons
 }
 
 // Deep copy data, returnee is mutable
-CvImagePtr toCvCopy(const sensor_msgs::CompressedImageConstPtr& source,
+CvImagePtr toCvCopy(const sensor_msgs::CompressedImage::ConstSharedPtr& source,
                     const std::string& encoding)
 {
   return toCvCopy(*source, encoding);
@@ -541,7 +541,7 @@ CvImagePtr toCvCopy(const sensor_msgs::CompressedImage& source, const std::strin
   }
 }
 
-CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
+CvImage::ConstSharedPtr cvtColorForDisplay(const CvImage::ConstSharedPtr& source,
                                    const std::string& encoding_out,
                                    const CvtColorForDisplayOptions options)
 {

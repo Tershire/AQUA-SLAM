@@ -79,10 +79,10 @@ public:
 		mT_e0_ei = Eigen::Isometry3d::Identity();
 		t_last = 0;
 	};
-	void GrabImu(const sensor_msgs::ImuConstPtr &imu_msg);
-	void GrabImu2(const nav_msgs::OdometryConstPtr &odo_msg);
+	void GrabImu(const sensor_msgs::Imu::ConstSharedPtr &imu_msg);
+	void GrabImu2(const nav_msgs::Odometry::ConstSharedPtr &odo_msg);
 
-	queue<sensor_msgs::ImuConstPtr> imuBuf;
+	queue<sensor_msgs::Imu::ConstSharedPtr> imuBuf;
 	Eigen::Isometry3d mT_e0_ei;
 	double t_last;
 	std::mutex mBufMutex;
@@ -93,10 +93,10 @@ class DVLGrabber
 public:
 	DVLGrabber()
 	{};
-	void GrabDVL(const ds_sensor_msgs::DvlConstPtr &odo);
+	void GrabDVL(const ds_sensor_msgs::Dvl::ConstSharedPtr &odo);
 
-//	queue<nav_msgs::OdometryConstPtr> dvlBuf;
-	queue<ds_sensor_msgs::DvlConstPtr> dvlBuf;
+//	queue<nav_msgs::Odometry::ConstSharedPtr> dvlBuf;
+	queue<ds_sensor_msgs::Dvl::ConstSharedPtr> dvlBuf;
 	std::mutex mBufMutex;
 
 };
@@ -108,12 +108,12 @@ public:
 		: mpSLAM(pSLAM), mpImuGb(pImuGb), mpDvlGb(pDvlGb), do_rectify(bRect), mbClahe(bClahe)
 	{}
 
-	void GrabImageLeft(const sensor_msgs::ImageConstPtr &msg);
-	void GrabImageRight(const sensor_msgs::ImageConstPtr &msg);
-	cv::Mat GetImage(const sensor_msgs::ImageConstPtr &img_msg);
+	void GrabImageLeft(const sensor_msgs::Image::ConstSharedPtr &msg);
+	void GrabImageRight(const sensor_msgs::Image::ConstSharedPtr &msg);
+	cv::Mat GetImage(const sensor_msgs::Image::ConstSharedPtr &img_msg);
 	void SyncWithImu();
 
-	queue<sensor_msgs::ImageConstPtr> imgLeftBuf, imgRightBuf;
+	queue<sensor_msgs::Image::ConstSharedPtr> imgLeftBuf, imgRightBuf;
 	std::mutex mBufMutexLeft, mBufMutexRight;
 
 	ORB_SLAM3::System *mpSLAM;
@@ -181,7 +181,7 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-void ImageGrabber::GrabImageLeft(const sensor_msgs::ImageConstPtr &img_msg)
+void ImageGrabber::GrabImageLeft(const sensor_msgs::Image::ConstSharedPtr &img_msg)
 {
 	BOOST_LOG_TRIVIAL(info) << fixed << setprecision(9) << "left recieved!, time: " << img_msg->header.stamp.toSec();
 //	cout<<"left recieved!, time: "<<img_msg->header.stamp.toNSec()<<endl;
@@ -194,7 +194,7 @@ void ImageGrabber::GrabImageLeft(const sensor_msgs::ImageConstPtr &img_msg)
 	mBufMutexLeft.unlock();
 }
 
-void ImageGrabber::GrabImageRight(const sensor_msgs::ImageConstPtr &img_msg)
+void ImageGrabber::GrabImageRight(const sensor_msgs::Image::ConstSharedPtr &img_msg)
 {
 	BOOST_LOG_TRIVIAL(info) << fixed << setprecision(9) << "right recieved!, time: " << img_msg->header.stamp.toSec();
 //	cout<<"right recieved!, time: "<<img_msg->header.stamp.toNSec()<<endl;
@@ -207,10 +207,10 @@ void ImageGrabber::GrabImageRight(const sensor_msgs::ImageConstPtr &img_msg)
 	mBufMutexRight.unlock();
 }
 
-cv::Mat ImageGrabber::GetImage(const sensor_msgs::ImageConstPtr &img_msg)
+cv::Mat ImageGrabber::GetImage(const sensor_msgs::Image::ConstSharedPtr &img_msg)
 {
 	// Copy the ros image message to cv::Mat.
-	cv_bridge::CvImageConstPtr cv_ptr;
+	cv_bridge::CvImage::ConstSharedPtr cv_ptr;
 	try {
 		cv_ptr = cv_bridge::toCvShare(img_msg, sensor_msgs::image_encodings::MONO8);
 	}
@@ -383,7 +383,7 @@ void ImageGrabber::SyncWithImu()
 	}
 }
 
-void ImuGrabber::GrabImu(const sensor_msgs::ImuConstPtr &imu_msg)
+void ImuGrabber::GrabImu(const sensor_msgs::Imu::ConstSharedPtr &imu_msg)
 {
 	BOOST_LOG_TRIVIAL(info) << fixed << setprecision(9) << "IMU recieved! time:" << imu_msg->header.stamp.toSec();
 //	cout<<"IMU recieved! time:"<<imu_msg->header.stamp.toNSec()<<endl;
@@ -409,7 +409,7 @@ void ImuGrabber::GrabImu(const sensor_msgs::ImuConstPtr &imu_msg)
 	mBufMutex.unlock();
 	return;
 }
-void ImuGrabber::GrabImu2(const nav_msgs::OdometryConstPtr &odo_msg)
+void ImuGrabber::GrabImu2(const nav_msgs::Odometry::ConstSharedPtr &odo_msg)
 {
 //	BOOST_LOG_TRIVIAL(info) << "EKF IMU recieved! time:" << odo_msg->header.stamp.toNSec();
 	sensor_msgs::ImuPtr imu(new sensor_msgs::Imu());
@@ -457,7 +457,7 @@ void ImuGrabber::GrabImu2(const nav_msgs::OdometryConstPtr &odo_msg)
 	mBufMutex.unlock();
 	return;
 }
-void DVLGrabber::GrabDVL(const ds_sensor_msgs::DvlConstPtr &odo)
+void DVLGrabber::GrabDVL(const ds_sensor_msgs::Dvl::ConstSharedPtr &odo)
 {
 	BOOST_LOG_TRIVIAL(info) << fixed << setprecision(9) << "DVL recieved! time:" << odo->header.stamp.toSec();
 //	cout<<"DVL recieved! time:"<<odo->header.stamp.toNSec()<<endl;

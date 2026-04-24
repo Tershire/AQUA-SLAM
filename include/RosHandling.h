@@ -88,9 +88,9 @@ class RosHandling
 {
 public:
 	RosHandling(System *pSys, LocalMapping *pLocal);
-	void PublishLeftImg(const sensor_msgs::ImageConstPtr &img);
-	void PublishRightImg(const sensor_msgs::ImageConstPtr &img);
-	void PublishImgWithInfo(const sensor_msgs::ImageConstPtr &img);
+	void PublishLeftImg(const sensor_msgs::Image::ConstSharedPtr &img);
+	void PublishRightImg(const sensor_msgs::Image::ConstSharedPtr &img);
+	void PublishImgWithInfo(const sensor_msgs::Image::ConstSharedPtr &img);
 	void PublishImgMergeCandidate(const cv::Mat &img);
 	void PublishIntegration(Atlas *pAtlas);
     void PublishLossKF(set<KeyFrame*,KFComparator> &loss_kfs);
@@ -130,28 +130,28 @@ protected:
 	boost::shared_ptr<image_transport::Publisher> mp_img_merge_cond_pub;
 
 	//publish qualisys path
-	nav_msgs::Path m_integration_path;
+	nav_msgs::msg::Path m_integration_path;
 // // 	boost::shared_ptr<ros::Publisher> mp_integration_path_pub;  // original  // original
     // publish reference integration path
-    nav_msgs::Path m_ref_integration_path;
+    nav_msgs::msg::Path m_ref_integration_path;
 // //     boost::shared_ptr<ros::Publisher> mp_ref_integration_path_pub;  // original  // original
 // //     boost::shared_ptr<ros::Publisher> mp_markers_pub;  // original  // original
 	//publish qulisys pose(if exist),
 // // 	boost::shared_ptr<ros::Publisher> mp_gt_pub;  // original  // original
 	//publish qualisys path
-	nav_msgs::Path m_gt_path;
+	nav_msgs::msg::Path m_gt_path;
 // // 	boost::shared_ptr<ros::Publisher> mp_gt_path_pub;  // original  // original
 
 	//publish orb pose, odometry and path, in camera frame
 // // 	boost::shared_ptr<ros::Publisher> mp_pose_orb_pub;  // original  // original
 // // 	boost::shared_ptr<ros::Publisher> mp_odom_orb_pub;  // original  // original
-	nav_msgs::Path m_path_orb;
+	nav_msgs::msg::Path m_path_orb;
 // // 	boost::shared_ptr<ros::Publisher> mp_path_orb_pub;  // original  // original
 // // 	boost::shared_ptr<ros::Publisher> mp_pose_orb_camera_pub;  // original  // original
 
 	//publish ekf pose and path, in EKF frame
 // // 	boost::shared_ptr<ros::Publisher> mp_pose_ekf_pub;  // original  // original
-	nav_msgs::Path m_path_ekf;
+	nav_msgs::msg::Path m_path_ekf;
 // // 	boost::shared_ptr<ros::Publisher> mp_path_ekf_pub;  // original  // original
 
 	//publish point cloud

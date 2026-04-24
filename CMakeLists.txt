@@ -24,7 +24,7 @@ set(CMAKE_CXX_STANDARD 17)
 #set(OpenCV_DIR /home/da/project/Thirdparty/opencv3.2/share/OpenCV)
 #set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} /home/da/project/Thirdparty/opencv3.2)
 # find_package(OpenCV 3.2 REQUIRED)  # original
-find_package(OpenCV REQUIRED)
+find_package(OpenCV 4 REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 # original --------------------------------------------------------------------
@@ -190,7 +190,7 @@ find_package(pcl_conversions REQUIRED)
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-        # include
+        include
         ${OpenCV_INCLUDE_DIRS}
         ${PROJECT_SOURCE_DIR}
         ${PROJECT_SOURCE_DIR}/include

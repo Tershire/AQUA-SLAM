@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 
 // //     ros::NodeHandle nh;  // original  // original
 // //     ros::Publisher pointcloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/dense_viewer/pointcloud", 1);  // original  // original
-// //     ros::Publisher trajectory_pub = nh.advertise<nav_msgs::Path>("/dense_viewer/trajectory", 1);  // original  // original
+// //     ros::Publisher trajectory_pub = nh.advertise<nav_msgs::msg::Path>("/dense_viewer/trajectory", 1);  // original  // original
 
     std::map<double, Eigen::Isometry3d> estimation_traj;
     std::string pose_path = "/home/da/project/ros/orb_dvl2_ws/src/dvl2/dvl2_results/dense/WholeTank_Medium_traj.txt";
@@ -117,7 +117,7 @@ int main(int argc, char** argv)
     //tranform pointcloud
     // pcl::transformPointCloud(*global_map, *global_map, T_rviz_c.matrix());
 
-    nav_msgs::Path traj_msg;
+    nav_msgs::msg::Path traj_msg;
     traj_msg.header.frame_id = "map";
 // //     traj_msg.header.stamp = ros::Time::now();  // original  // original
 

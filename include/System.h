@@ -126,7 +126,7 @@ public:
 	cv::Mat TrackStereoGroDVL(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp, const vector<IMU::GyroDvlPoint>& vDVLGyroMeas = vector<IMU::GyroDvlPoint>(), bool bDVL= false, string filename="");
 	cv::Mat TrackStereoGroDVLKLT(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp, const vector<IMU::ImuPoint>& vImuMeas = vector<IMU::ImuPoint>(), bool bDVL= false, string filename="");
 
-    void dvlCallBack(const nav_msgs::OdometryConstPtr &dvl);
+    void dvlCallBack(const nav_msgs::Odometry::ConstSharedPtr &dvl);
 
     // This stops local mapping thread (map building) and performs only camera tracking.
     void ActivateLocalizationMode();

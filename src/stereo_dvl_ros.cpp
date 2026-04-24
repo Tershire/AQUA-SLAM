@@ -21,7 +21,7 @@ class ImageGrabber
 public:
     ImageGrabber(ORB_SLAM3::System* pSLAM):mpSLAM(pSLAM){}
 
-    void GrabStereo(const sensor_msgs::ImageConstPtr& msgLeft,const sensor_msgs::ImageConstPtr& msgRight);
+    void GrabStereo(const sensor_msgs::Image::ConstSharedPtr& msgLeft,const sensor_msgs::Image::ConstSharedPtr& msgRight);
 
     ORB_SLAM3::System* mpSLAM;
     bool do_rectify;
@@ -114,10 +114,10 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void ImageGrabber::GrabStereo(const sensor_msgs::ImageConstPtr& msgLeft,const sensor_msgs::ImageConstPtr& msgRight)
+void ImageGrabber::GrabStereo(const sensor_msgs::Image::ConstSharedPtr& msgLeft,const sensor_msgs::Image::ConstSharedPtr& msgRight)
 {
     // Copy the ros image message to cv::Mat.
-    cv_bridge::CvImageConstPtr cv_ptrLeft;
+    cv_bridge::CvImage::ConstSharedPtr cv_ptrLeft;
     try
     {
         cv_ptrLeft = cv_bridge::toCvShare(msgLeft);
@@ -128,7 +128,7 @@ void ImageGrabber::GrabStereo(const sensor_msgs::ImageConstPtr& msgLeft,const se
         return;
     }
 
-    cv_bridge::CvImageConstPtr cv_ptrRight;
+    cv_bridge::CvImage::ConstSharedPtr cv_ptrRight;
     try
     {
         cv_ptrRight = cv_bridge::toCvShare(msgRight);

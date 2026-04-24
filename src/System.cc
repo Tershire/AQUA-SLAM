@@ -289,7 +289,7 @@ else
 //	mT_e_c.pretranslate(t);
 }
 
-void System::dvlCallBack(const nav_msgs::OdometryConstPtr &dvl)
+void System::dvlCallBack(const nav_msgs::Odometry::ConstSharedPtr &dvl)
 {
 	std::lock_guard<std::mutex> guard(mDVL_state_lock);
 	mDVL_updated = true;

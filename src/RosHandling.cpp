@@ -10,6 +10,12 @@
 #include "LocalMapping.h"
 #include "visualization_msgs/Marker.h"
 #include <fstream>
+
+#include "sensor_msgs/msg/image.hpp"
+#include "nav_msgs/msg/odometry.hpp"
+#include "std_srvs/srv/empty.hpp"
+#include "tf2_ros/transform_broadcaster.h"
+
 using namespace ORB_SLAM3;
 using namespace std;
 
@@ -38,13 +44,13 @@ RosHandling::RosHandling(System *pSys, LocalMapping *pLocal)
 
 // // 	// ros::Publisher gt_pub = nh_.advertise<geometry_msgs::PoseStamped>("orb_dvl/gt", 10);  // original  // original
 // // 	// mp_gt_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(gt_pub));  // original  // original
-// // 	// ros::Publisher gt_path_pub = nh_.advertise<nav_msgs::Path>("orb_path_gt", 10);  // original  // original
+// // 	// ros::Publisher gt_path_pub = nh_.advertise<nav_msgs::msg::Path>("orb_path_gt", 10);  // original  // original
 // // 	// mp_gt_path_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(gt_path_pub));  // original  // original
 
-// // 	ros::Publisher integration_path_pub = nh_.advertise<nav_msgs::Path>("/AQUA_SLAM/integration_path", 10);  // original  // original
+// // 	ros::Publisher integration_path_pub = nh_.advertise<nav_msgs::msg::Path>("/AQUA_SLAM/integration_path", 10);  // original  // original
 	mp_integration_path_pub =
 // // 		boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(integration_path_pub));  // original  // original
-// //     ros::Publisher ref_integration_path_pub = nh_.advertise<nav_msgs::Path>("/AQUA_SLAM/ref_integration_path", 10);  // original  // original
+// //     ros::Publisher ref_integration_path_pub = nh_.advertise<nav_msgs::msg::Path>("/AQUA_SLAM/ref_integration_path", 10);  // original  // original
     mp_ref_integration_path_pub =
 // //             boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(ref_integration_path_pub));  // original  // original
     // initialize mp_markers_pub
@@ -54,14 +60,14 @@ RosHandling::RosHandling(System *pSys, LocalMapping *pLocal)
 // // 	mp_pose_orb_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pose_orb_pub));  // original  // original
 // // 	ros::Publisher odom_orb_pub = nh_.advertise<nav_msgs::Odometry>("/AQUA_SLAM/orb_odom", 10);  // original  // original
 // // 	mp_odom_orb_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(odom_orb_pub));  // original  // original
-// // 	ros::Publisher path_orb_pub = nh_.advertise<nav_msgs::Path>("/AQUA_SLAM/orb_path", 10);  // original  // original
+// // 	ros::Publisher path_orb_pub = nh_.advertise<nav_msgs::msg::Path>("/AQUA_SLAM/orb_path", 10);  // original  // original
 // // 	mp_path_orb_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(path_orb_pub));  // original  // original
 // // 	ros::Publisher pose_orb_camera_pub = nh_.advertise<nav_msgs::Odometry>("/AQUA_SLAM/camera_pose", 10);  // original  // original
 // // 	mp_pose_orb_camera_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pose_orb_camera_pub));  // original  // original
 
 // // 	// ros::Publisher pose_ekf_pub = nh_.advertise<geometry_msgs::PoseStamped>("orb_ekf_pose", 10);  // original  // original
 // // 	// mp_pose_ekf_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pose_ekf_pub));  // original  // original
-// // 	ros::Publisher path_ekf_pub = nh_.advertise<nav_msgs::Path>("/AQUA_SLAM/ekf_path", 10);  // original  // original
+// // 	ros::Publisher path_ekf_pub = nh_.advertise<nav_msgs::msg::Path>("/AQUA_SLAM/ekf_path", 10);  // original  // original
 // // 	mp_path_ekf_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(path_ekf_pub));  // original  // original
 
 // // 	// ros::Publisher pose_pointcloud_pub = nh_.advertise<geometry_msgs::PoseStamped>("orb_point_pose", 10);  // original  // original
@@ -110,15 +116,15 @@ RosHandling::RosHandling(System *pSys, LocalMapping *pLocal)
 }
 
 
-void RosHandling::PublishLeftImg(const sensor_msgs::ImageConstPtr &img)
+void RosHandling::PublishLeftImg(const sensor_msgs::Image::ConstSharedPtr &img)
 {
 	mp_img_l_pub->publish(img);
 }
-void RosHandling::PublishRightImg(const sensor_msgs::ImageConstPtr &img)
+void RosHandling::PublishRightImg(const sensor_msgs::Image::ConstSharedPtr &img)
 {
 	mp_img_r_pub->publish(img);
 }
-void RosHandling::PublishImgWithInfo(const sensor_msgs::ImageConstPtr &img)
+void RosHandling::PublishImgWithInfo(const sensor_msgs::Image::ConstSharedPtr &img)
 {
 	mp_img_info_pub->publish(img);
 }

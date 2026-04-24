@@ -454,7 +454,9 @@ void Atlas::clearMap(Map *pMap)
 		cout<<"clear map: "<<pMap->GetId()<<endl;
 	}
 	else
+    {
 // 		ROS_ERROR_STREAM("fail to clear map!!!");  // original
+    }
 }
 bool Atlas::isDvlImuInitialized()
 {

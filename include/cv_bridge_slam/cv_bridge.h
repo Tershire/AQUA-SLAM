@@ -58,7 +58,7 @@ public:
 class CvImage;
 
 typedef boost::shared_ptr<CvImage> CvImagePtr;
-typedef boost::shared_ptr<CvImage const> CvImageConstPtr;
+typedef boost::shared_ptr<CvImage const> CvImage::ConstSharedPtr;
 
 //from: http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
 typedef enum {
@@ -131,14 +131,14 @@ public:
 
 
   typedef boost::shared_ptr<CvImage> Ptr;
-  typedef boost::shared_ptr<CvImage const> ConstPtr;
+  typedef boost::shared_ptr<CvImage const> ::ConstSharedPtr;
 
 protected:
   boost::shared_ptr<void const> tracked_object_; // for sharing ownership
 
   /// @cond DOXYGEN_IGNORE
   friend
-  CvImageConstPtr toCvShare(const sensor_msgs::Image& source,
+  CvImage::ConstSharedPtr toCvShare(const sensor_msgs::Image& source,
                             const boost::shared_ptr<void const>& tracked_object,
                             const std::string& encoding);
   /// @endcond
@@ -161,10 +161,10 @@ protected:
  * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
  * as \a source.
  */
-CvImagePtr toCvCopy(const sensor_msgs::ImageConstPtr& source,
+CvImagePtr toCvCopy(const sensor_msgs::Image::ConstSharedPtr& source,
                     const std::string& encoding = std::string());
 
-CvImagePtr toCvCopy(const sensor_msgs::CompressedImageConstPtr& source,
+CvImagePtr toCvCopy(const sensor_msgs::CompressedImage::ConstSharedPtr& source,
                     const std::string& encoding = std::string());
 
 /**
@@ -212,7 +212,7 @@ CvImagePtr toCvCopy(const sensor_msgs::CompressedImage& source,
  * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
  * as \a source.
  */
-CvImageConstPtr toCvShare(const sensor_msgs::ImageConstPtr& source,
+CvImage::ConstSharedPtr toCvShare(const sensor_msgs::Image::ConstSharedPtr& source,
                           const std::string& encoding = std::string());
 
 /**
@@ -239,14 +239,14 @@ CvImageConstPtr toCvShare(const sensor_msgs::ImageConstPtr& source,
  * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
  * as \a source.
  */
-CvImageConstPtr toCvShare(const sensor_msgs::Image& source,
+CvImage::ConstSharedPtr toCvShare(const sensor_msgs::Image& source,
                           const boost::shared_ptr<void const>& tracked_object,
                           const std::string& encoding = std::string());
 
 /**
  * \brief Convert a CvImage to another encoding using the same rules as toCvCopy
  */
-CvImagePtr cvtColor(const CvImageConstPtr& source,
+CvImagePtr cvtColor(const CvImage::ConstSharedPtr& source,
                     const std::string& encoding);
 
 struct CvtColorForDisplayOptions {
@@ -295,7 +295,7 @@ struct CvtColorForDisplayOptions {
  * - max_image_value Maximum image value
  * - colormap Colormap which the source image converted with.
  */
-CvImageConstPtr cvtColorForDisplay(const CvImageConstPtr& source,
+CvImage::ConstSharedPtr cvtColorForDisplay(const CvImage::ConstSharedPtr& source,
                                    const std::string& encoding = std::string(),
                                    const CvtColorForDisplayOptions options = CvtColorForDisplayOptions());
 
