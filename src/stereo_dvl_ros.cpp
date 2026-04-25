@@ -21,7 +21,7 @@ class ImageGrabber
 public:
     ImageGrabber(ORB_SLAM3::System* pSLAM):mpSLAM(pSLAM){}
 
-    void GrabStereo(const sensor_msgs::Image::ConstSharedPtr& msgLeft,const sensor_msgs::Image::ConstSharedPtr& msgRight);
+    void GrabStereo(const sensor_msgs::msg::Image::SharedPtr &img& msgLeft,const sensor_msgs::msg::Image::SharedPtr &img& msgRight);
 
     ORB_SLAM3::System* mpSLAM;
     bool do_rectify;
@@ -90,9 +90,9 @@ int main(int argc, char **argv)
 
 // //     // ros::NodeHandle nh;  // original  // original
 
-    // message_filters::Subscriber<sensor_msgs::Image> left_sub(nh, "suv3d/left/rgb_rect", 1);
-    // message_filters::Subscriber<sensor_msgs::Image> right_sub(nh, "suv3d/right/rgb_rect", 1);
-    // typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> sync_pol;
+    // message_filters::Subscriber<sensor_msgs::msg::Image> left_sub(nh, "suv3d/left/rgb_rect", 1);
+    // message_filters::Subscriber<sensor_msgs::msg::Image> right_sub(nh, "suv3d/right/rgb_rect", 1);
+    // typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::msg::Image, sensor_msgs::msg::Image> sync_pol;
     // message_filters::Synchronizer<sync_pol> sync(sync_pol(10), left_sub,right_sub);
     // sync.registerCallback(boost::bind(&ImageGrabber::GrabStereo,&igb,_1,_2));
 
@@ -114,7 +114,7 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void ImageGrabber::GrabStereo(const sensor_msgs::Image::ConstSharedPtr& msgLeft,const sensor_msgs::Image::ConstSharedPtr& msgRight)
+void ImageGrabber::GrabStereo(const sensor_msgs::msg::Image::SharedPtr &img& msgLeft,const sensor_msgs::msg::Image::SharedPtr &img& msgRight)
 {
     // Copy the ros image message to cv::Mat.
     cv_bridge::CvImage::ConstSharedPtr cv_ptrLeft;

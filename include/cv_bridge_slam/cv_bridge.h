@@ -38,7 +38,8 @@
 
 // #include <sensor_msgs/Image.h>  // original
 #include <sensor_msgs/msg/image.hpp>
-#include <sensor_msgs/CompressedImage.h>
+// #include <sensor_msgs/CompressedImage.h>  // original
+#include <sensor_msgs/msg/compressed_image.hpp>
 // #include <sensor_msgs/image_encodings.h>  // original
 #include <sensor_msgs/image_encodings.hpp>
 #include <ros/static_assert.h>
@@ -57,8 +58,8 @@ public:
 
 class CvImage;
 
-typedef boost::shared_ptr<CvImage> CvImagePtr;
-typedef boost::shared_ptr<CvImage const> CvImage::ConstSharedPtr;
+typedef std::shared_ptr<CvImage> CvImagePtr;
+typedef std::shared_ptr<CvImage const> CvImage::ConstSharedPtr;
 
 //from: http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
 typedef enum {
@@ -78,7 +79,7 @@ typedef enum {
 class CvImage
 {
 public:
-  std_msgs::Header header; //!< ROS header
+  std_msgs::msg::Header header; //!< ROS header
   std::string encoding;    //!< Image encoding ("mono8", "bgr8", etc.)
   cv::Mat image;           //!< Image data for use with OpenCV
 
@@ -90,18 +91,18 @@ public:
   /**
    * \brief Constructor.
    */
-  CvImage(const std_msgs::Header& header, const std::string& encoding,
+  CvImage(const std_msgs::msg::Header& header, const std::string& encoding,
           const cv::Mat& image = cv::Mat())
     : header(header), encoding(encoding), image(image)
   {
   }
   
   /**
-   * \brief Convert this message to a ROS sensor_msgs::Image message.
+   * \brief Convert this message to a ROS sensor_msgs::msg::Image message.
    *
-   * The returned sensor_msgs::Image message contains a copy of the image data.
+   * The returned sensor_msgs::msg::Image message contains a copy of the image data.
    */
-  sensor_msgs::ImagePtr toImageMsg() const;
+  sensor_msgs::msg::ImagePtr toImageMsg() const;
 
   /**
    * dst_format is compress the image to desire format.
@@ -113,12 +114,12 @@ public:
   sensor_msgs::CompressedImagePtr toCompressedImageMsg(const Format dst_format = JPG) const;
 
   /**
-   * \brief Copy the message data to a ROS sensor_msgs::Image message.
+   * \brief Copy the message data to a ROS sensor_msgs::msg::Image message.
    *
    * This overload is intended mainly for aggregate messages such as stereo_msgs::DisparityImage,
-   * which contains a sensor_msgs::Image as a data member.
+   * which contains a sensor_msgs::msg::Image as a data member.
    */
-  void toImageMsg(sensor_msgs::Image& ros_image) const;
+  void toImageMsg(sensor_msgs::msg::Image& ros_image) const;
 
   /**
    * dst_format is compress the image to desire format.
@@ -130,26 +131,26 @@ public:
   void toCompressedImageMsg(sensor_msgs::CompressedImage& ros_image, const Format dst_format = JPG) const;
 
 
-  typedef boost::shared_ptr<CvImage> Ptr;
-  typedef boost::shared_ptr<CvImage const> ::ConstSharedPtr;
+  typedef std::shared_ptr<CvImage> Ptr;
+  typedef std::shared_ptr<CvImage const> ::ConstSharedPtr;
 
 protected:
-  boost::shared_ptr<void const> tracked_object_; // for sharing ownership
+  std::shared_ptr<void const> tracked_object_; // for sharing ownership
 
   /// @cond DOXYGEN_IGNORE
   friend
-  CvImage::ConstSharedPtr toCvShare(const sensor_msgs::Image& source,
-                            const boost::shared_ptr<void const>& tracked_object,
+  CvImage::ConstSharedPtr toCvShare(const sensor_msgs::msg::Image& source,
+                            const std::shared_ptr<void const>& tracked_object,
                             const std::string& encoding);
   /// @endcond
 };
 
 
 /**
- * \brief Convert a sensor_msgs::Image message to an OpenCV-compatible CvImage, copying the
+ * \brief Convert a sensor_msgs::msg::Image message to an OpenCV-compatible CvImage, copying the
  * image data.
  *
- * \param source   A shared_ptr to a sensor_msgs::Image message
+ * \param source   A shared_ptr to a sensor_msgs::msg::Image message
  * \param encoding The desired encoding of the image data, one of the following strings:
  *    - \c "mono8"
  *    - \c "bgr8"
@@ -161,17 +162,17 @@ protected:
  * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
  * as \a source.
  */
-CvImagePtr toCvCopy(const sensor_msgs::Image::ConstSharedPtr& source,
+CvImagePtr toCvCopy(const sensor_msgs::msg::Image::SharedPtr &img& source,
                     const std::string& encoding = std::string());
 
 CvImagePtr toCvCopy(const sensor_msgs::CompressedImage::ConstSharedPtr& source,
                     const std::string& encoding = std::string());
 
 /**
- * \brief Convert a sensor_msgs::Image message to an OpenCV-compatible CvImage, copying the
+ * \brief Convert a sensor_msgs::msg::Image message to an OpenCV-compatible CvImage, copying the
  * image data.
  *
- * \param source   A sensor_msgs::Image message
+ * \param source   A sensor_msgs::msg::Image message
  * \param encoding The desired encoding of the image data, one of the following strings:
  *    - \c "mono8"
  *    - \c "bgr8"
@@ -186,21 +187,21 @@ CvImagePtr toCvCopy(const sensor_msgs::CompressedImage::ConstSharedPtr& source,
  * 255/65535 respectively). Otherwise, no scaling is applied and the rules from the convertTo OpenCV
  * function are applied (capping): http://docs.opencv.org/modules/core/doc/basic_structures.html#mat-convertto
  */
-CvImagePtr toCvCopy(const sensor_msgs::Image& source,
+CvImagePtr toCvCopy(const sensor_msgs::msg::Image& source,
                     const std::string& encoding = std::string());
 
 CvImagePtr toCvCopy(const sensor_msgs::CompressedImage& source,
                     const std::string& encoding = std::string());
 
 /**
- * \brief Convert an immutable sensor_msgs::Image message to an OpenCV-compatible CvImage, sharing
+ * \brief Convert an immutable sensor_msgs::msg::Image message to an OpenCV-compatible CvImage, sharing
  * the image data if possible.
  *
  * If the source encoding and desired encoding are the same, the returned CvImage will share
  * the image data with \a source without copying it. The returned CvImage cannot be modified, as that
  * could modify the \a source data.
  *
- * \param source   A shared_ptr to a sensor_msgs::Image message
+ * \param source   A shared_ptr to a sensor_msgs::msg::Image message
  * \param encoding The desired encoding of the image data, one of the following strings:
  *    - \c "mono8"
  *    - \c "bgr8"
@@ -212,11 +213,11 @@ CvImagePtr toCvCopy(const sensor_msgs::CompressedImage& source,
  * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
  * as \a source.
  */
-CvImage::ConstSharedPtr toCvShare(const sensor_msgs::Image::ConstSharedPtr& source,
+CvImage::ConstSharedPtr toCvShare(const sensor_msgs::msg::Image::SharedPtr &img& source,
                           const std::string& encoding = std::string());
 
 /**
- * \brief Convert an immutable sensor_msgs::Image message to an OpenCV-compatible CvImage, sharing
+ * \brief Convert an immutable sensor_msgs::msg::Image message to an OpenCV-compatible CvImage, sharing
  * the image data if possible.
  *
  * If the source encoding and desired encoding are the same, the returned CvImage will share
@@ -224,10 +225,10 @@ CvImage::ConstSharedPtr toCvShare(const sensor_msgs::Image::ConstSharedPtr& sour
  * could modify the \a source data.
  *
  * This overload is useful when you have a shared_ptr to a message that contains a
- * sensor_msgs::Image, and wish to share ownership with the containing message.
+ * sensor_msgs::msg::Image, and wish to share ownership with the containing message.
  *
- * \param source         The sensor_msgs::Image message
- * \param tracked_object A shared_ptr to an object owning the sensor_msgs::Image
+ * \param source         The sensor_msgs::msg::Image message
+ * \param tracked_object A shared_ptr to an object owning the sensor_msgs::msg::Image
  * \param encoding       The desired encoding of the image data, one of the following strings:
  *    - \c "mono8"
  *    - \c "bgr8"
@@ -239,8 +240,8 @@ CvImage::ConstSharedPtr toCvShare(const sensor_msgs::Image::ConstSharedPtr& sour
  * If \a encoding is the empty string (the default), the returned CvImage has the same encoding
  * as \a source.
  */
-CvImage::ConstSharedPtr toCvShare(const sensor_msgs::Image& source,
-                          const boost::shared_ptr<void const>& tracked_object,
+CvImage::ConstSharedPtr toCvShare(const sensor_msgs::msg::Image& source,
+                          const std::shared_ptr<void const>& tracked_object,
                           const std::string& encoding = std::string());
 
 /**
@@ -265,27 +266,27 @@ struct CvtColorForDisplayOptions {
 
 
 /**
- * \brief Converts an immutable sensor_msgs::Image message to another CvImage for display purposes,
+ * \brief Converts an immutable sensor_msgs::msg::Image message to another CvImage for display purposes,
  * using practical conversion rules if needed.
  *
  * Data will be shared between input and output if possible.
  *
- * Recall: sensor_msgs::image_encodings::isColor and isMono tell whether an image contains R,G,B,A, mono
+ * Recall: sensor_msgs::msg::Image_encodings::isColor and isMono tell whether an image contains R,G,B,A, mono
  * (or any combination/subset) with 8 or 16 bit depth.
  *
  * The following rules apply:
  * - if the output encoding is empty, the fact that the input image is mono or multiple-channel is
  * preserved in the ouput image. The bit depth will be 8. it tries to convert to BGR no matter what
  * encoding image is passed.
- * - if the output encoding is not empty, it must have sensor_msgs::image_encodings::isColor and
+ * - if the output encoding is not empty, it must have sensor_msgs::msg::Image_encodings::isColor and
  * isMono return true. It must also be 8 bit in depth
  * - if the input encoding is an OpenCV format (e.g. 8UC1), and if we have 1,3 or 4 channels, it is
  * respectively converted to mono, BGR or BGRA.
  * - if the input encoding is 32SC1, this estimate that image as label image and will convert it as
  * bgr image with different colors for each label.
  *
- * \param source   A shared_ptr to a sensor_msgs::Image message
- * \param encoding Either an encoding string that returns true in sensor_msgs::image_encodings::isColor
+ * \param source   A shared_ptr to a sensor_msgs::msg::Image message
+ * \param encoding Either an encoding string that returns true in sensor_msgs::msg::Image_encodings::isColor
  * isMono or the empty string as explained above.
  * \param options (cv_bridge::CvtColorForDisplayOptions) Options to convert the source image with.
  * - do_dynamic_scaling If true, the image is dynamically scaled between its minimum and maximum value
@@ -324,26 +325,26 @@ namespace message_traits {
 
 template<> struct MD5Sum<cv_bridge::CvImage>
 {
-  static const char* value() { return MD5Sum<sensor_msgs::Image>::value(); }
+  static const char* value() { return MD5Sum<sensor_msgs::msg::Image>::value(); }
   static const char* value(const cv_bridge::CvImage&) { return value(); }
 
-  static const uint64_t static_value1 = MD5Sum<sensor_msgs::Image>::static_value1;
-  static const uint64_t static_value2 = MD5Sum<sensor_msgs::Image>::static_value2;
+  static const uint64_t static_value1 = MD5Sum<sensor_msgs::msg::Image>::static_value1;
+  static const uint64_t static_value2 = MD5Sum<sensor_msgs::msg::Image>::static_value2;
   
   // If the definition of sensor_msgs/Image changes, we'll get a compile error here.
-  ROS_STATIC_ASSERT(MD5Sum<sensor_msgs::Image>::static_value1 == 0x060021388200f6f0ULL);
-  ROS_STATIC_ASSERT(MD5Sum<sensor_msgs::Image>::static_value2 == 0xf447d0fcd9c64743ULL);
+  ROS_STATIC_ASSERT(MD5Sum<sensor_msgs::msg::Image>::static_value1 == 0x060021388200f6f0ULL);
+  ROS_STATIC_ASSERT(MD5Sum<sensor_msgs::msg::Image>::static_value2 == 0xf447d0fcd9c64743ULL);
 };
 
 template<> struct DataType<cv_bridge::CvImage>
 {
-  static const char* value() { return DataType<sensor_msgs::Image>::value(); }
+  static const char* value() { return DataType<sensor_msgs::msg::Image>::value(); }
   static const char* value(const cv_bridge::CvImage&) { return value(); }
 };
 
 template<> struct Definition<cv_bridge::CvImage>
 {
-  static const char* value() { return Definition<sensor_msgs::Image>::value(); }
+  static const char* value() { return Definition<sensor_msgs::msg::Image>::value(); }
   static const char* value(const cv_bridge::CvImage&) { return value(); }
 };
 
@@ -408,7 +409,7 @@ template<> struct Printer<cv_bridge::CvImage>
   template<typename Stream>
   static void stream(Stream&, const std::string&, const cv_bridge::CvImage&)
   {
-    /// @todo Replicate printing for sensor_msgs::Image
+    /// @todo Replicate printing for sensor_msgs::msg::Image
   }
 };
 

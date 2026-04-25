@@ -280,6 +280,7 @@ add_library(${PROJECT_NAME} SHARED  # original
         ${PROJECT_SOURCE_DIR}/include/MLPnPsolver.h
         ${PROJECT_SOURCE_DIR}/include/TwoViewReconstruction.h
         # ${PROJECT_SOURCE_DIR}/include/RosHandling.h  # original
+        ${PROJECT_SOURCE_DIR}/include/RosHandling.h
         ${PROJECT_SOURCE_DIR}/include/DenseMapper.h
         ${PROJECT_SOURCE_DIR}/include/LKTracker.h
         ${PROJECT_SOURCE_DIR}/src/System.cc
@@ -307,6 +308,7 @@ add_library(${PROJECT_NAME} SHARED  # original
         ${PROJECT_SOURCE_DIR}/src/MLPnPsolver.cpp
         ${PROJECT_SOURCE_DIR}/src/TwoViewReconstruction.cc
         # ${PROJECT_SOURCE_DIR}/src/RosHandling.cpp  # original
+        ${PROJECT_SOURCE_DIR}/src/RosHandling.cpp
         ${PROJECT_SOURCE_DIR}/src/DenseMapper.cpp
         # ${PROJECT_SOURCE_DIR}/src/cv_bridge.cpp  # original
         ${PROJECT_SOURCE_DIR}/src/rgb_colors.cpp
@@ -347,6 +349,21 @@ add_library(${PROJECT_NAME}_optimization SHARED
         ${PROJECT_SOURCE_DIR}/src/DVLGroPreIntegration.cpp
         ${PROJECT_SOURCE_DIR}/src/G2oTypes.cc
         ${PROJECT_SOURCE_DIR}/src/OptimizableTypes.cpp)
+ament_target_dependencies(${PROJECT_NAME}_optimization
+  rclcpp
+  sensor_msgs
+  nav_msgs
+  geometry_msgs
+  std_srvs
+  image_transport
+  cv_bridge
+  visualization_msgs
+  octomap_msgs
+  tf2_ros
+  tf2_geometry_msgs
+  tf2_sensor_msgs
+  pcl_conversions
+)
 # target_link_libraries(${PROJECT_NAME}_Optmization  # original
 target_link_libraries(${PROJECT_NAME}_optimization
 # target_link_libraries(aqua_slam_node_optimization
@@ -403,6 +420,12 @@ ament_target_dependencies(${PROJECT_NAME}_node
 
   pcl_conversions
 #   pcl_ros
+)
+# target_link_libraries(stereo_dvl2 ${Boost_LIBRARIES} ${PROJECT_NAME} ${PROJECT_NAME}_Optmization)  // original
+target_link_libraries(${PROJECT_NAME}_node
+  ${PROJECT_NAME}
+  ${PROJECT_NAME}_optimization
+  ${Boost_LIBRARIES}
 )
 # -----------------------------------------------------------------------------
 

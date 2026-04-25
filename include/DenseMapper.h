@@ -7,8 +7,11 @@
 // #include <ros/ros.h>  // original
 // #include <rosbag/bag.h>
 // #include <rosbag/view.h>
+#include <rclcpp/rclcpp.hpp>
 // #include <sensor_msgs/Image.h>  // original
 #include <sensor_msgs/msg/image.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <sensor_msgs/image_encodings.hpp>
 // #include <image_transport/image_transport.h>  // original
 #include <image_transport/image_transport.hpp>
 // #include <image_transport/subscriber_filter.h>  // original
@@ -106,7 +109,8 @@ struct DepthEstParamters
 class DenseMapper
 {
 public:
-	DenseMapper(string settingFile);
+	// DenseMapper(string settingFile);  // original
+	DenseMapper(string settingFile, rclcpp::Node::SharedPtr node);
 	std::mutex mDenseMapMutex;
 	/***
 	 * blobal point cloud in first DVL frame(d0 frame)
@@ -124,9 +128,10 @@ public:
 	std::queue<KeyFrame *> mKFQueueTemp;
 
 	//ros publisher
-	boost::shared_ptr<image_transport::Publisher> mDepthPub;
-	boost::shared_ptr<image_transport::Publisher> mDepthConfPub;
-// // 	boost::shared_ptr<ros::Publisher> mMapPub;  // original  // original
+	std::shared_ptr<image_transport::Publisher> mDepthPub;
+	std::shared_ptr<image_transport::Publisher> mDepthConfPub;
+// // 	std::shared_ptr<ros::Publisher> mMapPub;  // original  // original
+	rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr mMapPub;
 
 	bool mStop = false;
 	bool mEnable = true;
@@ -147,6 +152,7 @@ public:
 	void Save(string path);
 
 protected:
+	rclcpp::Node::SharedPtr mNode;
 	double fx, fy, cx, cy, bf;
 	DepthEstParamters mParam;
 

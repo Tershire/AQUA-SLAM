@@ -85,7 +85,7 @@ VertexGDir* v_GDir = nullptr;
 g2o::VertexSE3Expmap* v_Tbd = nullptr;
 g2o::VertexSE3Expmap* v_Tdc = nullptr;
 // publisher pointer
-// // boost::shared_ptr<ros::Publisher> p_markers_pub;  // original  // original
+// // std::shared_ptr<ros::Publisher> p_markers_pub;  // original  // original
 
 void DeleteGraphRviz()
 {
@@ -212,7 +212,7 @@ void PublishGraph()
     p_markers_pub->publish(marker_array);
 }
 
-bool OptimizeBA(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
+bool OptimizeBA(std::shared_ptr<std_srvs::srv::Empty::Request> &req, std::shared_ptr<std_srvs::srv::Empty::Response> &res)
 {
     if (!optimizer) {
 //         ROS_ERROR_STREAM("Optimizer is not initialized.");  // original
@@ -291,7 +291,7 @@ bool OptimizeBA(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
     return true;
 }
 
-bool OptimizeBAWithoutBias(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
+bool OptimizeBAWithoutBias(std::shared_ptr<std_srvs::srv::Empty::Request> &req, std::shared_ptr<std_srvs::srv::Empty::Response> &res)
 {
     if (!optimizer) {
 //         ROS_ERROR_STREAM("Optimizer is not initialized.");  // original
@@ -367,7 +367,7 @@ bool OptimizeBAWithoutBias(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse 
     return true;
 }
 
-bool OptimizePoseGraph(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
+bool OptimizePoseGraph(std::shared_ptr<std_srvs::srv::Empty::Request> &req, std::shared_ptr<std_srvs::srv::Empty::Response> &res)
 {
     if (!optimizer) {
 //         ROS_ERROR_STREAM("Optimizer is not initialized.");  // original
@@ -562,7 +562,7 @@ bool OptimizePoseGraph(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res
     return true;
 }
 
-bool OptimizePoseGraphWithout(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
+bool OptimizePoseGraphWithout(std::shared_ptr<std_srvs::srv::Empty::Request> &req, std::shared_ptr<std_srvs::srv::Empty::Response> &res)
 {
     if (!optimizer) {
 //         ROS_ERROR_STREAM("Optimizer is not initialized.");  // original
@@ -756,7 +756,7 @@ bool OptimizePoseGraphWithout(std_srvs::EmptyRequest &req, std_srvs::EmptyRespon
     return true;
 }
 
-bool OptimizeExtrinsic(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
+bool OptimizeExtrinsic(std::shared_ptr<std_srvs::srv::Empty::Request> &req, std::shared_ptr<std_srvs::srv::Empty::Response> &res)
 {
     for (auto v: vertex_pose) {
         v->setFixed(true);
@@ -794,7 +794,7 @@ bool OptimizeExtrinsic(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res
     return true;
 }
 
-bool ReloadGraph(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
+bool ReloadGraph(std::shared_ptr<std_srvs::srv::Empty::Request> &req, std::shared_ptr<std_srvs::srv::Empty::Response> &res)
 {
     DeleteGraphRviz();
     // clear the vector
@@ -941,7 +941,7 @@ bool ReloadGraph(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
     return true;
 }
 
-bool SaveResult(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res)
+bool SaveResult(std::shared_ptr<std_srvs::srv::Empty::Request> &req, std::shared_ptr<std_srvs::srv::Empty::Response> &res)
 {
     //save to a local file
     std::ofstream fout("/home/da/project/ros/orb_dvl2_ws/src/dvl2/data/g2o/stamped_traj_estimate.txt");
@@ -995,7 +995,7 @@ int main(int argc, char** argv)
 // //     ros::ServiceServer service8 = nh.advertiseService("/g2oGraph/OptimizePoseGraphWithout",  // original  // original
                                                       OptimizePoseGraphWithout);
 // //     ros::Publisher markers_pub = nh.advertise<visualization_msgs::MarkerArray>("/g2oGraph/GraphMarker", 10);  // original  // original
-// //     p_markers_pub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(markers_pub));  // original  // original
+// //     p_markers_pub = std::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(markers_pub));  // original  // original
 
     optimizer = new g2o::SparseOptimizer();
     linearSolver = new g2o::LinearSolverEigen<g2o::BlockSolverX::PoseMatrixType>();

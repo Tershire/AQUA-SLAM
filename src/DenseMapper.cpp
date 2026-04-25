@@ -11,7 +11,8 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/radius_outlier_removal.h>
 // #include <sensor_msgs/Image.h>
-#include <sensor_msgs/CompressedImage.h>
+// #include <sensor_msgs/CompressedImage.h>  // original
+#include <sensor_msgs/msg/compressed_image.hpp>
 // #include <cv_bridge/cv_bridge.h>  // original
 #include <cv_bridge/cv_bridge.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -24,39 +25,39 @@
 
 namespace ORB_SLAM3
 {
-    DenseMapper::DenseMapper(string settingFile)
+    // DenseMapper::DenseMapper(string settingFile)  // original
+    DenseMapper::DenseMapper(string settingFile, rclcpp::Node::SharedPtr node)
     {
-// //         ros::NodeHandle nh_;  // original  // original
-        image_transport::ImageTransport it(nh_);
+        mNode = node;
+// //         ros::NodeHandle nh_;  // original
+        image_transport::ImageTransport it(mNode);
         image_transport::Publisher depth_pub = it.advertise("/AQUA_SLAM/dense_mapper/depth", 10);
-        mDepthPub = boost::shared_ptr<image_transport::Publisher>(
-                boost::make_shared<image_transport::Publisher>(depth_pub));
+        mDepthPub = std::make_shared<image_transport::Publisher>(depth_pub);
         image_transport::Publisher depth_conf_pub = it.advertise(
                 "/AQUA_SLAM/dense_mapper/depth_cpnfidence", 10);
-        mDepthConfPub = boost::shared_ptr<image_transport::Publisher>(
-                boost::make_shared<image_transport::Publisher>(depth_conf_pub));
-// //         ros::Publisher pointcloud_pub = nh_.advertise<sensor_msgs::PointCloud2>("/AQUA_SLAM/dense_map",  // original  // original
-                                                                                10);
-// //         mMapPub = boost::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pointcloud_pub));  // original  // original
+        mDepthConfPub = std::make_shared<image_transport::Publisher>(depth_conf_pub);
+// //         ros::Publisher pointcloud_pub = nh_.advertise<sensor_msgs::msg::PointCloud2>("/AQUA_SLAM/dense_map", 10);  // original  // original
+// //         mMapPub = std::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pointcloud_pub));  // original  // original
+        mMapPub = mNode->create_publisher<sensor_msgs::msg::PointCloud2>("/AQUA_SLAM/dense_map", 10);
 
         FileStorage fs(settingFile, FileStorage::READ);
-        FileNode node = fs["DenseMapper"];
-        float P1 = (float) node["P1"];
-        float P2 = (float) node["P2"];
-        int correlation_window_size = (int) node["correlation_window_size"];
-        int disp12MaxDiff = (int) node["disp12MaxDiff"];
-        int disparity_range = (int) node["disparity_range"];
-        int min_disparity = (int) node["min_disparity"];
-        int prefilter_cap = (int) node["prefilter_cap"];
-        int prefilter_size = (int) node["prefilter_size"];
-        int speckle_range = (int) node["speckle_range"];
-        int speckle_size = (int) node["speckle_size"];
-        int texture_threshold = (int) node["texture_threshold"];
-        float uniqueness_ratio = (float) node["uniqueness_ratio"];
-        mLeafSize = (float) node["leaf_size"];
-        mMeanK = (int) node["mean_k"];
-        mStdThred = (float) node["std_thred"];
-        mEnable = !((float) node["enable"] == 0);
+        FileNode fsNode = fs["DenseMapper"];
+        float P1 = (float) fsNode["P1"];
+        float P2 = (float) fsNode["P2"];
+        int correlation_window_size = (int) fsNode["correlation_window_size"];
+        int disp12MaxDiff = (int) fsNode["disp12MaxDiff"];
+        int disparity_range = (int) fsNode["disparity_range"];
+        int min_disparity = (int) fsNode["min_disparity"];
+        int prefilter_cap = (int) fsNode["prefilter_cap"];
+        int prefilter_size = (int) fsNode["prefilter_size"];
+        int speckle_range = (int) fsNode["speckle_range"];
+        int speckle_size = (int) fsNode["speckle_size"];
+        int texture_threshold = (int) fsNode["texture_threshold"];
+        float uniqueness_ratio = (float) fsNode["uniqueness_ratio"];
+        mLeafSize = (float) fsNode["leaf_size"];
+        mMeanK = (int) fsNode["mean_k"];
+        mStdThred = (float) fsNode["std_thred"];
+        mEnable = !((float) fsNode["enable"] == 0);
 
         mParam = DepthEstParamters(P1, P2, correlation_window_size, disp12MaxDiff, disparity_range,
                                    min_disparity, prefilter_cap, prefilter_size, speckle_range, speckle_size,
@@ -75,7 +76,8 @@ namespace ORB_SLAM3
     void DenseMapper::InsertNewKF(KeyFrame* pKF)
     {
         if (pKF->GetMap()->GetAllKeyFrames().size() < 5) {
-            ROS_DEBUG_STREAM("DenserMapper: less than 5 KF in current map, skip");
+            // ROS_DEBUG_STREAM("DenserMapper: less than 5 KF in current map, skip");  // original
+            RCLCPP_DEBUG(mNode->get_logger(), "DenserMapper: less than 5 KF in current map, skip");
             return;
         }
         else if (pKF->GetMap()->GetAllKeyFrames().size() == 5) {
@@ -254,8 +256,8 @@ namespace ORB_SLAM3
 
         cv::Mat img_l_rgb, img_r_rgb;
         if (img_l.empty() || img_r.empty()) {
-            ROS_WARN_STREAM(
-                    "DenserMapper: found empty images!" << "timestamp: " << fixed << setprecision(12) << time);
+            // ROS_WARN_STREAM("DenserMapper: found empty images!" << "timestamp: " << fixed << setprecision(12) << time);  // original
+            RCLCPP_WARN(mNode->get_logger(), "DenserMapper: found empty images!");
             return;
         }
         img_l_rgb = img_l.clone();
@@ -263,7 +265,7 @@ namespace ORB_SLAM3
         ComputeDisp(img_l, img_r, disp, disp_conf, mParam);
         disp_conf.convertTo(disp_conf, CV_8UC1);
 
-        sensor_msgs::Image::_header_type header;
+        sensor_msgs::msg::Image::_header_type header;
 // //         header.stamp = ros::Time::now();  // original  // original
 
         cv_bridge::CvImage img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, disp);
@@ -424,7 +426,8 @@ namespace ORB_SLAM3
             std::lock_guard<std::mutex> lock(mKFMutex);
             for (auto kf_pointcloud: mKFWithPointCloud) {
                 if (kf_pointcloud.first->isBad()) {
-                    ROS_DEBUG_STREAM("DenserMapper: find bad KF, remove and skip");
+                    // ROS_DEBUG_STREAM("DenserMapper: find bad KF, remove and skip");  // original
+                    RCLCPP_DEBUG(mNode->get_logger(), "DenserMapper: find bad KF, remove and skip");
                     mKFWithPointCloud.erase(kf_pointcloud.first);
                     return;
                 }
@@ -436,12 +439,12 @@ namespace ORB_SLAM3
 
     void DenseMapper::PublishMap()
     {
-        sensor_msgs::PointCloud2 dense_map;
+        sensor_msgs::msg::PointCloud2 dense_map;
 
         std::lock_guard<std::mutex> lock(mDenseMapMutex);
         pcl::PointCloud<pcl::PointXYZRGB> filtered_cloud;
         pcl::VoxelGrid<pcl::PointXYZRGB> sor;
-        sor.setInputCloud(boost::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>(mGlobalMap));
+        sor.setInputCloud(std::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>(mGlobalMap));
         sor.setLeafSize(0.05f, 0.05f, 0.05f);
         //	sor.filter(filtered_cloud);
         pcl::toROSMsg(mGlobalMap, dense_map);
@@ -543,14 +546,14 @@ namespace ORB_SLAM3
         //
         //     cv_bridge::CvImagePtr cv_ptr_l;
         //     try {
-        //         cv_ptr_l = cv_bridge::toCvCopy(left_pair.second, sensor_msgs::image_encodings::BGR8);
+        //         cv_ptr_l = cv_bridge::toCvCopy(left_pair.second, sensor_msgs::msg::Image_encodings::BGR8);
         //     } catch (cv_bridge::Exception &e) {
         //         ROS_ERROR("cv_bridge exception: %s", e.what());
         //         return;
         //     }
         //     cv_bridge::CvImagePtr cv_ptr_r;
         //     try {
-        //         cv_ptr_r = cv_bridge::toCvCopy(closest_right->second, sensor_msgs::image_encodings::BGR8);
+        //         cv_ptr_r = cv_bridge::toCvCopy(closest_right->second, sensor_msgs::msg::Image_encodings::BGR8);
         //     } catch (cv_bridge::Exception &e) {
         //         ROS_ERROR("cv_bridge exception: %s", e.what());
         //         return;

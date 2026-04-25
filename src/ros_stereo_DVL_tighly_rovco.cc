@@ -80,7 +80,7 @@ public:
 		t_last = 0;
 	};
 	void GrabImu(const sensor_msgs::Imu::ConstSharedPtr &imu_msg);
-	void GrabImu2(const nav_msgs::Odometry::ConstSharedPtr &odo_msg);
+	void GrabImu2(const nav_msgs::msg::Odometry::SharedPtr &odo_msg);
 
 	queue<sensor_msgs::Imu::ConstSharedPtr> imuBuf;
 	Eigen::Isometry3d mT_e0_ei;
@@ -95,7 +95,7 @@ public:
 	{};
 	void GrabDVL(const ds_sensor_msgs::Dvl::ConstSharedPtr &odo);
 
-//	queue<nav_msgs::Odometry::ConstSharedPtr> dvlBuf;
+//	queue<nav_msgs::msg::Odometry::SharedPtr> dvlBuf;
 	queue<ds_sensor_msgs::Dvl::ConstSharedPtr> dvlBuf;
 	std::mutex mBufMutex;
 
@@ -108,12 +108,12 @@ public:
 		: mpSLAM(pSLAM), mpImuGb(pImuGb), mpDvlGb(pDvlGb), do_rectify(bRect), mbClahe(bClahe)
 	{}
 
-	void GrabImageLeft(const sensor_msgs::Image::ConstSharedPtr &msg);
-	void GrabImageRight(const sensor_msgs::Image::ConstSharedPtr &msg);
-	cv::Mat GetImage(const sensor_msgs::Image::ConstSharedPtr &img_msg);
+	void GrabImageLeft(const sensor_msgs::msg::Image::SharedPtr &img &msg);
+	void GrabImageRight(const sensor_msgs::msg::Image::SharedPtr &img &msg);
+	cv::Mat GetImage(const sensor_msgs::msg::Image::SharedPtr &img &img_msg);
 	void SyncWithImu();
 
-	queue<sensor_msgs::Image::ConstSharedPtr> imgLeftBuf, imgRightBuf;
+	queue<sensor_msgs::msg::Image::SharedPtr &img> imgLeftBuf, imgRightBuf;
 	std::mutex mBufMutexLeft, mBufMutexRight;
 
 	ORB_SLAM3::System *mpSLAM;
@@ -181,7 +181,7 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-void ImageGrabber::GrabImageLeft(const sensor_msgs::Image::ConstSharedPtr &img_msg)
+void ImageGrabber::GrabImageLeft(const sensor_msgs::msg::Image::SharedPtr &img &img_msg)
 {
 	BOOST_LOG_TRIVIAL(info) << fixed << setprecision(9) << "left recieved!, time: " << img_msg->header.stamp.toSec();
 //	cout<<"left recieved!, time: "<<img_msg->header.stamp.toNSec()<<endl;
@@ -194,7 +194,7 @@ void ImageGrabber::GrabImageLeft(const sensor_msgs::Image::ConstSharedPtr &img_m
 	mBufMutexLeft.unlock();
 }
 
-void ImageGrabber::GrabImageRight(const sensor_msgs::Image::ConstSharedPtr &img_msg)
+void ImageGrabber::GrabImageRight(const sensor_msgs::msg::Image::SharedPtr &img &img_msg)
 {
 	BOOST_LOG_TRIVIAL(info) << fixed << setprecision(9) << "right recieved!, time: " << img_msg->header.stamp.toSec();
 //	cout<<"right recieved!, time: "<<img_msg->header.stamp.toNSec()<<endl;
@@ -207,12 +207,12 @@ void ImageGrabber::GrabImageRight(const sensor_msgs::Image::ConstSharedPtr &img_
 	mBufMutexRight.unlock();
 }
 
-cv::Mat ImageGrabber::GetImage(const sensor_msgs::Image::ConstSharedPtr &img_msg)
+cv::Mat ImageGrabber::GetImage(const sensor_msgs::msg::Image::SharedPtr &img &img_msg)
 {
 	// Copy the ros image message to cv::Mat.
 	cv_bridge::CvImage::ConstSharedPtr cv_ptr;
 	try {
-		cv_ptr = cv_bridge::toCvShare(img_msg, sensor_msgs::image_encodings::MONO8);
+		cv_ptr = cv_bridge::toCvShare(img_msg, sensor_msgs::msg::Image_encodings::MONO8);
 	}
 	catch (cv_bridge::Exception &e) {
 		ROS_ERROR("cv_bridge exception: %s", e.what());
@@ -409,7 +409,7 @@ void ImuGrabber::GrabImu(const sensor_msgs::Imu::ConstSharedPtr &imu_msg)
 	mBufMutex.unlock();
 	return;
 }
-void ImuGrabber::GrabImu2(const nav_msgs::Odometry::ConstSharedPtr &odo_msg)
+void ImuGrabber::GrabImu2(const nav_msgs::msg::Odometry::SharedPtr &odo_msg)
 {
 //	BOOST_LOG_TRIVIAL(info) << "EKF IMU recieved! time:" << odo_msg->header.stamp.toNSec();
 	sensor_msgs::ImuPtr imu(new sensor_msgs::Imu());

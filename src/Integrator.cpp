@@ -66,13 +66,15 @@ void Integrator::IntegrateMeasurements(Frame &cur_F, std::list<IMU::GyroDvlPoint
     auto cur_time = cur_F.mTimeStamp;
     auto pre_time = cur_F.mpPrevFrame->mTimeStamp;
     if (pre_time == 0) {
-        ROS_WARN_STREAM(fixed<<setprecision(6)<<"non prev frame, frame timestamp: "<<cur_time);
+        // ROS_WARN_STREAM(fixed<<setprecision(6)<<"non prev frame, frame timestamp: "<<cur_time);  // original
+        RCLCPP_WARN_STREAM(rclcpp::get_logger("aqua_slam"), std::fixed << std::setprecision(6) << "non prev frame, frame timestamp: " << cur_time);
         //		Verbose::PrintMess(, Verbose::VERBOSITY_NORMAL);
         cur_F.setIntegrated();
         return;
     }
     else if (DvlGyroDataQueue.size() == 0) {
-        ROS_WARN_STREAM("Not IMU data in mlQueueDVLGyroData!!");
+        // ROS_WARN_STREAM("Not IMU data in mlQueueDVLGyroData!!");  // original
+        RCLCPP_WARN(rclcpp::get_logger("aqua_slam"), "Not IMU data in mlQueueDVLGyroData!!");
         cur_F.setIntegrated();
         return;
     }
@@ -120,7 +122,8 @@ void Integrator::IntegrateMeasurements(Frame &cur_F, std::list<IMU::GyroDvlPoint
 
     int n = measurements.size();
     if (n == 0) {
-        ROS_WARN_STREAM("no measurement to integrate!");
+        // ROS_WARN_STREAM("no measurement to integrate!");  // original
+        RCLCPP_WARN(rclcpp::get_logger("aqua_slam"), "no measurement to integrate!");
         return;
     }
 
@@ -155,7 +158,8 @@ void Integrator::IntegrateMeasurements(Frame &cur_F, std::list<IMU::GyroDvlPoint
             }
         }
         if(!isDVL_there){
-            ROS_WARN_STREAM("wait init, skip integration");
+            // ROS_WARN_STREAM("wait init, skip integration");  // original
+            RCLCPP_WARN(rclcpp::get_logger("aqua_slam"), "wait init, skip integration");
             return;
         }
     }

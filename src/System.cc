@@ -50,10 +50,14 @@ namespace ORB_SLAM3
 
 Verbose::eLevel Verbose::th = Verbose::VERBOSITY_NORMAL;
 
+// System::System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor,  // original
+//                const bool bUseViewer, const int initFr, const string &strSequence, const string &strLoadingFile)  // original
 System::System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor,
+               rclcpp::Node::SharedPtr node,
                const bool bUseViewer, const int initFr, const string &strSequence, const string &strLoadingFile)
 	: mSensor(sensor), mbReset(false), mbResetActiveMap(false),
-	  mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false), mStrVocabularyFilePath(strVocFile)
+	  mbActivateLocalizationMode(false), mbDeactivateLocalizationMode(false), mStrVocabularyFilePath(strVocFile),
+	  mp_node(node)
 {
 	// Output welcome message
 	// cout << endl
@@ -205,10 +209,12 @@ else
 
 
 	//set DenseMapper
-	mpDenseMapper = new DenseMapper(strSettingsFile);
+	// mpDenseMapper = new DenseMapper(strSettingsFile);  // original
+	mpDenseMapper = new DenseMapper(strSettingsFile, mp_node);
 	auto dense_mapping = new thread(&ORB_SLAM3::DenseMapper::Run, mpDenseMapper);
 
-	mRosHandler = new RosHandling(this,mpLocalMapper);
+	// mRosHandler = new RosHandling(this,mpLocalMapper);  // original
+	mRosHandler = new RosHandling(this, mpLocalMapper, mp_node);
 	//Initialize the Tracking thread
 	//(it will live in the main thread of execution, the one that called this constructor)
 	cout << "Seq. Name: " << strSequence << endl;
@@ -245,13 +251,15 @@ else
 	//Initialize the Loop Closing thread and launch
 	// mSensor!=MONOCULAR && mSensor!=IMU_MONOCULAR
 	int mergingThreshold = fsSettings["Optimizer.mergingThreshold"];
+	// mpLoopCloser = new LoopClosing(mpAtlas, mpKeyFrameDatabase, mpVocabulary, mRosHandler, mSensor != MONOCULAR, mergingThreshold);  // original
 	mpLoopCloser =
 		new LoopClosing(mpAtlas,
 		                mpKeyFrameDatabase,
 		                mpVocabulary,
 		                mRosHandler,
 		                mSensor != MONOCULAR,
-		                mergingThreshold); // mSensor!=MONOCULAR);
+		                mergingThreshold,
+		                mp_node);
 	mptLoopClosing = new thread(&ORB_SLAM3::LoopClosing::Run, mpLoopCloser);
 
     auto viewer = new thread(&ORB_SLAM3::RosHandling::Run, mRosHandler, mpAtlas);
@@ -289,7 +297,7 @@ else
 //	mT_e_c.pretranslate(t);
 }
 
-void System::dvlCallBack(const nav_msgs::Odometry::ConstSharedPtr &dvl)
+void System::dvlCallBack(const nav_msgs::msg::Odometry::SharedPtr &dvl)
 {
 	std::lock_guard<std::mutex> guard(mDVL_state_lock);
 	mDVL_updated = true;

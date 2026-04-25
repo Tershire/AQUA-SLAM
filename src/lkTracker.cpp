@@ -5,7 +5,7 @@ using namespace message_filters;
 using namespace ORB_SLAM3;
 LKTracker* tracker= nullptr;
 
-void img_callback(const sensor_msgs::Image::ConstSharedPtr &left, const sensor_msgs::Image::ConstSharedPtr &right)
+void img_callback(const sensor_msgs::msg::Image::SharedPtr &img &left, const sensor_msgs::msg::Image::SharedPtr &img &right)
 {
 	cv_bridge::CvImagePtr cv_ptr_l;
 	cv_bridge::CvImagePtr cv_ptr_r;

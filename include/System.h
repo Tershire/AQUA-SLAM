@@ -31,25 +31,29 @@
 
 // include ros
 // #include <ros/ros.h>  // original
+#include <rclcpp/rclcpp.hpp>
 // #include <image_transport/image_transport.h>  // original
 #include <image_transport/image_transport.hpp>
 // #include <cv_bridge/cv_bridge.h>  // original
 #include <cv_bridge/cv_bridge.hpp>
-// #include <sensor_msgs/image_encodings.h>  // original
-#include <sensor_msgs/image_encodings.hpp>
-// #include <geometry_msgs/PoseStamped.h>  // original
-#include <geometry_msgs/msg/pose_stamped.hpp>
-// #include <nav_msgs/Odometry.h>  // original
-#include <nav_msgs/msg/odometry.hpp>
+
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
+// #include <sensor_msgs/image_encodings.h>  // original
+#include <sensor_msgs/image_encodings.hpp>
 // #include <sensor_msgs/Image.h>  // original
 #include <sensor_msgs/msg/image.hpp>
+#include <sensor_msgs/msg/compressed_image.hpp>
 // #include <sensor_msgs/Imu.h>  // original
 #include <sensor_msgs/msg/imu.hpp>
+// #include <nav_msgs/Odometry.h>  // original
+#include <nav_msgs/msg/odometry.hpp>
+// #include <geometry_msgs/PoseStamped.h>  // original
+#include <geometry_msgs/msg/pose_stamped.hpp>
 
+#include <std_srvs/srv/empty.hpp>
 
 #include "RosHandling.h"
 // #include "MapDrawer.h"
@@ -120,13 +124,14 @@ public: bool mbResetActiveMap;
 public:
 
     // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and Viewer threads.
-    System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor, const bool bUseViewer = true, const int initFr = 0, const string &strSequence = std::string(), const string &strLoadingFile = std::string());
+    // System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor, const bool bUseViewer = true, const int initFr = 0, const string &strSequence = std::string(), const string &strLoadingFile = std::string());  // original
+    System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor, rclcpp::Node::SharedPtr node, const bool bUseViewer = true, const int initFr = 0, const string &strSequence = std::string(), const string &strLoadingFile = std::string());
 
 	cv::Mat TrackStereoGroDVL(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp, const vector<IMU::ImuPoint>& vImuMeas = vector<IMU::ImuPoint>(), bool bDVL= false, string filename="");
 	cv::Mat TrackStereoGroDVL(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp, const vector<IMU::GyroDvlPoint>& vDVLGyroMeas = vector<IMU::GyroDvlPoint>(), bool bDVL= false, string filename="");
 	cv::Mat TrackStereoGroDVLKLT(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timestamp, const vector<IMU::ImuPoint>& vImuMeas = vector<IMU::ImuPoint>(), bool bDVL= false, string filename="");
 
-    void dvlCallBack(const nav_msgs::Odometry::ConstSharedPtr &dvl);
+    void dvlCallBack(const nav_msgs::msg::Odometry::SharedPtr &dvl);
 
     // This stops local mapping thread (map building) and performs only camera tracking.
     void ActivateLocalizationMode();
@@ -280,6 +285,8 @@ private:
     image_transport::Publisher* mImg_r_pub=NULL;
 // //     ros::Publisher* mGt_pub=NULL;  // original  // original
     RosHandling* mRosHandler;
+
+    rclcpp::Node::SharedPtr mp_node;
 
 
 };

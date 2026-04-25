@@ -1337,7 +1337,8 @@ void Optimizer::PoseOnlyOptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kf
         if (pKFi->GetMap() != (*loss_kfs.begin())->GetMap() && pKFi->mnId > (maxKFid-4)) {
             vpab.push_back(VA);
             VA->setFixed(true);
-            ROS_DEBUG_STREAM("optimizable bias: " << pKFi->mnId);
+            // ROS_DEBUG_STREAM("optimizable bias: " << pKFi->mnId);  // original
+            RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "optimizable bias: " << pKFi->mnId);
         }
         optimizer.addVertex(VA);
 
@@ -1404,7 +1405,8 @@ void Optimizer::PoseOnlyOptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kf
             if (pKFi->isBad() || pKFi->mPrevKF->mnId > maxKFid) {
                 continue;
             }
-            ROS_DEBUG_STREAM("add dvl-imu edge: " << pKFi->mPrevKF->mnId << " -> " << pKFi->mnId);
+            // ROS_DEBUG_STREAM("add dvl-imu edge: " << pKFi->mPrevKF->mnId << " -> " << pKFi->mnId);  // original
+            RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "add dvl-imu edge: " << pKFi->mPrevKF->mnId << " -> " << pKFi->mnId);
             VertexPoseDvlIMU *VP1 = dynamic_cast<VertexPoseDvlIMU *>(optimizer.vertex(pKFi->mPrevKF->mnId));
             //				g2o::HyperGraph::Vertex *VV1 = optimizer.vertex(maxKFid + (pKFi->mPrevKF->mnId) + 1);
             VertexPoseDvlIMU *VP2 = dynamic_cast<VertexPoseDvlIMU *>(optimizer.vertex(pKFi->mnId));
@@ -1596,7 +1598,8 @@ void Optimizer::PoseOnlyOptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kf
         }
         Eigen::Quaterniond Rwc(VP->estimate().Rwc);
         Eigen::Vector3d twc = VP->estimate().twc;
-        ROS_DEBUG_STREAM("recover KF[" << pKFi->mnId << "] pose: from"<<pKFi->GetPoseInverse().col(3).rowRange(0,3).t()<<" to: " << twc.transpose());
+        // ROS_DEBUG_STREAM("recover KF[" << pKFi->mnId << "] pose: from"<<pKFi->GetPoseInverse().col(3).rowRange(0,3).t()<<" to: " << twc.transpose());  // original
+        RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "recover KF[" << pKFi->mnId << "] pose: from"<<pKFi->GetPoseInverse().col(3).rowRange(0,3).t()<<" to: " << twc.transpose());
         Eigen::Isometry3d Twc = Eigen::Isometry3d::Identity();
         Twc.pretranslate(twc);
         Twc.rotate(Rwc);
@@ -1827,7 +1830,8 @@ void Optimizer::OptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kfs, Atlas
             if (pKFi->isBad() || pKFi->mPrevKF->mnId > maxKFid) {
                 continue;
             }
-            ROS_DEBUG_STREAM("add dvl-imu edge: " << pKFi->mPrevKF->mnId << " -> " << pKFi->mnId);
+            // ROS_DEBUG_STREAM("add dvl-imu edge: " << pKFi->mPrevKF->mnId << " -> " << pKFi->mnId);  // original
+            RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "add dvl-imu edge: " << pKFi->mPrevKF->mnId << " -> " << pKFi->mnId);
             VertexPoseDvlIMU *VP1 = dynamic_cast<VertexPoseDvlIMU *>(optimizer.vertex(pKFi->mPrevKF->mnId));
             //				g2o::HyperGraph::Vertex *VV1 = optimizer.vertex(maxKFid + (pKFi->mPrevKF->mnId) + 1);
             VertexPoseDvlIMU *VP2 = dynamic_cast<VertexPoseDvlIMU *>(optimizer.vertex(pKFi->mnId));
@@ -1983,7 +1987,8 @@ void Optimizer::OptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kfs, Atlas
             IMU::Bias b(v_ab->estimate().x(), v_ab->estimate().y(), v_ab->estimate().z(),
                         v_gb->estimate().x(), v_gb->estimate().y(), v_gb->estimate().z());
             pKFi->SetNewBias(b);
-            ROS_DEBUG_STREAM("recover KF[" << pKFi->mnId << "] bias: " << b);
+            // ROS_DEBUG_STREAM("recover KF[" << pKFi->mnId << "] bias: " << b);  // original
+            RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "recover KF[" << pKFi->mnId << "] bias: " << b);
 
             // Pose
             VertexPoseDvlIMU *VP = dynamic_cast<VertexPoseDvlIMU *>(optimizer.vertex(pKFi->mnId));
@@ -1992,7 +1997,8 @@ void Optimizer::OptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kfs, Atlas
             }
             Eigen::Quaterniond Rwc(VP->estimate().Rwc);
             Eigen::Vector3d twc = VP->estimate().twc;
-            ROS_DEBUG_STREAM("recover KF[" << pKFi->mnId << "] pose: from"<<pKFi->GetPoseInverse().col(3).rowRange(0,3).t()<<" to: " << twc.transpose());
+            // ROS_DEBUG_STREAM("recover KF[" << pKFi->mnId << "] pose: from"<<pKFi->GetPoseInverse().col(3).rowRange(0,3).t()<<" to: " << twc.transpose());  // original
+            RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "recover KF[" << pKFi->mnId << "] pose: from"<<pKFi->GetPoseInverse().col(3).rowRange(0,3).t()<<" to: " << twc.transpose());
             Eigen::Isometry3d Twc = Eigen::Isometry3d::Identity();
             Twc.pretranslate(twc);
             Twc.rotate(Rwc);
@@ -6011,7 +6017,8 @@ void Optimizer::GlobalVAPoseGraphOptimization(KeyFrame* pCurKF, vector<KeyFrame*
     for(auto m:pAtlas->GetAllMaps()){
         for (KeyFrame *pKFi: m->GetAllKeyFrames()) {
             if (pKFi->isBad()) {
-                ROS_DEBUG_STREAM("KF: "<<pKFi->mnId<<"is bad");
+                // ROS_DEBUG_STREAM("KF: "<<pKFi->mnId<<"is bad");  // original
+                RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "KF: "<<pKFi->mnId<<"is bad");
                 continue;
             }
 
@@ -13253,9 +13260,9 @@ void Optimizer::DvlGyroInitOptimization6(Map *pMap, Eigen::Vector3d &bg, bool bM
 
 //		cout << "kf id: " << pkf->mnId << " gyros bias: " << bg.transpose() << endl;
 // 		ROS_INFO_STREAM("beam calibration: KeyFrame id:<<" << pkf->mnId << " dvl velocity: "  // original
-		                                                   << pkf->mpDvlPreintegrationKeyFrame->v_dk_dvl
-		                                                   << " visual velocity: "
-		                                                   << pkf->mpDvlPreintegrationKeyFrame->v_dk_visual.transpose());
+// 		                                                   << pkf->mpDvlPreintegrationKeyFrame->v_dk_dvl  // original
+// 		                                                   << " visual velocity: "  // original
+// 		                                                   << pkf->mpDvlPreintegrationKeyFrame->v_dk_visual.transpose());  // original
 	}
 
 	DvlBeamOptimization(pMap);
@@ -13636,9 +13643,9 @@ double Optimizer::DvlIMUInitOptimization(Map *pMap, double priori_g, double prio
 
 			if (!VP1 || !VP2 || !VV1 || !VV2 || !VG || !VA  || !VT_d_c || !VT_g_d || !VR_w_b0) {
 //                 ROS_ERROR_STREAM("DVL IMU initialzation Error, KF1 ID:"<< pKFi->mPrevKF->mnId << "KF2 ID:" << pKFi->mnId << "VP1: " << VP1 <<", VP2: " << VP2 << ", VV1: " << VV1  // original
-								 << ", VV2: " << VV2 << ", VG: " << VG << ", VA: " << VA
-								 << ", VT_d_c: " << VT_d_c << ", VT_g_d: " << VT_g_d
-								 << ", VR_w_b0: " << VR_w_b0);
+// 								 << ", VV2: " << VV2 << ", VG: " << VG << ", VA: " << VA  // original
+// 								 << ", VT_d_c: " << VT_d_c << ", VT_g_d: " << VT_g_d  // original
+// 								 << ", VR_w_b0: " << VR_w_b0);  // original
 				continue;
                 // assert(-1);
 			}
@@ -13918,7 +13925,8 @@ void Optimizer::DvlIMURefineOptimization(Atlas* pAtlas)
     // optimizer.setVerbose(true);
     optimizer.initializeOptimization(0);
     optimizer.optimize(5);
-    ROS_DEBUG_STREAM(ss.str());
+    // ROS_DEBUG_STREAM(ss.str());  // original
+    RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), ss.str());
     // for(VertexGyroBias* v:vpgb){
     //     v->setFixed(false);
     // }
@@ -14026,13 +14034,13 @@ void Optimizer::DvlBeamOptimization(Map *pMap)
 	Eigen::Matrix<double, 8, 1> r_opt = v_beam_ori->estimate();
 
 // 	ROS_INFO_STREAM(  // original
-		"DVL Calibration(visual data):\nbeam1_theta=" << r_opt(0) / M_PI * 180.0 << " beam1_phi=" << r_opt(1) / M_PI * 180.0
-		                                 << "\nbeam2_theta=" << r_opt(2) / M_PI * 180.0 << " beam2_phi="
-		                                 << r_opt(3) / M_PI * 180.0
-		                                 << "\nbeam3_theta=" << r_opt(4) / M_PI * 180.0 << " beam3_phi="
-		                                 << r_opt(5) / M_PI * 180.0
-		                                 << "\nbeam4_theta=" << r_opt(6) / M_PI * 180.0 << " beam4_phi="
-		                                 << r_opt(7) / M_PI * 180.0);
+// 		"DVL Calibration(visual data):\nbeam1_theta=" << r_opt(0) / M_PI * 180.0 << " beam1_phi=" << r_opt(1) / M_PI * 180.0  // original
+// 		                                 << "\nbeam2_theta=" << r_opt(2) / M_PI * 180.0 << " beam2_phi="  // original
+// 		                                 << r_opt(3) / M_PI * 180.0  // original
+// 		                                 << "\nbeam3_theta=" << r_opt(4) / M_PI * 180.0 << " beam3_phi="  // original
+// 		                                 << r_opt(5) / M_PI * 180.0  // original
+// 		                                 << "\nbeam4_theta=" << r_opt(6) / M_PI * 180.0 << " beam4_phi="  // original
+// 		                                 << r_opt(7) / M_PI * 180.0);  // original
 
 
 
@@ -14121,13 +14129,13 @@ void Optimizer::DvlBeamOptimization_dvl(Map *pMap)
 	Eigen::Matrix<double, 8, 1> r_opt = v_beam_ori->estimate();
 
 // 	ROS_INFO_STREAM(  // original
-		"DVL Calibration(DVL data):\nbeam1_theta=" << r_opt(0) / M_PI * 180.0 << " beam1_phi=" << r_opt(1) / M_PI * 180.0
-		                                 << "\nbeam2_theta=" << r_opt(2) / M_PI * 180.0 << " beam2_phi="
-		                                 << r_opt(3) / M_PI * 180.0
-		                                 << "\nbeam3_theta=" << r_opt(4) / M_PI * 180.0 << " beam3_phi="
-		                                 << r_opt(5) / M_PI * 180.0
-		                                 << "\nbeam4_theta=" << r_opt(6) / M_PI * 180.0 << " beam4_phi="
-		                                 << r_opt(7) / M_PI * 180.0);
+// 		"DVL Calibration(DVL data):\nbeam1_theta=" << r_opt(0) / M_PI * 180.0 << " beam1_phi=" << r_opt(1) / M_PI * 180.0  // original
+// 		                                 << "\nbeam2_theta=" << r_opt(2) / M_PI * 180.0 << " beam2_phi="  // original
+// 		                                 << r_opt(3) / M_PI * 180.0  // original
+// 		                                 << "\nbeam3_theta=" << r_opt(4) / M_PI * 180.0 << " beam3_phi="  // original
+// 		                                 << r_opt(5) / M_PI * 180.0  // original
+// 		                                 << "\nbeam4_theta=" << r_opt(6) / M_PI * 180.0 << " beam4_phi="  // original
+// 		                                 << r_opt(7) / M_PI * 180.0);  // original
 
 
 

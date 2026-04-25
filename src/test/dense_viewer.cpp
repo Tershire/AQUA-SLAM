@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 // //     ros::init(argc, argv, "image_listener");  // original  // original
 
 // //     ros::NodeHandle nh;  // original  // original
-// //     ros::Publisher pointcloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/dense_viewer/pointcloud", 1);  // original  // original
+// //     ros::Publisher pointcloud_pub = nh.advertise<sensor_msgs::msg::PointCloud2>("/dense_viewer/pointcloud", 1);  // original  // original
 // //     ros::Publisher trajectory_pub = nh.advertise<nav_msgs::msg::Path>("/dense_viewer/trajectory", 1);  // original  // original
 
     std::map<double, Eigen::Isometry3d> estimation_traj;
@@ -140,7 +140,7 @@ int main(int argc, char** argv)
         traj_msg.poses.push_back(p);
     }
 
-    sensor_msgs::PointCloud2 pointcloud_msg;
+    sensor_msgs::msg::PointCloud2 pointcloud_msg;
     pcl::toROSMsg(*global_map, pointcloud_msg);
 
 

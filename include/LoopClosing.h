@@ -31,6 +31,7 @@
 #include <mutex>
 #include "Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h"
 // #include <ros/ros.h>  // original
+#include <rclcpp/rclcpp.hpp>
 // #include <image_transport/image_transport.h>  // original
 #include <image_transport/image_transport.hpp>
 // #include <sensor_msgs/Image.h>  // original
@@ -38,7 +39,6 @@
 #include <opencv2/highgui/highgui.hpp>
 // #include <cv_bridge/cv_bridge.h>  // original
 #include <cv_bridge/cv_bridge.hpp>
-// #include <ros/ros.h>  // original
 
 namespace ORB_SLAM3
 {
@@ -61,7 +61,8 @@ public:
 
 public:
 
-    LoopClosing(Atlas* pAtlas, KeyFrameDatabase* pDB, ORBVocabulary* pVoc, RosHandling* pRosHandler, const bool bFixScale,int mergingThreshold);
+    // LoopClosing(Atlas* pAtlas, KeyFrameDatabase* pDB, ORBVocabulary* pVoc, RosHandling* pRosHandler, const bool bFixScale, int mergingThreshold);  // original
+    LoopClosing(Atlas* pAtlas, KeyFrameDatabase* pDB, ORBVocabulary* pVoc, RosHandling* pRosHandler, const bool bFixScale, int mergingThreshold, rclcpp::Node::SharedPtr node);
 
     void SetTracker(Tracking* pTracker);
 
@@ -97,7 +98,8 @@ public:
 
     // Viewer* mpViewer;
 // //     ros::NodeHandlePtr mpNH;  // original  // original
-    boost::shared_ptr<image_transport::ImageTransport> mpIt;
+    rclcpp::Node::SharedPtr mpNode;
+    std::shared_ptr<image_transport::ImageTransport> mpIt;
     // publisher for current keyframe
     image_transport::Publisher mImgPub_cur_keyframe;
 	// publisher for previous keyframe in the map which may have the loop

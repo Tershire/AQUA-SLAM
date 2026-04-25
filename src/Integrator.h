@@ -7,6 +7,8 @@
 
 #include "DVLGroPreIntegration.h"
 #include <list>
+// #include <ros/ros.h>  // original
+#include <rclcpp/rclcpp.hpp>
 //class DVLGroPreIntegration;
 
 namespace ORB_SLAM3

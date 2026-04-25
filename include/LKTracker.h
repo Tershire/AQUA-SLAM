@@ -138,7 +138,7 @@ public:
 
 	vector<cv::Point2f> pts_velocity, right_pts_velocity;
 
-	boost::shared_ptr<image_transport::Publisher> pTrack_img_pub;
+	std::shared_ptr<image_transport::Publisher> pTrack_img_pub;
 
 };
 

@@ -6,48 +6,55 @@
 #define ROSHANDLING_H
 
 // #include <ros/ros.h>  // original
+#include <rclcpp/rclcpp.hpp>
 // #include <image_transport/image_transport.h>  // original
 #include <image_transport/image_transport.hpp>
 // #include <cv_bridge/cv_bridge.h>  // original
 #include <cv_bridge/cv_bridge.hpp>
-// #include <sensor_msgs/image_encodings.h>  // original
-#include <sensor_msgs/image_encodings.hpp>
-// #include <geometry_msgs/PoseStamped.h>  // original
-#include <geometry_msgs/msg/pose_stamped.hpp>
-// #include <geometry_msgs/Transform.h>  // original
-#include <geometry_msgs/msg/transform.hpp>
-// #include <geometry_msgs/TransformStamped.h>  // original
-#include <geometry_msgs/msg/transform_stamped.hpp>
-// #include <nav_msgs/Odometry.h>  // original
-#include <nav_msgs/msg/odometry.hpp>
+
+#include <octomap/OcTree.h>
+#include <octomap/octomap.h>
+#include <octomap/ColorOcTree.h>
+
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/exact_time.h>
 #include <message_filters/sync_policies/approximate_time.h>
+// #include <sensor_msgs/image_encodings.h>  // original
+#include <sensor_msgs/image_encodings.hpp>
 // #include <sensor_msgs/Image.h>  // original
 #include <sensor_msgs/msg/image.hpp>
+#include <sensor_msgs/msg/compressed_image.hpp>
 // #include <sensor_msgs/Imu.h>  // original
 #include <sensor_msgs/msg/imu.hpp>
 // #include <sensor_msgs/PointCloud2.h>  // original
 #include <sensor_msgs/msg/point_cloud2.hpp>
 // #include <nav_msgs/Path.h>  // original
 #include <nav_msgs/msg/path.hpp>
-// #include <tf/transform_broadcaster.h>  // original
-#include <tf2_ros/transform_broadcaster.hpp>
-#include <tf2/LinearMath/Quaternion.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#include <octomap/OcTree.h>
-#include <octomap/octomap.h>
-// #include <octomap_msgs/Octomap.h>  // original
-#include <octomap_msgs/msg/octomap.hpp>
-#include <octomap/ColorOcTree.h>
-#include <octomap_msgs/conversions.h>
-// #include <std_srvs/Empty.h>  // original
-#include <std_srvs/srv/empty.hpp>
+// #include <nav_msgs/Odometry.h>  // original
+#include <nav_msgs/msg/odometry.hpp>
+// #include <geometry_msgs/PoseStamped.h>  // original
+#include <geometry_msgs/msg/pose_stamped.hpp>
+// #include <geometry_msgs/Transform.h>  // original
+#include <geometry_msgs/msg/transform.hpp>
+// #include <geometry_msgs/TransformStamped.h>  // original
+#include <geometry_msgs/msg/transform_stamped.hpp>
 // #include <visualization_msgs/Marker.h>  // original
 #include <visualization_msgs/msg/marker.hpp>
 // #include <visualization_msgs/MarkerArray.h>  // original
+#include <visualization_msgs/msg/marker.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
+// #include <octomap_msgs/Octomap.h>  // original
+#include <octomap_msgs/msg/octomap.hpp>
+#include <octomap_msgs/conversions.h>
+
+// #include <tf/transform_broadcaster.h>  // original
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+
+// #include <std_srvs/Empty.h>  // original
+#include <std_srvs/srv/empty.hpp>
 
 #include <pcl/point_types.h>
 #include <pcl/filters/voxel_grid.h>
@@ -62,9 +69,9 @@
 #include <tf2_sensor_msgs/tf2_sensor_msgs.hpp>
 #include <pcl_conversions/pcl_conversions.h>
 
-#include<opencv2/core/core.hpp>
-#include<opencv2/features2d/features2d.hpp>
-#include<opencv2/core/eigen.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/core/eigen.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -87,10 +94,11 @@ class LocalMapping;
 class RosHandling
 {
 public:
-	RosHandling(System *pSys, LocalMapping *pLocal);
-	void PublishLeftImg(const sensor_msgs::Image::ConstSharedPtr &img);
-	void PublishRightImg(const sensor_msgs::Image::ConstSharedPtr &img);
-	void PublishImgWithInfo(const sensor_msgs::Image::ConstSharedPtr &img);
+	// RosHandling(System *pSys, LocalMapping *pLocal);  // original
+	RosHandling(System *pSys, LocalMapping *pLocal, rclcpp::Node::SharedPtr node);
+	void PublishLeftImg(const sensor_msgs::msg::Image::SharedPtr &img);
+	void PublishRightImg(const sensor_msgs::msg::Image::SharedPtr &img);
+	void PublishImgWithInfo(const sensor_msgs::msg::Image::SharedPtr &img);
 	void PublishImgMergeCandidate(const cv::Mat &img);
 	void PublishIntegration(Atlas *pAtlas);
     void PublishLossKF(set<KeyFrame*,KFComparator> &loss_kfs);
@@ -114,61 +122,83 @@ public:
 	                            pcl::PointCloud<pcl::PointXYZRGB> &cloud_free);
 	double LinearInterpolation(double start_x, double end_x, double start_y, double end_y, double x);
 	void PublishLossInteration(const Eigen::Isometry3d &T_e0_er, const Eigen::Isometry3d &T_e0_ec);
-	bool SavePose(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res);
-	bool LoadMap(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res);
-	bool CalibrateDVLGyro(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res);
-    bool FullBA(std_srvs::EmptyRequest &req, std_srvs::EmptyResponse &res);
+	// bool SavePose(std::shared_ptr<std_srvs::srv::Empty::Request> &req, std::shared_ptr<std_srvs::srv::Empty::Response> &res);  // original (ROS2: void, no &)
+	void SavePose(std::shared_ptr<std_srvs::srv::Empty::Request> req, std::shared_ptr<std_srvs::srv::Empty::Response> res);
+	// bool LoadMap(std::shared_ptr<std_srvs::srv::Empty::Request> &req, std::shared_ptr<std_srvs::srv::Empty::Response> &res);  // original
+	void LoadMap(std::shared_ptr<std_srvs::srv::Empty::Request> req, std::shared_ptr<std_srvs::srv::Empty::Response> res);
+	// bool CalibrateDVLGyro(std::shared_ptr<std_srvs::srv::Empty::Request> &req, std::shared_ptr<std_srvs::srv::Empty::Response> &res);  // original
+	void CalibrateDVLGyro(std::shared_ptr<std_srvs::srv::Empty::Request> req, std::shared_ptr<std_srvs::srv::Empty::Response> res);
+	// bool FullBA(std::shared_ptr<std_srvs::srv::Empty::Request> &req, std::shared_ptr<std_srvs::srv::Empty::Response> &res);  // original
+	void FullBA(std::shared_ptr<std_srvs::srv::Empty::Request> req, std::shared_ptr<std_srvs::srv::Empty::Response> res);
 
 protected:
 	System *mp_system;
 	LocalMapping *mp_LocalMapping;
+	rclcpp::Node::SharedPtr mp_node;
 
-	boost::shared_ptr<image_transport::ImageTransport> mp_it;
-	boost::shared_ptr<image_transport::Publisher> mp_img_l_pub;
-	boost::shared_ptr<image_transport::Publisher> mp_img_r_pub;
-	boost::shared_ptr<image_transport::Publisher> mp_img_info_pub;
-	boost::shared_ptr<image_transport::Publisher> mp_img_merge_cond_pub;
+	std::shared_ptr<image_transport::ImageTransport> mp_it;
+	std::shared_ptr<image_transport::Publisher> mp_img_l_pub;
+	std::shared_ptr<image_transport::Publisher> mp_img_r_pub;
+	std::shared_ptr<image_transport::Publisher> mp_img_info_pub;
+	std::shared_ptr<image_transport::Publisher> mp_img_merge_cond_pub;
 
 	//publish qualisys path
 	nav_msgs::msg::Path m_integration_path;
-// // 	boost::shared_ptr<ros::Publisher> mp_integration_path_pub;  // original  // original
+// // 	std::shared_ptr<ros::Publisher> mp_integration_path_pub;  // original  // original
+	rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr mp_integration_path_pub;
     // publish reference integration path
     nav_msgs::msg::Path m_ref_integration_path;
-// //     boost::shared_ptr<ros::Publisher> mp_ref_integration_path_pub;  // original  // original
-// //     boost::shared_ptr<ros::Publisher> mp_markers_pub;  // original  // original
+// //     std::shared_ptr<ros::Publisher> mp_ref_integration_path_pub;  // original  // original
+	rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr mp_ref_integration_path_pub;
+// //     std::shared_ptr<ros::Publisher> mp_markers_pub;  // original  // original
+	rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr mp_markers_pub;
 	//publish qulisys pose(if exist),
-// // 	boost::shared_ptr<ros::Publisher> mp_gt_pub;  // original  // original
+// // 	std::shared_ptr<ros::Publisher> mp_gt_pub;  // original  // original
+	rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr mp_gt_pub;
 	//publish qualisys path
 	nav_msgs::msg::Path m_gt_path;
-// // 	boost::shared_ptr<ros::Publisher> mp_gt_path_pub;  // original  // original
+// // 	std::shared_ptr<ros::Publisher> mp_gt_path_pub;  // original  // original
+	rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr mp_gt_path_pub;
 
 	//publish orb pose, odometry and path, in camera frame
-// // 	boost::shared_ptr<ros::Publisher> mp_pose_orb_pub;  // original  // original
-// // 	boost::shared_ptr<ros::Publisher> mp_odom_orb_pub;  // original  // original
+// // 	std::shared_ptr<ros::Publisher> mp_pose_orb_pub;  // original  // original
+	rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr mp_pose_orb_pub;
+// // 	std::shared_ptr<ros::Publisher> mp_odom_orb_pub;  // original  // original
+	rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr mp_odom_orb_pub;
 	nav_msgs::msg::Path m_path_orb;
-// // 	boost::shared_ptr<ros::Publisher> mp_path_orb_pub;  // original  // original
-// // 	boost::shared_ptr<ros::Publisher> mp_pose_orb_camera_pub;  // original  // original
+// // 	std::shared_ptr<ros::Publisher> mp_path_orb_pub;  // original  // original
+	rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr mp_path_orb_pub;
+// // 	std::shared_ptr<ros::Publisher> mp_pose_orb_camera_pub;  // original  // original
+	rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr mp_pose_orb_camera_pub;
 
 	//publish ekf pose and path, in EKF frame
-// // 	boost::shared_ptr<ros::Publisher> mp_pose_ekf_pub;  // original  // original
+// // 	std::shared_ptr<ros::Publisher> mp_pose_ekf_pub;  // original  // original
+	rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr mp_pose_ekf_pub;
 	nav_msgs::msg::Path m_path_ekf;
-// // 	boost::shared_ptr<ros::Publisher> mp_path_ekf_pub;  // original  // original
+// // 	std::shared_ptr<ros::Publisher> mp_path_ekf_pub;  // original  // original
+	rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr mp_path_ekf_pub;
 
 	//publish point cloud
-// // 	boost::shared_ptr<ros::Publisher> mp_pointcloud_pub;  // original  // original
-// // 	boost::shared_ptr<ros::Publisher> mp_octomap_pub;  // original  // original
-// // 	boost::shared_ptr<ros::Publisher> mp_map_info_pub;  // original  // original
+// // 	std::shared_ptr<ros::Publisher> mp_pointcloud_pub;  // original  // original
+	rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr mp_pointcloud_pub;
+// // 	std::shared_ptr<ros::Publisher> mp_octomap_pub;  // original  // original
+	rclcpp::Publisher<octomap_msgs::msg::Octomap>::SharedPtr mp_octomap_pub;
+// // 	std::shared_ptr<ros::Publisher> mp_map_info_pub;  // original  // original
+	rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr mp_map_info_pub;
 
 	std::mutex m_mutex_map;
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr mp_cloud_occupied;
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr mp_cloud_free;
 	float m_octomap_resolution;
-	boost::shared_ptr<octomap::OcTree> mp_octree;
+	std::shared_ptr<octomap::OcTree> mp_octree;
 
-// // 	boost::shared_ptr<ros::Publisher> mp_pose_integration_ref_pub;  // original  // original
-// // 	boost::shared_ptr<ros::Publisher> mp_pose_integration_cur_pub;  // original  // original
+// // 	std::shared_ptr<ros::Publisher> mp_pose_integration_ref_pub;  // original  // original
+	rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr mp_pose_integration_ref_pub;
+// // 	std::shared_ptr<ros::Publisher> mp_pose_integration_cur_pub;  // original  // original
+	rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr mp_pose_integration_cur_pub;
 
-// // 	boost::shared_ptr<ros::ServiceServer> mp_save_srv, m_load_srv, m_calib_srv, m_fullBA_srv;  // original  // original
+// // 	std::shared_ptr<ros::ServiceServer> mp_save_srv, m_load_srv, m_calib_srv, m_fullBA_srv;  // original  // original
+	rclcpp::Service<std_srvs::srv::Empty>::SharedPtr mp_save_srv, mp_load_srv, mp_calib_srv, mp_fullBA_srv;
 
     // gravity dir of current map
     Eigen::Isometry3d mT_w_c0;
@@ -184,10 +214,11 @@ protected:
 	//	todo unfinished
 
 	//publish orb pose, in orb frame
-// // 	boost::shared_ptr<ros::Publisher> mp_pose_pointcloud_pub;  // original  // original
+// // 	std::shared_ptr<ros::Publisher> mp_pose_pointcloud_pub;  // original  // original
 	// call service to send last N good keyframes once lost feature tracking
-// // 	boost::shared_ptr<ros::ServiceClient> mp_lost_srv;  // original  // original
-	tf::TransformBroadcaster m_tb;
+// // 	std::shared_ptr<ros::ServiceClient> mp_lost_srv;  // original  // original
+	// tf2_ros::TransformBroadcaster m_tb;  // original (no default constructor in ROS2)
+	std::shared_ptr<tf2_ros::TransformBroadcaster> m_tb;
 
 };
 }

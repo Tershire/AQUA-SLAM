@@ -1524,7 +1524,8 @@ DvlGyroOptimizer::LocalDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool
             }
             e_bias->setInformation(info_acc_bias);
             // if(info_acc_bias(0,0)==0)
-            ROS_DEBUG_STREAM("KF["<<pKFi->mnId<<"] acc bias info:\n"<<info_acc_bias);
+            // ROS_DEBUG_STREAM("KF["<<pKFi->mnId<<"] acc bias info:\n"<<info_acc_bias);  // original
+            RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "KF["<<pKFi->mnId<<"] acc bias info:\n"<<info_acc_bias);
             optimizer.addEdge(e_bias);
 
             EdgeGyroRW* eg_bias = new EdgeGyroRW();
@@ -1545,7 +1546,8 @@ DvlGyroOptimizer::LocalDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool
             }
             eg_bias->setInformation(info_gyro_bias);
             // if(info_gyro_bias(0,0)==0)
-            ROS_DEBUG_STREAM("KF["<<pKFi->mnId<<"] gyro bias info:\n"<<info_gyro_bias);
+            // ROS_DEBUG_STREAM("KF["<<pKFi->mnId<<"] gyro bias info:\n"<<info_gyro_bias);  // original
+            RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "KF["<<pKFi->mnId<<"] gyro bias info:\n"<<info_gyro_bias);
 
             optimizer.addEdge(eg_bias);
 
@@ -1569,7 +1571,8 @@ DvlGyroOptimizer::LocalDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool
             // if(!pAtlas->IsIMUCalibrated()){
             //     eDVL->setLevel(1);
             // }
-            ROS_DEBUG_STREAM("DVL edge info:\n"<<info_DVL);
+            // ROS_DEBUG_STREAM("DVL edge info:\n"<<info_DVL);  // original
+            RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "DVL edge info:\n"<<info_DVL);
             optimizer.addEdge(eDVL);
 
 
@@ -1607,7 +1610,8 @@ DvlGyroOptimizer::LocalDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool
             // info_DI(1,1) = 1e10; // before 10_24
 //             // ROS_INFO_STREAM("info: "<<info_DI);  // original
             eG->setInformation(info_DI);
-            ROS_DEBUG_STREAM("IMU edge info:\n"<<info_DI);
+            // ROS_DEBUG_STREAM("IMU edge info:\n"<<info_DI);  // original
+            RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "IMU edge info:\n"<<info_DI);
             dvlimu_edges.push_back(eG);
             optimizer.addEdge(eG);
         }
@@ -1654,7 +1658,8 @@ DvlGyroOptimizer::LocalDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool
     for(int i=0;i<4;i++){
         if(pbStopFlag){
             if(*pbStopFlag){
-                ROS_DEBUG_STREAM("stop BA");
+                // ROS_DEBUG_STREAM("stop BA");  // original
+                RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "stop BA");
                 break;
             }
         }
@@ -1734,7 +1739,8 @@ DvlGyroOptimizer::LocalDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool
         IMU::Bias b(v_ab->estimate().x(), v_ab->estimate().y(), v_ab->estimate().z(),
                     v_gb->estimate().x(), v_gb->estimate().y(), v_gb->estimate().z());
         pKFi->SetNewBias(b);
-        ROS_DEBUG_STREAM("KF["<<pKFi->mnId<<"] bias[acc gyros]: "<<v_ab->estimate().transpose()<<" "<<v_gb->estimate().transpose());
+        // ROS_DEBUG_STREAM("KF["<<pKFi->mnId<<"] bias[acc gyros]: "<<v_ab->estimate().transpose()<<" "<<v_gb->estimate().transpose());  // original
+        RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "KF["<<pKFi->mnId<<"] bias[acc gyros]: "<<v_ab->estimate().transpose()<<" "<<v_gb->estimate().transpose());
         // ss<<"KF["<<pKFi->mnId<<"] bias[acc gyros]: "<<v_ab->estimate().transpose()<<" "<<v_gb->estimate().transpose()<<"\n";
 
         //recover dvl_velocity of pKFi
@@ -1751,7 +1757,8 @@ DvlGyroOptimizer::LocalDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool
     }
 
 
-	ROS_DEBUG_STREAM(ss.str());
+	// ROS_DEBUG_STREAM(ss.str());  // original
+	RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), ss.str());
 
     for (int i = 0; i < N_map_points; i++) {
         MapPoint *pMP = LocalMapPoints[i];
@@ -2434,7 +2441,8 @@ void DvlGyroOptimizer::LocalDVLIMUBundleAdjustment2(Atlas* pAtlas, KeyFrame* pKF
 
 
     }
-    ROS_DEBUG_STREAM(ss.str());
+    // ROS_DEBUG_STREAM(ss.str());  // original
+    RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), ss.str());
 
     for (int i = 0; i < N_map_points; i++) {
         MapPoint *pMP = LocalMapPoints[i];
@@ -2876,7 +2884,8 @@ void DvlGyroOptimizer::FullDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, 
             }
             e_bias->setInformation(info_acc_bias);
             // if(info_acc_bias(0,0)==0)
-            ROS_DEBUG_STREAM("KF["<<pKFi->mnId<<"] acc bias info:\n"<<info_acc_bias);
+            // ROS_DEBUG_STREAM("KF["<<pKFi->mnId<<"] acc bias info:\n"<<info_acc_bias);  // original
+            RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "KF["<<pKFi->mnId<<"] acc bias info:\n"<<info_acc_bias);
             optimizer.addEdge(e_bias);
 
             EdgeGyroRW* eg_bias = new EdgeGyroRW();
@@ -2897,7 +2906,8 @@ void DvlGyroOptimizer::FullDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, 
             }
             eg_bias->setInformation(info_gyro_bias);
             // if(info_gyro_bias(0,0)==0)
-            ROS_DEBUG_STREAM("KF["<<pKFi->mnId<<"] gyro bias info:\n"<<info_gyro_bias);
+            // ROS_DEBUG_STREAM("KF["<<pKFi->mnId<<"] gyro bias info:\n"<<info_gyro_bias);  // original
+            RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "KF["<<pKFi->mnId<<"] gyro bias info:\n"<<info_gyro_bias);
 
             optimizer.addEdge(eg_bias);
 
@@ -2918,7 +2928,8 @@ void DvlGyroOptimizer::FullDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, 
             info_DVL.block(3,3,3,3) = Eigen::Matrix3d::Identity() * 1e2;
             info_DVL.block(6,6,3,3) = Eigen::Matrix3d::Identity() * 1e2;
             eDVL->setInformation(info_DVL);
-            ROS_DEBUG_STREAM("DVL edge info:\n"<<info_DVL);
+            // ROS_DEBUG_STREAM("DVL edge info:\n"<<info_DVL);  // original
+            RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "DVL edge info:\n"<<info_DVL);
             optimizer.addEdge(eDVL);
 
 
@@ -2956,7 +2967,8 @@ void DvlGyroOptimizer::FullDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, 
             // info_DI(1,1) = 1e10; // before 10_24
 //             // ROS_INFO_STREAM("info: "<<info_DI);  // original
             eG->setInformation(info_DI);
-            ROS_DEBUG_STREAM("IMU edge info:\n"<<info_DI);
+            // ROS_DEBUG_STREAM("IMU edge info:\n"<<info_DI);  // original
+            RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "IMU edge info:\n"<<info_DI);
             dvlimu_edges.push_back(eG);
             optimizer.addEdge(eG);
         }
@@ -3101,7 +3113,8 @@ void DvlGyroOptimizer::FullDVLIMUBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, 
     }
 
 
-    ROS_DEBUG_STREAM(ss.str());
+    // ROS_DEBUG_STREAM(ss.str());  // original
+    RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), ss.str());
 
     for (auto pMP:LocalMapPoints) {
         if(find(LocalFixedMapPoints.begin(), LocalFixedMapPoints.end(), pMP) !=

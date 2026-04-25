@@ -166,7 +166,8 @@ void LocalMapping::Run()
                                                                       mpTracker->mlamda_DVL,
                                                                       mpTracker->mlamda_visual);
 
-                        ROS_DEBUG_STREAM("LocalBA for KF["<<mpCurrentKeyFrame->mnId<<"] is done");
+                        // ROS_DEBUG_STREAM("LocalBA for KF["<<mpCurrentKeyFrame->mnId<<"] is done");  // original
+                        RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "LocalBA for KF[" << mpCurrentKeyFrame->mnId << "] is done");
 						mpTracker->UpdateFrameDVLGyro(mpCurrentKeyFrame->GetImuBias(),mpCurrentKeyFrame);
 
                     }

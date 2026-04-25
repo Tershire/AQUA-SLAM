@@ -33,7 +33,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "cv_bridge/rgb_colors.h"
+// #include "cv_bridge/rgb_colors.h"  // original
+#include <cv_bridge/rgb_colors.hpp>
 
 
 namespace cv_bridge

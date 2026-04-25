@@ -15,19 +15,17 @@ namespace ORB_SLAM3
 LKTracker::LKTracker()
 {
 // // 	ros::NodeHandle n;  // original  // original
-	image_transport::ImageTransport it(n);
-	image_transport::Publisher track_pub = it.advertise("/lk_tracker/track_img", 10);
-	pTrack_img_pub =
-		boost::shared_ptr<image_transport::Publisher>(boost::make_shared<image_transport::Publisher>(track_pub));
+// // 	image_transport::ImageTransport it(n);  // original
+// // 	image_transport::Publisher track_pub = it.advertise("/lk_tracker/track_img", 10);  // original
+// // 	pTrack_img_pub = std::shared_ptr<image_transport::Publisher>(boost::make_shared<image_transport::Publisher>(track_pub));  // original
 }
 LKTracker::LKTracker(bool bStereo)
 	: stereo_cam(bStereo)
 {
 // // 	ros::NodeHandle n;  // original  // original
-	image_transport::ImageTransport it(n);
-	image_transport::Publisher track_pub = it.advertise("/lk_tracker/track_img", 10);
-	pTrack_img_pub =
-		boost::shared_ptr<image_transport::Publisher>(boost::make_shared<image_transport::Publisher>(track_pub));
+// // 	image_transport::ImageTransport it(n);  // original
+// // 	image_transport::Publisher track_pub = it.advertise("/lk_tracker/track_img", 10);  // original
+// // 	pTrack_img_pub = std::shared_ptr<image_transport::Publisher>(boost::make_shared<image_transport::Publisher>(track_pub));  // original
 }
 void LKTracker::drawTrack(const cv::Mat &imLeft,
                           const cv::Mat &imRight,
@@ -80,10 +78,10 @@ void LKTracker::drawTrack(const cv::Mat &imLeft,
 
 	//cv::Mat imCur2Compress;
 	//cv::resize(imCur2, imCur2Compress, cv::Size(cols, rows / 2));
-	std_msgs::Header header; // empty header
+	std_msgs::msg::Header header; // empty header
 // // 	header.stamp = ros::Time::now();  // original  // original
 	cv_bridge::CvImage img_bridge(header, sensor_msgs::image_encodings::BGR8, imTrack);
-	pTrack_img_pub->publish(img_bridge.toImageMsg());
+	if (pTrack_img_pub) pTrack_img_pub->publish(img_bridge.toImageMsg());
 }
 map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> LKTracker::trackImage(double _cur_time,
                                                                                const cv::Mat &_img,
@@ -178,11 +176,13 @@ map<int, vector<pair<int, Eigen::Matrix<double, 7, 1>>>> LKTracker::trackImage(d
 
 	if (1) {
 		//rejectWithF();
-		ROS_DEBUG("set mask begins");
+// 		ROS_DEBUG("set mask begins");  // original
+		RCLCPP_DEBUG(rclcpp::get_logger("aqua_slam"), "set mask begins");
 		// set a
 		setMask();
 
-		ROS_DEBUG("detect feature begins");
+// 		ROS_DEBUG("detect feature begins");  // original
+		RCLCPP_DEBUG(rclcpp::get_logger("aqua_slam"), "detect feature begins");
 		int n_max_cnt = MAX_CNT - static_cast<int>(cur_pts.size());
 		if (n_max_cnt > 0) {
 			if (mask.empty()) {
@@ -619,9 +619,9 @@ bool LKTracker::trackFrame(Frame &cur_frame, const Frame &prev_frame)
 
 	// draw and publish track result
 //	drawTrackFrame(cur_frame, prev_frame, imTrack);
-//	std_msgs::Header header; // empty header
+//	std_msgs::msg::Header header; // empty header
 // // //	header.stamp = ros::Time::now();  // original  // original
-//	cv_bridge::CvImage img_bridge(header, sensor_msgs::image_encodings::BGR8, imTrack);
+//	cv_bridge::CvImage img_bridge(header, sensor_msgs::msg::Image_encodings::BGR8, imTrack);
 //	pTrack_img_pub->publish(img_bridge.toImageMsg());
 
 	return nmatches > 10;
@@ -875,9 +875,9 @@ bool LKTracker::TrackReferenceKeyFrameKLT(KeyFrame *pKF, const Frame &cur_frame)
 
 	// draw and publish track result
 //	drawTrackFrame(cur_frame, prev_frame, imTrack);
-//	std_msgs::Header header; // empty header
+//	std_msgs::msg::Header header; // empty header
 // // //	header.stamp = ros::Time::now();  // original  // original
-//	cv_bridge::CvImage img_bridge(header, sensor_msgs::image_encodings::BGR8, imTrack);
+//	cv_bridge::CvImage img_bridge(header, sensor_msgs::msg::Image_encodings::BGR8, imTrack);
 //	pTrack_img_pub->publish(img_bridge.toImageMsg());
 
 	return nmatches > 10;

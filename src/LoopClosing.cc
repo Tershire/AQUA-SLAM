@@ -35,16 +35,20 @@
 namespace ORB_SLAM3
 {
 
-LoopClosing::LoopClosing(Atlas *pAtlas, KeyFrameDatabase *pDB, ORBVocabulary *pVoc, RosHandling* pRosHandler, const bool bFixScale, int mergingThreshold):
+// LoopClosing::LoopClosing(Atlas *pAtlas, KeyFrameDatabase *pDB, ORBVocabulary *pVoc, RosHandling* pRosHandler, const bool bFixScale, int mergingThreshold):  // original
+LoopClosing::LoopClosing(Atlas *pAtlas, KeyFrameDatabase *pDB, ORBVocabulary *pVoc, RosHandling* pRosHandler, const bool bFixScale, int mergingThreshold, rclcpp::Node::SharedPtr node):
     mbResetRequested(false), mbResetActiveMapRequested(false), mbFinishRequested(false), mbFinished(true), mpAtlas(pAtlas),
     mpKeyFrameDB(pDB), mpORBVocabulary(pVoc), mpMatchedKF(NULL), mLastLoopKFid(0), mbRunningGBA(false), mbFinishedGBA(true),
     mbStopGBA(false), mpThreadGBA(NULL), mbFixScale(bFixScale), mnFullBAIdx(0), mnLoopNumCoincidences(0), mnMergeNumCoincidences(0),
-    mbLoopDetected(false), mbMergeDetected(false), mnLoopNumNotFound(0), mnMergeNumNotFound(0), mpRosHandler(pRosHandler), mMergingThreshold(mergingThreshold)
+    mbLoopDetected(false), mbMergeDetected(false), mnLoopNumNotFound(0), mnMergeNumNotFound(0), mpRosHandler(pRosHandler), mMergingThreshold(mergingThreshold),
+    mpNode(node)
 {
     mnCovisibilityConsistencyTh = mMergingThreshold;
     mpLastCurrentKF = static_cast<KeyFrame*>(NULL);
 // //     mpNH=boost::make_shared<ros::NodeHandle>();  // original  // original
-    mpIt=boost::make_shared<image_transport::ImageTransport>(*mpNH);
+    // mpIt=boost::make_shared<image_transport::ImageTransport>(*mpNH);  // original
+    // mpIt=boost::make_shared<image_transport::ImageTransport>(mpNode);  // original
+    mpIt=std::make_shared<image_transport::ImageTransport>(mpNode);
     mImgPub_cur_keyframe=mpIt->advertise("/AQUA_SLAM/loop/cur_img",10);
     mImgPub_map_keyframe=mpIt->advertise("AQUA_SLAM/loop/map_img",10);
 	mTargetMapID = -1;
@@ -1592,10 +1596,11 @@ void LoopClosing::MergeLocal()
 
         if(pKFi->GetMap() != pCurrentMap){
 //			Verbose::PrintMess("Other map KF, this should't happen", Verbose::VERBOSITY_DEBUG);
-			if(pKFi->GetMap()==nullptr||pKFi->GetMap()->IsBad())
+			if(pKFi->GetMap()==nullptr||pKFi->GetMap()->IsBad()){
 // 				ROS_ERROR_STREAM("try to merge null map KF, this should't happen");  // original
-			else
+			} else {
 // 				ROS_ERROR_STREAM("try to merge KF in map: "<<pKFi->GetMap()->GetId()<<", this should't happen");  // original
+			}
 			mpLocalMapper->Release();
 			return;
 		}
@@ -1680,7 +1685,8 @@ void LoopClosing::MergeLocal()
 		// 	return;
 		// }
 		//check if there is bad data
-        ROS_DEBUG_STREAM("check KF size: " << vCorrectedSim3.size());
+        // ROS_DEBUG_STREAM("check KF size: " << vCorrectedSim3.size());  // original
+        RCLCPP_DEBUG(mpNode->get_logger(), "check KF size: %zu", vCorrectedSim3.size());
 		for (auto it: vCorrectedSim3) {
 
 			if (!(it.first) || (it.first->isBad())) {
@@ -1693,9 +1699,9 @@ void LoopClosing::MergeLocal()
 				mpLocalMapper->Release();
 				return;
 			}
-            ROS_DEBUG_STREAM("KF check before map merge, KF: " << it.first->mnId << ", " << " in map: "
-			                                                  << it.first->GetMap()->GetId() << ", map is bad? "
-			                                                  << it.first->GetMap()->IsBad());
+            // ROS_DEBUG_STREAM("KF check before map merge, KF: " << it.first->mnId << ...);  // original
+            RCLCPP_DEBUG(mpNode->get_logger(), "KF check before map merge, KF: %ld, in map: %u, map is bad? %d",
+                         it.first->mnId, it.first->GetMap()->GetId(), it.first->GetMap()->IsBad());
 		}
 
 
@@ -1911,10 +1917,10 @@ void LoopClosing::MergeLocal()
                 pMergeMap->AddKeyFrame(pKFi);
                 pCurrentMap->EraseKeyFrame(pKFi);
             }
-            ROS_DEBUG_STREAM("MERGE-VISUAL: There are " + to_string(pMergeMap->MapPointsInMap()) + " MPs in the map");
-            ROS_DEBUG_STREAM("MERGE-VISUAL: It will be inserted " + to_string(vpCurrentMapMPs.size()) + " MPs in the map");
-            //            Verbose::PrintMess("MERGE-VISUAL: There are " + to_string(pMergeMap->MapPointsInMap()) + " MPs in the map", Verbose::VERBOSITY_DEBUG);
-            //            Verbose::PrintMess("MERGE-VISUAL: It will be inserted " + to_string(vpCurrentMapMPs.size()) + " MPs in the map", Verbose::VERBOSITY_DEBUG);
+            // ROS_DEBUG_STREAM("MERGE-VISUAL: There are " + to_string(pMergeMap->MapPointsInMap()) + " MPs in the map");  // original
+            RCLCPP_DEBUG(mpNode->get_logger(), "MERGE-VISUAL: There are %zu MPs in the map", pMergeMap->MapPointsInMap());
+            // ROS_DEBUG_STREAM("MERGE-VISUAL: It will be inserted " + to_string(vpCurrentMapMPs.size()) + " MPs in the map");  // original
+            RCLCPP_DEBUG(mpNode->get_logger(), "MERGE-VISUAL: It will be inserted %zu MPs in the map", vpCurrentMapMPs.size());
 
             for(MapPoint* pMPi : vpCurrentMapMPs)
             {
@@ -1925,7 +1931,8 @@ void LoopClosing::MergeLocal()
                 pMergeMap->AddMapPoint(pMPi);
                 pCurrentMap->EraseMapPoint(pMPi);
             }
-            ROS_DEBUG_STREAM("MERGE-VISUAL: There are " + to_string(pMergeMap->MapPointsInMap()) + " MPs in the map");
+            // ROS_DEBUG_STREAM("MERGE-VISUAL: There are " + to_string(pMergeMap->MapPointsInMap()) + " MPs in the map");  // original
+            RCLCPP_DEBUG(mpNode->get_logger(), "MERGE-VISUAL: There are %zu MPs in the map (after merge)", pMergeMap->MapPointsInMap());
             mpAtlas->SetMapBad(pCurrentMap);
         }
 	}
