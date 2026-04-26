@@ -132,6 +132,22 @@ RosHandling::RosHandling(System *pSys, LocalMapping *pLocal, rclcpp::Node::Share
 	m_tb = std::make_shared<tf2_ros::TransformBroadcaster>(mp_node);
 
     mT_w_c0.setIdentity();
+
+    // publish empty messages so RViz2 clears stale path/pointcloud on node restart
+    {
+        auto stamp = mp_node->now();
+
+        nav_msgs::msg::Path empty_path;
+        empty_path.header.stamp = stamp;
+        empty_path.header.frame_id = "AQUA_SLAM";
+        mp_path_orb_pub->publish(empty_path);
+        mp_integration_path_pub->publish(empty_path);
+
+        sensor_msgs::msg::PointCloud2 empty_cloud;
+        empty_cloud.header.stamp = stamp;
+        empty_cloud.header.frame_id = "AQUA_SLAM";
+        mp_pointcloud_pub->publish(empty_cloud);
+    }
 }
 
 
