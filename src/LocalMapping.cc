@@ -1800,8 +1800,14 @@ std::pair<double,double> LocalMapping::GetTravelDistance()
         Eigen::Isometry3d T_c0_cj = Eigen::Isometry3d::Identity();
         cv::cv2eigen(Tc0cj_cv, T_c0_cj.matrix());
         Eigen::Isometry3d T_ci_cj = T_c0_ci.inverse() * T_c0_cj;
-        Eigen::Matrix3d R_ci_cj = T_ci_cj.rotation();
         Eigen::Vector3d t_ci_cj = T_ci_cj.translation();
+        // Re-orthogonalize via SVD: float→double conversion from cv::Mat
+        // can leave the 3×3 rotation slightly non-orthonormal, which
+        // causes Sophus::SO3 to abort.
+        Eigen::Matrix3d R_ci_cj = T_ci_cj.rotation();
+        Eigen::JacobiSVD<Eigen::Matrix3d> svd(R_ci_cj,
+            Eigen::ComputeFullU | Eigen::ComputeFullV);
+        R_ci_cj = svd.matrixU() * svd.matrixV().transpose();
         Sophus::SO3<double> R_ci_cj_SO3(R_ci_cj);
         Eigen::Vector3d R_ci_cj_so3 = R_ci_cj_SO3.log();
         t_dis += t_ci_cj.norm();

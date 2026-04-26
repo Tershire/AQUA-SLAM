@@ -2018,6 +2018,7 @@ void Tracking::topicPublishDVLOnly()
 	Eigen::Isometry3d T_d0_cj = T_d_c * T_c0_cj;
 
 // // 	mpRosHandler->PublishOrb(T_c0_cj, T_d_c, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
+	mpRosHandler->PublishOrb(T_c0_cj, T_d_c);
 // // 	mpRosHandler->PublishCamera(T_c0_cj_camera, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
 	// EKF pose
 	Eigen::Isometry3d T_e0_ej_ekf = mCurrentFrame.mT_e0_ej;
@@ -2512,6 +2513,7 @@ void Tracking::Track()
 			Eigen::Isometry3d T_d0_cj = T_d_c * T_c0_cj;
 
 // // 			mpRosHandler->PublishOrb(T_c0_cj, T_d_c, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
+				mpRosHandler->PublishOrb(T_c0_cj, T_d_c);
 // // 			mpRosHandler->PublishCamera(T_c0_cj_camera, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
 //			mpRosHandler->UpdateMap(mpAtlas);
 			cv::Mat img_with_info = mpFrameDrawer->DrawFrame(true);
@@ -2882,6 +2884,7 @@ void Tracking::TrackDVLGyro()
 			Eigen::Isometry3d T_d0_cj = T_d_c * T_c0_cj;
 
 // // 			mpRosHandler->PublishOrb(T_c0_cj, T_d_c, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
+				mpRosHandler->PublishOrb(T_c0_cj, T_d_c);
 // // 			mpRosHandler->PublishCamera(T_c0_cj_camera, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
 //			mpRosHandler->UpdateMap(mpAtlas);
 			cv::Mat img_with_info = mpFrameDrawer->DrawFrame(true);
@@ -3323,6 +3326,7 @@ void Tracking::TrackKLT()
 			Eigen::Isometry3d T_d0_cj = T_d_c * T_c0_cj;
 
 // // 			mpRosHandler->PublishOrb(T_c0_cj, T_d_c, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
+				mpRosHandler->PublishOrb(T_c0_cj, T_d_c);
 // // 			mpRosHandler->PublishCamera(T_c0_cj_camera, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
 //			mpRosHandler->UpdateMap(mpAtlas);
 			cv::Mat img_with_info = mpFrameDrawer->DrawFrame(true);
@@ -3516,10 +3520,7 @@ void Tracking::StereoInitialization()
             mpLastKeyFrame->mNextKF = pKFini;
             pKFini->SetNewBias(pKFini->mpDvlPreintegrationKeyFrame->mb);
         }
-        else if(pKFini->mnId != 0){
-//             ROS_ERROR_STREAM("mpLastKeyFrame is NULL");  // original
-            assert(mpLastKeyFrame);
-        }
+        // else: first init or re-init after map reset — no prev KF to link
 
 		mpAtlas->AddKeyFrame(pKFini);
 		mpLastKeyFrame = pKFini;
@@ -5371,10 +5372,7 @@ void Tracking::CreateNewKeyFrame()
         // pKF->SetDvlVelocity(Vd);
         mpLastKeyFrame->mNextKF = pKF;
     }
-    else {
-//         ROS_ERROR_STREAM("mpLastKeyFrame is NULL! when create new KF!");  // original
-        assert(-1);
-    }
+    // else: first KF after map reset — no prev KF to link
     // //Optimize bias of new KF
     // if(mInitialized){
     //     set<KeyFrame*, KFComparator> spKFs;

@@ -219,6 +219,41 @@ void RosHandling::PublishOrb(const Eigen::Isometry3d &T_c0_cj_orb,
 }
 */ // original
 
+void RosHandling::PublishOrb(const Eigen::Isometry3d &T_c0_cj_orb,
+                             const Eigen::Isometry3d &T_d_c)
+{
+    Eigen::Isometry3d T_c_rviz = Eigen::Isometry3d::Identity();
+    Eigen::AngleAxisd r_z(M_PI / 2, Eigen::Vector3d::UnitZ());
+    Eigen::AngleAxisd r_y(-M_PI / 2, Eigen::Vector3d::UnitY());
+    T_c_rviz.rotate(r_z);
+    T_c_rviz.rotate(r_y);
+
+    Eigen::Isometry3d T_w_cj = mT_w_c0 * T_c0_cj_orb;
+
+    geometry_msgs::msg::PoseStamped pose_to_pub;
+    pose_to_pub.header.frame_id = "AQUA_SLAM";
+    pose_to_pub.header.stamp = mp_node->now();
+    pose_to_pub.pose.position.x = T_w_cj.translation().x();
+    pose_to_pub.pose.position.y = T_w_cj.translation().y();
+    pose_to_pub.pose.position.z = T_w_cj.translation().z();
+    Eigen::Quaterniond rotation_q(T_w_cj.rotation());
+    pose_to_pub.pose.orientation.x = rotation_q.x();
+    pose_to_pub.pose.orientation.y = rotation_q.y();
+    pose_to_pub.pose.orientation.z = rotation_q.z();
+    pose_to_pub.pose.orientation.w = rotation_q.w();
+    mp_pose_orb_pub->publish(pose_to_pub);
+
+    m_path_orb.header = pose_to_pub.header;
+    m_path_orb.poses.push_back(pose_to_pub);
+    mp_path_orb_pub->publish(m_path_orb);
+
+    Eigen::Isometry3d T_w_rviz = T_w_cj * T_c_rviz;
+    BroadcastTF(T_w_rviz, "AQUA_SLAM", "/bluerov/base_link");
+    nav_msgs::msg::Odometry odom;
+    odom.header = pose_to_pub.header;
+    odom.pose.pose = pose_to_pub.pose;
+    mp_odom_orb_pub->publish(odom);
+}
 
 void RosHandling::UpdateMap(ORB_SLAM3::Atlas *pAtlas)
 {
