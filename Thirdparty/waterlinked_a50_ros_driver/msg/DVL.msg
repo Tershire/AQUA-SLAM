@@ -1,0 +1,9 @@
+std_msgs/Header header
+float64 time
+geometry_msgs/Vector3 velocity
+float64 fom
+float64 altitude
+waterlinked_a50_ros_driver/DVLBeam[] beams
+bool velocity_valid
+int64 status
+string form

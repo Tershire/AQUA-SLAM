@@ -418,8 +418,15 @@ cv::Mat System::TrackStereoGroDVL(const Mat &imLeft,
 	}
 
 
-	for (size_t i_imu = 0; i_imu < vDVLGyroMeas.size(); i_imu++)
+	for (size_t i_imu = 0; i_imu < vDVLGyroMeas.size(); i_imu++) {
 		mpTracker->GrabDVLGyroData(vDVLGyroMeas[i_imu]);
+		const auto &m = vDVLGyroMeas[i_imu];
+		// feed IMU measurements (those with angular velocity) to standard preintegration
+		if (m.angular_v.x != 0 || m.angular_v.y != 0 || m.angular_v.z != 0)
+			mpTracker->GrabImuData(IMU::ImuPoint(m.acc.x, m.acc.y, m.acc.z,
+			                                     m.angular_v.x, m.angular_v.y, m.angular_v.z,
+			                                     m.t));
+	}
 
 	// std::cout << "start GrabImageStereo" << std::endl;
     cv::Mat Tcw;

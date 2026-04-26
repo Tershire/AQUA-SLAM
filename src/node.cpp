@@ -158,7 +158,7 @@ public:
                         float vz = dvl->twist.twist.linear.z;
                         vDVLMeas.push_back(ORB_SLAM3::IMU::DvlPoint(vx, vy, vz, 0, 0, 0, 0, t));
                         vGyroDVLMeas.push_back(ORB_SLAM3::IMU::GyroDvlPoint(
-                            0, 0, 0, vx, vy, vz, 0, 0, 0, 0, 0, 0, 0, t));
+                            0, 0, 0, 0, 0, 0, vx, vy, vz, 0, 0, 0, 0, t));
                         mpDvlGb->dvlBuf.pop();
                     }
                 }

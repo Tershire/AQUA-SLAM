@@ -48,13 +48,10 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 find_package(Pangolin REQUIRED)
 set(Eigen3_DIR ${PROJECT_SOURCE_DIR}/Thirdparty/eigen3.3.4)
 find_package(Eigen3 3.3 REQUIRED)
-# new -------------------------------------------------------------------------
-set(VTK_DIR "/usr/lib/x86_64-linux-gnu/cmake/vtk-9.1")  # new
-find_package(VTK REQUIRED)  # new
-find_package(PCL REQUIRED COMPONENTS common io visualization)
-# -----------------------------------------------------------------------------
-# find_package(PCL REQUIRED)
-# find_package(VTK REQUIRED)  # new
+# set(VTK_DIR "/usr/lib/x86_64-linux-gnu/cmake/vtk-9.1")  # temporary: disabled (pulls Java via PCL visualization)
+# find_package(VTK REQUIRED)  # temporary: disabled
+find_package(PCL REQUIRED COMPONENTS common io filters)  # temporary: removed visualization (VTK/Java not needed for node)
+# find_package(PCL REQUIRED COMPONENTS common io visualization)  # original
 find_package(fmt REQUIRED)
 find_package(Boost REQUIRED COMPONENTS log_setup log)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBOOST_LOG_DYN_LINK")
@@ -201,7 +198,7 @@ include_directories(
         #${PROJECT_SOURCE_DIR}/Thirdparty/include/eigen3
         ${Pangolin_INCLUDE_DIRS}
         # ${VTK_INCLUDE_DIRS}  # new
-        /usr/include/vtk-9.1
+        # /usr/include/vtk-9.1  # temporary: disabled
         ${PCL_INCLUDE_DIRS}
         /home/da/Matlab/extern/include #matlab head
         # ${catkin_INCLUDE_DIRS}  # original
@@ -371,7 +368,7 @@ target_link_libraries(${PROJECT_NAME}_optimization
         ${EIGEN3_LIBS}
         ${Boost_LIBRARIES}
         ${PCL_LIBRARIES}
-        ${VTK_LIBRARIES}  # new
+        # ${VTK_LIBRARIES}  # temporary: disabled
         fmt::fmt-header-only
         ${Sophus_LIBRARIES}
         DBoW2
@@ -380,11 +377,12 @@ target_link_libraries(${PROJECT_NAME}_optimization
         # ${catkin_LIBRARIES}  # original
         )
 target_link_libraries(${PROJECT_NAME}
+        ${PROJECT_NAME}_optimization
         ${OpenCV_LIBS}
         ${EIGEN3_LIBS}
         ${Boost_LIBRARIES}
         ${PCL_LIBRARIES}
-        ${VTK_LIBRARIES}  # new
+        # ${VTK_LIBRARIES}  # temporary: disabled
         fmt::fmt-header-only
         DBoW2
         octomap
@@ -551,5 +549,33 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 # catkin_add_nosetests(test)
 
 # ROS 2 -----------------------------------------------------------------------
+install(TARGETS ${PROJECT_NAME}_node
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_optimization
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+install(FILES
+  ${PROJECT_SOURCE_DIR}/lib/liboctomap.so
+  ${PROJECT_SOURCE_DIR}/lib/liboctomath.so
+  ${PROJECT_SOURCE_DIR}/Thirdparty/DBoW2/lib/libDBoW2.so
+  ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
+  DESTINATION lib
+)
+
+install(DIRECTORY launch data urdf Vocabulary
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(PROGRAMS
+  scripts/dvl_converter.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME dvl_converter
+)
+
 ament_package()
 # -----------------------------------------------------------------------------

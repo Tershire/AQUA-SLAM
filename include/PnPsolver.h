@@ -120,7 +120,7 @@ private:
     int maximum_number_of_correspondences;
     int number_of_correspondences;
 
-    double cws[4][3];
+    double cws[4][3], ccs[4][3];
 
     // ===== Core Functions =====
     bool Refine();
@@ -166,11 +166,18 @@ private:
                       double t_dst[3]);
 
     void set_maximum_number_of_correspondences(int n);
-
     void reset_correspondences();
+    void add_correspondence(double X, double Y, double Z, double u, double v);
 
-    void add_correspondence(double X, double Y, double Z,
-                            double u, double v);
+    void compute_ccs(const double *betas, const double *ut);
+    void compute_pcs();
+    void solve_for_sign();
+    void estimate_R_and_t(double R[3][3], double t[3]);
+
+    double reprojection_error(const double R[3][3], const double t[3]);
+    double dist2(const double *p1, const double *p2);
+    double dot(const double *v1, const double *v2);
+    void   print_pose(const double R[3][3], const double t[3]);
 };
 
 }
