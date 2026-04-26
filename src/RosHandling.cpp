@@ -145,6 +145,8 @@ void RosHandling::PublishRightImg(const sensor_msgs::msg::Image::SharedPtr &img)
 }
 void RosHandling::PublishImgWithInfo(const sensor_msgs::msg::Image::SharedPtr &img)
 {
+	img->header.stamp = mp_node->now();
+	img->header.frame_id = "AQUA_SLAM";
 	mp_img_info_pub->publish(img);
 }
 
@@ -248,7 +250,7 @@ void RosHandling::PublishOrb(const Eigen::Isometry3d &T_c0_cj_orb,
     mp_path_orb_pub->publish(m_path_orb);
 
     Eigen::Isometry3d T_w_rviz = T_w_cj * T_c_rviz;
-    BroadcastTF(T_w_rviz, "AQUA_SLAM", "/bluerov/base_link");
+    BroadcastTF(T_w_rviz, "AQUA_SLAM", "bluerov/base_link");
     nav_msgs::msg::Odometry odom;
     odom.header = pose_to_pub.header;
     odom.pose.pose = pose_to_pub.pose;
