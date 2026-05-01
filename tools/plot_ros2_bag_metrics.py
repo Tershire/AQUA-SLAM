@@ -259,54 +259,54 @@ def read_bag(args: argparse.Namespace) -> tuple[dict[str, Any], list[tuple[float
     bag_paths = resolve_bag_path(args.bag)
 
     try:
-        reader = AnyReader(bag_paths)
-        reader.open()
+        with AnyReader(bag_paths) as reader:
+            print_topics(reader)
+            selected = choose_connections(reader, wanted_topics)
+            active_connections = [conn for conns in selected.values() for conn in conns]
+            loop_connections = [
+                conn for conn in reader.connections
+                if any(hint in conn.topic.lower() for hint in LOOP_TOPIC_HINTS)
+            ]
+            active_connections.extend(loop_connections)
+            if not active_connections:
+                raise SystemExit('No selected topics were found in this bag.')
+
+            # nav_msgs/Path accumulates all poses in each message; keep only the last one.
+            latest_path_msgs: dict[str, tuple[Any, float]] = {}
+
+            for conn, timestamp, rawdata in reader.messages(connections=active_connections):
+                msg = reader.deserialize(rawdata, conn.msgtype)
+                t = msg_time(msg, timestamp)
+
+                if conn.topic == args.imu_topic:
+                    imu_acc.append(t, msg.linear_acceleration)
+                    imu_gyro.append(t, msg.angular_velocity)
+                elif conn.topic == args.dvl_topic:
+                    if hasattr(msg, 'twist') and hasattr(msg.twist, 'twist'):
+                        dvl_vel.append(t, msg.twist.twist.linear)
+                    elif hasattr(msg, 'velocity'):
+                        dvl_vel.append(t, msg.velocity)
+                elif conn.topic in poses:
+                    if 'Path' in conn.msgtype:
+                        latest_path_msgs[conn.topic] = (msg, t)
+                    else:
+                        result = extract_pose(msg)
+                        if result is not None:
+                            poses[conn.topic].append(t, result[0], result[1], result[2])
+                elif any(hint in conn.topic.lower() for hint in LOOP_TOPIC_HINTS):
+                    loop_events.append((t, conn.topic))
+
+            for topic, (msg, t) in latest_path_msgs.items():
+                append_path(poses[topic], msg, t)
+
+    except SystemExit:
+        raise
     except Exception as exc:
         raise SystemExit(
-            f'Failed to open bag: {exc}\n'
+            f'Failed to read bag: {exc}\n'
             'The recording may have been interrupted before the MCAP file was finalized.\n'
             'Use a bag that was stopped cleanly with Ctrl+C.'
         ) from exc
-
-    with reader:
-        print_topics(reader)
-        selected = choose_connections(reader, wanted_topics)
-        active_connections = [conn for conns in selected.values() for conn in conns]
-        loop_connections = [
-            conn for conn in reader.connections
-            if any(hint in conn.topic.lower() for hint in LOOP_TOPIC_HINTS)
-        ]
-        active_connections.extend(loop_connections)
-        if not active_connections:
-            raise SystemExit('No selected topics were found in this bag.')
-
-        # nav_msgs/Path accumulates all poses in each message; keep only the last one.
-        latest_path_msgs: dict[str, tuple[Any, float]] = {}
-
-        for conn, timestamp, rawdata in reader.messages(connections=active_connections):
-            msg = reader.deserialize(rawdata, conn.msgtype)
-            t = msg_time(msg, timestamp)
-
-            if conn.topic == args.imu_topic:
-                imu_acc.append(t, msg.linear_acceleration)
-                imu_gyro.append(t, msg.angular_velocity)
-            elif conn.topic == args.dvl_topic:
-                if hasattr(msg, 'twist') and hasattr(msg.twist, 'twist'):
-                    dvl_vel.append(t, msg.twist.twist.linear)
-                elif hasattr(msg, 'velocity'):
-                    dvl_vel.append(t, msg.velocity)
-            elif conn.topic in poses:
-                if 'Path' in conn.msgtype:
-                    latest_path_msgs[conn.topic] = (msg, t)
-                else:
-                    result = extract_pose(msg)
-                    if result is not None:
-                        poses[conn.topic].append(t, result[0], result[1], result[2])
-            elif any(hint in conn.topic.lower() for hint in LOOP_TOPIC_HINTS):
-                loop_events.append((t, conn.topic))
-
-        for topic, (msg, t) in latest_path_msgs.items():
-            append_path(poses[topic], msg, t)
 
     series: dict[str, Any] = {
         'imu_acc': imu_acc,
