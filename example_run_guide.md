@@ -154,13 +154,7 @@ After running Step 4a and Step 5, plot the result bag from the **host** (outside
 
 ```bash
 cd src/AQUA-SLAM
-python3 tools/plot_ros2_bag_metrics.py
+python3 tools/plot_ros2_bag_metrics.py results/slam_YYYYMMDD_HHMMSS/
 ```
 
-Automatically uses the latest bag under `results/`. Plots and CSVs are saved to `results/slam_YYYYMMDD_HHMMSS_plots/`.
-
-To specify a bag explicitly:
-
-```bash
-python3 tools/plot_ros2_bag_metrics.py results/slam_20250501_120000/
-```
+Plots and CSVs are saved to `results/slam_YYYYMMDD_HHMMSS_plots/`.

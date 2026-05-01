@@ -11,20 +11,6 @@ from pathlib import Path
 from typing import Any
 
 
-def _latest_result_bag() -> Path:
-    results_dir = Path(__file__).resolve().parents[1] / 'results'
-    if results_dir.exists():
-        candidates = sorted(
-            (p for p in results_dir.iterdir()
-             if p.is_dir() and (p / 'metadata.yaml').exists()),
-            reverse=True,
-        )
-        if candidates:
-            return candidates[0]
-    return results_dir  # will fail gracefully with a clear error message
-
-
-DEFAULT_BAG = _latest_result_bag()
 DEFAULT_POSE_TOPICS = (
     '/aqua_slam/orb_odom',          # SLAM pose + velocity
     '/aqua_slam/orb_path',          # SLAM trajectory
@@ -89,10 +75,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         'bag',
-        nargs='?',
         type=Path,
-        default=DEFAULT_BAG,
-        help=f'ROS2 bag directory or metadata.yaml. Default: {DEFAULT_BAG}',
+        help='ROS2 bag directory (e.g. results/slam_20260501_120000).',
     )
     parser.add_argument('--output-dir', type=Path, help='Directory for PNG/CSV outputs.')
     parser.add_argument('--imu-topic', default='/imu/data')
@@ -133,11 +117,24 @@ def require_bag_dep() -> Any:
     return AnyReader
 
 
-def resolve_bag_path(path: Path) -> Path:
+def resolve_bag_path(path: Path) -> list[Path]:
+    """Return a list of paths to pass to AnyReader.
+
+    Accepts a bag directory (with or without metadata.yaml) or a direct
+    .mcap / .bag file.  When metadata.yaml is absent, falls back to
+    passing the individual MCAP files so the bag can still be read.
+    """
     path = path.expanduser().resolve()
     if path.name == 'metadata.yaml':
-        return path.parent
-    return path
+        path = path.parent
+    if path.is_dir():
+        if (path / 'metadata.yaml').exists():
+            return [path]
+        mcap_files = sorted(path.glob('*.mcap'))
+        if mcap_files:
+            return mcap_files
+        raise SystemExit(f'No metadata.yaml or .mcap files found in: {path}')
+    return [path]
 
 
 def output_dir_for(bag: Path, requested: Path | None) -> Path:
@@ -256,11 +253,22 @@ def read_bag(args: argparse.Namespace) -> tuple[dict[str, Any], list[tuple[float
     poses = {topic: PoseSeries() for topic in pose_topics}
     loop_events: list[tuple[float, str]] = []
 
-    bag = resolve_bag_path(args.bag)
-    if not bag.exists():
-        raise SystemExit(f'Bag path does not exist: {bag}')
+    bag_dir = args.bag.expanduser().resolve()
+    if not bag_dir.exists():
+        raise SystemExit(f'Bag path does not exist: {bag_dir}')
+    bag_paths = resolve_bag_path(args.bag)
 
-    with AnyReader([bag]) as reader:
+    try:
+        reader = AnyReader(bag_paths)
+        reader.open()
+    except Exception as exc:
+        raise SystemExit(
+            f'Failed to open bag: {exc}\n'
+            'The recording may have been interrupted before the MCAP file was finalized.\n'
+            'Use a bag that was stopped cleanly with Ctrl+C.'
+        ) from exc
+
+    with reader:
         print_topics(reader)
         selected = choose_connections(reader, wanted_topics)
         active_connections = [conn for conns in selected.values() for conn in conns]
@@ -418,7 +426,7 @@ def write_pose_csv(out: Path, topic: str, data: PoseSeries) -> None:
 def main() -> None:
     args = parse_args()
     plt = require_plot_deps()
-    bag = resolve_bag_path(args.bag)
+    bag = args.bag.expanduser().resolve()
     out = output_dir_for(bag, args.output_dir)
 
     series, loop_events, warnings = read_bag(args)
