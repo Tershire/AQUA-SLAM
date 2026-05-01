@@ -639,6 +639,7 @@ void RosHandling::PublishIntegration(Atlas *pAtlas)
 
                 geometry_msgs::msg::PoseStamped pose_to_pub;
                 pose_to_pub.header.frame_id = "aqua_slam";
+                pose_to_pub.header.stamp = rclcpp::Time(static_cast<int64_t>(pKF->mTimeStamp * 1e9));
 // //                 //pose_to_pub.header.stamp=ros::Time::now();  // original  // original
 // //                 pose_to_pub.header.stamp = ros::Time(pKF->mTimeStamp);  // original  // original
                 pose_to_pub.pose.position.x = T_w_c1.translation().x();
@@ -707,6 +708,7 @@ void RosHandling::PublishIntegration(Atlas *pAtlas)
 
             geometry_msgs::msg::PoseStamped pose_to_pub;
             pose_to_pub.header.frame_id = "aqua_slam";
+            pose_to_pub.header.stamp = rclcpp::Time(static_cast<int64_t>(pKF->mTimeStamp * 1e9));
 // //             //pose_to_pub.header.stamp=ros::Time::now();  // original  // original
 // //             pose_to_pub.header.stamp = ros::Time(pKF->mTimeStamp);  // original  // original
             pose_to_pub.pose.position.x = T_w_cj_integration.translation().x();
@@ -788,6 +790,7 @@ void RosHandling::PublishIntegration(Atlas *pAtlas)
 		Eigen::Isometry3d T_w_cj = mT_w_c0 * T_c0_cj;
 		geometry_msgs::msg::PoseStamped pose_to_pub;
 		pose_to_pub.header.frame_id = "aqua_slam";
+		pose_to_pub.header.stamp = rclcpp::Time(static_cast<int64_t>(pKF->mTimeStamp * 1e9));
 // // 		pose_to_pub.header.stamp = ros::Time(pKF->mTimeStamp);  // original  // original
 		pose_to_pub.pose.position.x = T_w_cj.translation().x();
 		pose_to_pub.pose.position.y = T_w_cj.translation().y();

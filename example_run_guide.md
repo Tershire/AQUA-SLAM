@@ -66,7 +66,7 @@ ros2 launch aqua_slam blue_gx5_StructureEasy.launch.py
 
 This starts:
 - `aqua_slam_node` — main SLAM node (stereo + IMU + DVL)
-- `dvl_converter` — converts `/dvl/data` (WaterLinked A50) → `/bluerov2/DVL` (nav_msgs/Odometry)
+- `dvl_converter` — converts `/dvl/data` (WaterLinked A50) → `/bluerov2/dvl` (nav_msgs/Odometry)
 - `robot_state_publisher` — publishes robot URDF
 - `static_transform_publisher` — `odom` → `orb_slam` static TF
 - `rviz2` — visualizer with pre-configured layout
@@ -76,6 +76,28 @@ To disable RViz2:
 ```bash
 ros2 launch aqua_slam blue_gx5_StructureEasy.launch.py use_rviz:=false
 ```
+
+### 4a. Launch SLAM + Record Results (for analysis)
+
+To automatically record SLAM output to a result bag under `results/`:
+
+```bash
+source /opt/ros/jazzy/setup.bash
+source /root/ros2_ws/install/setup.bash
+ros2 launch aqua_slam blue_gx5_StructureEasy_record.launch.py
+```
+
+This runs everything in Step 4, plus records the following topics to `results/slam_YYYYMMDD_HHMMSS/`:
+
+| Topic | Description |
+|---|---|
+| `/aqua_slam/orb_odom` | SLAM pose + velocity |
+| `/aqua_slam/orb_path` | SLAM trajectory |
+| `/aqua_slam/dvl_imu_pose` | DVL+IMU dead-reckoning pose |
+| `/aqua_slam/dvl_imu_path` | DVL+IMU dead-reckoning trajectory |
+| `/aqua_slam/dvl_imu_pose_ref` | DVL+IMU reference pose |
+| `/aqua_slam/dvl_imu_path_ref` | DVL+IMU reference trajectory |
+| `/apriltag_slam/GT` | Ground truth (from input bag) |
 
 ---
 
@@ -123,3 +145,22 @@ SLAM initialization requires:
 | `/aqua_slam/image/features` | `sensor_msgs/Image` | Left image with feature overlay |
 
 TF tree: `aqua_slam` → `/bluerov/base_link` (broadcast by `aqua_slam_node`)
+
+---
+
+## 7. Plot Results
+
+After running Step 4a and Step 5, plot the result bag from the **host** (outside the container):
+
+```bash
+cd src/AQUA-SLAM
+python3 tools/plot_ros2_bag_metrics.py
+```
+
+Automatically uses the latest bag under `results/`. Plots and CSVs are saved to `results/slam_YYYYMMDD_HHMMSS_plots/`.
+
+To specify a bag explicitly:
+
+```bash
+python3 tools/plot_ros2_bag_metrics.py results/slam_20250501_120000/
+```
