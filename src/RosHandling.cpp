@@ -238,7 +238,8 @@ void RosHandling::PublishOrb(const Eigen::Isometry3d &T_c0_cj_orb,
 */ // original
 
 void RosHandling::PublishOrb(const Eigen::Isometry3d &T_c0_cj_orb,
-                             const Eigen::Isometry3d &T_d_c)
+                             const Eigen::Isometry3d &T_d_c,
+                             const cv::Mat &Vwb)
 {
     Eigen::Isometry3d T_c_rviz = Eigen::Isometry3d::Identity();
     Eigen::AngleAxisd r_z(M_PI / 2, Eigen::Vector3d::UnitZ());
@@ -270,6 +271,14 @@ void RosHandling::PublishOrb(const Eigen::Isometry3d &T_c0_cj_orb,
     nav_msgs::msg::Odometry odom;
     odom.header = pose_to_pub.header;
     odom.pose.pose = pose_to_pub.pose;
+    if (!Vwb.empty() && Vwb.rows == 3) {
+        // Vwb: velocity of body expressed in world frame (from IMU propagation / g2o BA)
+        cv::Mat Vwb_f;
+        Vwb.convertTo(Vwb_f, CV_32F);
+        odom.twist.twist.linear.x = Vwb_f.at<float>(0);
+        odom.twist.twist.linear.y = Vwb_f.at<float>(1);
+        odom.twist.twist.linear.z = Vwb_f.at<float>(2);
+    }
     mp_odom_orb_pub->publish(odom);
 }
 

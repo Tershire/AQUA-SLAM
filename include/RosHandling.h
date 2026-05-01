@@ -103,7 +103,8 @@ public:
 	void PublishIntegration(Atlas *pAtlas);
     void PublishLossKF(set<KeyFrame*,KFComparator> &loss_kfs);
 // // 	// void PublishGT(const Eigen::Isometry3d &T_g0_gj_gt, const ros::Time &stamp);  // original  // original
-	void PublishOrb(const Eigen::Isometry3d &T_c0_cj_orb, const Eigen::Isometry3d &T_d_c);
+	void PublishOrb(const Eigen::Isometry3d &T_c0_cj_orb, const Eigen::Isometry3d &T_d_c,
+	                const cv::Mat &Vwb = cv::Mat());
 // // 	void PublishCamera(const Eigen::Isometry3d &T_c0_cj_orb, const ros::Time &stamp);  // original  // original
 // // 	// void PublishEkf(const Eigen::Isometry3d &T_e0_ej_ekf, const ros::Time &stamp);  // original  // original
 // // 	// void PublishDensePointCloudPose(const Eigen::Isometry3d &T_c0_cmj, const ros::Time &stamp);  // original  // original
