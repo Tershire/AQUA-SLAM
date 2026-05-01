@@ -25,8 +25,11 @@ This installs all dependencies and pre-builds `waterlinked_a50_ros_driver` insid
 ## 2. Start Container
 
 ```bash
+xhost +local:root
 docker compose up -d
 ```
+
+`xhost +local:root` allows the container (running as root) to open GUI windows on the host X server. This resets on reboot, so run it every time before starting the container.
 
 The AQUA-SLAM source is mounted at `/root/ros2_ws/src/AQUA-SLAM` inside the container.
 
