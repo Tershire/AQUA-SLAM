@@ -99,6 +99,8 @@ This runs everything in Step 4, plus records the following topics to `results/sl
 | `/aqua_slam/dvl_imu_path_ref` | DVL+IMU reference trajectory |
 | `/apriltag_slam/GT` | Ground truth (from input bag) |
 
+> **Note:** To ensure the result bag is properly finalized (metadata written), **close the RViz2 window** before pressing Ctrl+C to stop the launch. If the launch is killed while RViz2 is still open, `ros2 bag record` may not finish writing and the bag will be corrupt.
+
 ---
 
 ## 5. Play Dataset
