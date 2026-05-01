@@ -12,9 +12,9 @@ Comparison of original ROS1 (`main` branch) and current ROS2 (`ros2_jazzy` branc
 | `right/image_raw` | `right/image_raw` | `sensor_msgs/Image` | frame rate | Right camera raw image |
 | `img_with_info` | `image/features` | `sensor_msgs/Image` | frame rate | Left image with feature overlay |
 | `img_merge_cand` | `image/map_merge` | `sensor_msgs/Image` | on event | Map merge candidate image |
-| `orb_pose` | `orb_pose` | `geometry_msgs/PoseStamped` | frame rate | SLAM pose, camera frame, every tracked frame |
-| `orb_odom` | `orb_odom` | `nav_msgs/Odometry` | frame rate | SLAM odometry; ROS2 adds `twist.twist.linear` = world-frame body velocity from IMU propagation |
-| `orb_path` | `orb_path` | `nav_msgs/Path` | ~4 Hz | SLAM camera trajectory, rebuilt from BA-optimized keyframes |
+| `orb_pose` | `orb_pose` | `geometry_msgs/PoseStamped` | frame rate | Per-frame tracking pose, camera frame — **visual-only** (`PoseOptimization`); per-frame tightly coupled tracking is `todo_tightly` |
+| `orb_odom` | `orb_odom` | `nav_msgs/Odometry` | frame rate | Same pose as `orb_pose`; ROS2 adds `twist.twist.linear` = world-frame body velocity (`mVw`) from DVL+IMU propagation |
+| `orb_path` | `orb_path` | `nav_msgs/Path` | ~4 Hz | Keyframe trajectory rebuilt after `LocalDVLIMUBundleAdjustment` — **tightly coupled** DVL+IMU+visual BA result |
 | `camera_pose` | `camera_pose` | ~~`nav_msgs/Odometry`~~ → `geometry_msgs/PoseStamped` | — | **Not published** — publisher registered but function body is `#if 0`; type changed in ROS2 migration |
 | `sparse_map` | `sparse_map` | `sensor_msgs/PointCloud2` | ~4 Hz | Visual map points |
 | `octomap` | `octomap` | `octomap_msgs/Octomap` | ~4 Hz | 3D occupancy map |
@@ -56,6 +56,19 @@ Comparison of original ROS1 (`main` branch) and current ROS2 (`ros2_jazzy` branc
 3. **`orb_odom` twist**: ROS1 has no twist field populated. ROS2 adds `twist.twist.linear` = world-frame body velocity (`mVw`) from IMU preintegration propagation.
 4. **`camera_pose`**: ROS1 type was `nav_msgs/Odometry`; ROS2 changed to `geometry_msgs/PoseStamped`, but function body is disabled — topic is not published in either version.
 5. **TF frame ID**: `AQUA_SLAM` → `aqua_slam`
+
+---
+
+## Tight Coupling: Tracking vs. LocalMapping
+
+AQUA-SLAM uses `DVL_STEREO` sensor mode. The "tightly coupled" claim applies at two different levels:
+
+| Stage | Optimization | Sensors used | Topics |
+|---|---|---|---|
+| Per-frame tracking | `PoseOptimization` (visual only) | Camera | `orb_pose`, `orb_odom` (pose) |
+| LocalMapping BA | `LocalDVLIMUBundleAdjustment` | Camera + DVL + IMU | `orb_path` (keyframes) |
+
+The per-frame DVL+gyro tightly coupled tracker (`TrackLocalMapWithDvlGyro`) is marked `//todo_tightly` and is not active. For the current pose published in `orb_pose`/`orb_odom`, the **pose** is visual-only; only the **velocity** in `orb_odom.twist` comes from DVL+IMU propagation.
 
 ---
 
