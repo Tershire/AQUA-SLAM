@@ -91,7 +91,7 @@ void DeleteGraphRviz()
 {
     visualization_msgs::MarkerArray marker_delete;
     visualization_msgs::Marker marker_d;
-    marker_d.header.frame_id = "AQUA_SLAM";
+    marker_d.header.frame_id = "aqua_slam";
 // //     marker_d.header.stamp = ros::Time();  // original  // original
     marker_d.action = visualization_msgs::Marker::DELETEALL;
     marker_delete.markers.push_back(marker_d);
@@ -115,7 +115,7 @@ void PublishGraph()
     // add vertices
     for (auto v: vertex_pose) {
         visualization_msgs::Marker marker;
-        marker.header.frame_id = "AQUA_SLAM";
+        marker.header.frame_id = "aqua_slam";
 // //         marker.header.stamp = ros::Time();  // original  // original
         marker.ns = "vertex";
         marker.id = v->id();
@@ -134,7 +134,7 @@ void PublishGraph()
     }
     for (auto v: vertex_point) {
         visualization_msgs::Marker marker;
-        marker.header.frame_id = "AQUA_SLAM";
+        marker.header.frame_id = "aqua_slam";
 // //         marker.header.stamp = ros::Time();  // original  // original
         marker.ns = "vertex";
         marker.id = v->id();
@@ -157,7 +157,7 @@ void PublishGraph()
     // add edge
     for (auto e: edge_mono) {
         visualization_msgs::Marker marker;
-        marker.header.frame_id = "AQUA_SLAM";
+        marker.header.frame_id = "aqua_slam";
 // //         marker.header.stamp = ros::Time();  // original  // original
         marker.ns = "edge";
         marker.id = e->id();
@@ -184,7 +184,7 @@ void PublishGraph()
     }
     for (auto e: edge_stereo) {
         visualization_msgs::Marker marker;
-        marker.header.frame_id = "AQUA_SLAM";
+        marker.header.frame_id = "aqua_slam";
 // //         marker.header.stamp = ros::Time();  // original  // original
         marker.ns = "edge";
         marker.id = e->id();

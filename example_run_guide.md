@@ -98,11 +98,11 @@ ros2 bag play /root/ros2_ws/src/AQUA-SLAM/dataset/short_test_ros2/
 
 | Display | Topic | Notes |
 |---|---|---|
-| PointCloud2 (sparse map) | `/AQUA_SLAM/sparse_map` | Appears after SLAM initialization (~3 s into bag) |
-| Path (camera trajectory) | `/AQUA_SLAM/orb_path` | Drawn as SLAM tracks keyframes |
-| Pose (DVL integration) | `/AQUA_SLAM/integration_cur` | Current DVL-integrated pose |
-| Path (DVL integration) | `/AQUA_SLAM/integration_path` | Full DVL-integrated trajectory |
-| Image | `/AQUA_SLAM/img_with_info` | Left camera with feature overlay |
+| PointCloud2 (sparse map) | `/aqua_slam/sparse_map` | Appears after SLAM initialization (~3 s into bag) |
+| Path (camera trajectory) | `/aqua_slam/orb_path` | Drawn as SLAM tracks keyframes |
+| Pose (DVL+IMU dead-reckoning) | `/aqua_slam/dvl_imu_pose` | Current DVL+IMU integrated pose |
+| Path (DVL+IMU dead-reckoning) | `/aqua_slam/dvl_imu_path` | Full DVL+IMU integrated trajectory |
+| Image | `/aqua_slam/image/features` | Left camera with feature overlay |
 
 SLAM initialization requires:
 - Feature count > 500 in the current frame
@@ -114,12 +114,12 @@ SLAM initialization requires:
 
 | Topic | Type | Description |
 |---|---|---|
-| `/AQUA_SLAM/sparse_map` | `sensor_msgs/PointCloud2` | Visual map points |
-| `/AQUA_SLAM/orb_path` | `nav_msgs/Path` | ORB-SLAM camera path |
-| `/AQUA_SLAM/orb_pose` | `geometry_msgs/PoseStamped` | Current ORB-SLAM pose |
-| `/AQUA_SLAM/orb_odom` | `nav_msgs/Odometry` | Current ORB-SLAM odometry |
-| `/AQUA_SLAM/integration_cur` | `geometry_msgs/PoseStamped` | Current DVL-integrated pose |
-| `/AQUA_SLAM/integration_path` | `nav_msgs/Path` | DVL-integrated trajectory |
-| `/AQUA_SLAM/img_with_info` | `sensor_msgs/Image` | Left image with feature overlay |
+| `/aqua_slam/sparse_map` | `sensor_msgs/PointCloud2` | Visual map points |
+| `/aqua_slam/orb_path` | `nav_msgs/Path` | ORB-SLAM camera path |
+| `/aqua_slam/orb_pose` | `geometry_msgs/PoseStamped` | Current ORB-SLAM pose |
+| `/aqua_slam/orb_odom` | `nav_msgs/Odometry` | Current ORB-SLAM odometry |
+| `/aqua_slam/dvl_imu_pose` | `geometry_msgs/PoseStamped` | Current DVL+IMU dead-reckoning pose |
+| `/aqua_slam/dvl_imu_path` | `nav_msgs/Path` | DVL+IMU dead-reckoning trajectory |
+| `/aqua_slam/image/features` | `sensor_msgs/Image` | Left image with feature overlay |
 
-TF tree: `AQUA_SLAM` → `/bluerov/base_link` (broadcast by `aqua_slam_node`)
+TF tree: `aqua_slam` → `/bluerov/base_link` (broadcast by `aqua_slam_node`)

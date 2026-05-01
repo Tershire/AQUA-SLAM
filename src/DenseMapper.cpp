@@ -31,14 +31,14 @@ namespace ORB_SLAM3
         mNode = node;
 // //         ros::NodeHandle nh_;  // original
         image_transport::ImageTransport it(mNode);
-        image_transport::Publisher depth_pub = it.advertise("/AQUA_SLAM/dense_mapper/depth", 10);
+        image_transport::Publisher depth_pub = it.advertise("/aqua_slam/dense_mapper/depth", 10);
         mDepthPub = std::make_shared<image_transport::Publisher>(depth_pub);
         image_transport::Publisher depth_conf_pub = it.advertise(
-                "/AQUA_SLAM/dense_mapper/depth_cpnfidence", 10);
+                "/aqua_slam/dense_mapper/depth_confidence", 10);
         mDepthConfPub = std::make_shared<image_transport::Publisher>(depth_conf_pub);
-// //         ros::Publisher pointcloud_pub = nh_.advertise<sensor_msgs::msg::PointCloud2>("/AQUA_SLAM/dense_map", 10);  // original  // original
+// //         ros::Publisher pointcloud_pub = nh_.advertise<sensor_msgs::msg::PointCloud2>("/aqua_slam/dense_map", 10);  // original  // original
 // //         mMapPub = std::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pointcloud_pub));  // original  // original
-        mMapPub = mNode->create_publisher<sensor_msgs::msg::PointCloud2>("/AQUA_SLAM/dense_map", 10);
+        mMapPub = mNode->create_publisher<sensor_msgs::msg::PointCloud2>("/aqua_slam/dense_map", 10);
 
         FileStorage fs(settingFile, FileStorage::READ);
         FileNode fsNode = fs["DenseMapper"];
@@ -448,7 +448,7 @@ namespace ORB_SLAM3
         sor.setLeafSize(0.05f, 0.05f, 0.05f);
         //	sor.filter(filtered_cloud);
         pcl::toROSMsg(mGlobalMap, dense_map);
-        dense_map.header.frame_id = "AQUA_SLAM";
+        dense_map.header.frame_id = "aqua_slam";
         mMapPub->publish(dense_map);
         //	mMapPub->publish(mGlobalMap);
     }

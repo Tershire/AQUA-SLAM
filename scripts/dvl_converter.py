@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Converts /dvl/data (waterlinked_a50_ros_driver/msg/DVL) to /bluerov2/DVL (nav_msgs/Odometry)."""
+"""Converts /dvl/data (waterlinked_a50_ros_driver/msg/DVL) to /bluerov2/dvl (nav_msgs/Odometry)."""
 
 import rclpy
 from rclpy.node import Node
@@ -10,7 +10,7 @@ from waterlinked_a50_ros_driver.msg import DVL
 class DvlConverter(Node):
     def __init__(self):
         super().__init__('dvl_converter')
-        self.pub = self.create_publisher(Odometry, '/bluerov2/DVL', 10)
+        self.pub = self.create_publisher(Odometry, '/bluerov2/dvl', 10)
         self.sub = self.create_subscription(DVL, '/dvl/data', self.callback, 10)
 
     def callback(self, msg: DVL):

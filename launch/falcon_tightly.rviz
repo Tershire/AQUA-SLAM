@@ -103,7 +103,7 @@ Visualization Manager:
           Size (Pixels): 4
           Size (m): 0.009999999776482582
           Style: Points
-          Topic: /AQUA_SLAM/sparse_map
+          Topic: /aqua_slam/sparse_map
           Unreliable: false
           Use Fixed Frame: true
           Use rainbow: true
@@ -129,7 +129,7 @@ Visualization Manager:
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /AQUA_SLAM/integration_path
+          Topic: /aqua_slam/dvl_imu_path
           Unreliable: false
           Value: false
         - Alpha: 1
@@ -153,7 +153,7 @@ Visualization Manager:
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /AQUA_SLAM/orb_path
+          Topic: /aqua_slam/orb_path
           Unreliable: false
           Value: true
         - Alpha: 1
@@ -169,7 +169,7 @@ Visualization Manager:
           Shaft Length: 1
           Shaft Radius: 0.05000000074505806
           Shape: Axes
-          Topic: /AQUA_SLAM/orb_pose
+          Topic: /aqua_slam/orb_pose
           Unreliable: false
           Value: false
         - Alpha: 1
@@ -185,7 +185,7 @@ Visualization Manager:
           Shaft Length: 1
           Shaft Radius: 0.05000000074505806
           Shape: Arrow
-          Topic: /AQUA_SLAM/integration_cur
+          Topic: /aqua_slam/dvl_imu_pose
           Unreliable: false
           Value: false
         - Alpha: 1
@@ -201,7 +201,7 @@ Visualization Manager:
           Shaft Length: 1
           Shaft Radius: 0.05000000074505806
           Shape: Axes
-          Topic: /AQUA_SLAM/integration_ref
+          Topic: /aqua_slam/dvl_imu_pose_ref
           Unreliable: false
           Value: false
         - Alpha: 1
@@ -217,12 +217,12 @@ Visualization Manager:
           Shaft Length: 1
           Shaft Radius: 0.05000000074505806
           Shape: Axes
-          Topic: /AQUA_SLAM/integration_cur
+          Topic: /aqua_slam/dvl_imu_pose
           Unreliable: false
           Value: false
         - Class: rviz_default_plugins/Image
           Enabled: false
-          Topic: /AQUA_SLAM/img_with_info
+          Topic: /aqua_slam/image/features
           Max Value: 1
           Median window: 5
           Min Value: 0
@@ -252,12 +252,12 @@ Visualization Manager:
           Radius: 0.029999999329447746
           Shaft Diameter: 0.10000000149011612
           Shaft Length: 0.10000000149011612
-          Topic: /AQUA_SLAM/ref_integration_path
+          Topic: /aqua_slam/dvl_imu_path_ref
           Unreliable: false
           Value: false
         - Class: rviz_default_plugins/MarkerArray
           Enabled: false
-          Marker Topic: /AQUA_SLAM/markers
+          Marker Topic: /aqua_slam/markers
           Name: MarkerArray
           Namespaces:
             {}
@@ -267,7 +267,7 @@ Visualization Manager:
       Name: DVL2.0
     - Class: rviz_default_plugins/Image
       Enabled: true
-      Topic: /AQUA_SLAM/img_with_info
+      Topic: /aqua_slam/image/features
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -280,7 +280,7 @@ Visualization Manager:
   Global Options:
     Background Color: 255; 255; 255
     Default Light: true
-    Fixed Frame: AQUA_SLAM
+    Fixed Frame: aqua_slam
     Frame Rate: 30
   Name: root
   Tools:

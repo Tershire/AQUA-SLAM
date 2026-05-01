@@ -49,7 +49,7 @@ LoopClosing::LoopClosing(Atlas *pAtlas, KeyFrameDatabase *pDB, ORBVocabulary *pV
     // mpIt=boost::make_shared<image_transport::ImageTransport>(*mpNH);  // original
     // mpIt=boost::make_shared<image_transport::ImageTransport>(mpNode);  // original
     mpIt=std::make_shared<image_transport::ImageTransport>(mpNode);
-    mImgPub_cur_keyframe=mpIt->advertise("/AQUA_SLAM/loop/cur_img",10);
+    mImgPub_cur_keyframe=mpIt->advertise("/aqua_slam/loop/cur_img",10);
     mImgPub_map_keyframe=mpIt->advertise("AQUA_SLAM/loop/map_img",10);
 	mTargetMapID = -1;
 }
