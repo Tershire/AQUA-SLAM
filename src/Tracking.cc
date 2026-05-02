@@ -2026,7 +2026,7 @@ void Tracking::topicPublishDVLOnly()
 	Eigen::Isometry3d T_d0_cj = T_d_c * T_c0_cj;
 
 // // 	mpRosHandler->PublishOrb(T_c0_cj, T_d_c, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
-	mpRosHandler->PublishOrb(T_c0_cj, T_d_c, mCurrentFrame.mVw);
+	mpRosHandler->PublishOrb(T_c0_cj, T_d_c, mCurrentFrame.mTimeStamp, mCurrentFrame.mVw);
 // // 	mpRosHandler->PublishCamera(T_c0_cj_camera, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
 	// EKF pose
 	Eigen::Isometry3d T_e0_ej_ekf = mCurrentFrame.mT_e0_ej;
@@ -2521,7 +2521,7 @@ void Tracking::Track()
 			Eigen::Isometry3d T_d0_cj = T_d_c * T_c0_cj;
 
 // // 			mpRosHandler->PublishOrb(T_c0_cj, T_d_c, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
-				mpRosHandler->PublishOrb(T_c0_cj, T_d_c, mCurrentFrame.mVw);
+				mpRosHandler->PublishOrb(T_c0_cj, T_d_c, mCurrentFrame.mTimeStamp, mCurrentFrame.mVw);
 // // 			mpRosHandler->PublishCamera(T_c0_cj_camera, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
 //			mpRosHandler->UpdateMap(mpAtlas);
 			cv::Mat img_with_info = mpFrameDrawer->DrawFrame(true);
@@ -2892,7 +2892,7 @@ void Tracking::TrackDVLGyro()
 			Eigen::Isometry3d T_d0_cj = T_d_c * T_c0_cj;
 
 // // 			mpRosHandler->PublishOrb(T_c0_cj, T_d_c, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
-				mpRosHandler->PublishOrb(T_c0_cj, T_d_c, mCurrentFrame.mVw);
+				mpRosHandler->PublishOrb(T_c0_cj, T_d_c, mCurrentFrame.mTimeStamp, mCurrentFrame.mVw);
 // // 			mpRosHandler->PublishCamera(T_c0_cj_camera, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
 //			mpRosHandler->UpdateMap(mpAtlas);
 			cv::Mat img_with_info = mpFrameDrawer->DrawFrame(true);
@@ -3334,7 +3334,7 @@ void Tracking::TrackKLT()
 			Eigen::Isometry3d T_d0_cj = T_d_c * T_c0_cj;
 
 // // 			mpRosHandler->PublishOrb(T_c0_cj, T_d_c, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
-				mpRosHandler->PublishOrb(T_c0_cj, T_d_c, mCurrentFrame.mVw);
+				mpRosHandler->PublishOrb(T_c0_cj, T_d_c, mCurrentFrame.mTimeStamp, mCurrentFrame.mVw);
 // // 			mpRosHandler->PublishCamera(T_c0_cj_camera, ros::Time(mCurrentFrame.mTimeStamp));  // original  // original
 //			mpRosHandler->UpdateMap(mpAtlas);
 			cv::Mat img_with_info = mpFrameDrawer->DrawFrame(true);

@@ -242,6 +242,7 @@ void RosHandling::PublishOrb(const Eigen::Isometry3d &T_c0_cj_orb,
 
 void RosHandling::PublishOrb(const Eigen::Isometry3d &T_c0_cj_orb,
                              const Eigen::Isometry3d &T_d_c,
+                             double timestamp,
                              const cv::Mat &Vwb)
 {
     Eigen::Isometry3d T_c_rviz = Eigen::Isometry3d::Identity();
@@ -254,7 +255,7 @@ void RosHandling::PublishOrb(const Eigen::Isometry3d &T_c0_cj_orb,
 
     geometry_msgs::msg::PoseStamped pose_to_pub;
     pose_to_pub.header.frame_id = "aqua_slam";
-    pose_to_pub.header.stamp = mp_node->now();
+    pose_to_pub.header.stamp = rclcpp::Time(static_cast<int64_t>(timestamp * 1e9));
     pose_to_pub.pose.position.x = T_w_cj.translation().x();
     pose_to_pub.pose.position.y = T_w_cj.translation().y();
     pose_to_pub.pose.position.z = T_w_cj.translation().z();
