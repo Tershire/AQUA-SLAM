@@ -206,8 +206,8 @@ void KeyFrame::SetDvlVelocity(const Eigen::Vector3d &v_d)
 cv::Mat KeyFrame::GetGyroRotation()
 {
 	unique_lock<mutex> lock(mMutexPose);
-	// R_w_c * R_c_gyro
-	return Twc.rowRange(0,3).colRange(0,3) * mImuCalib.mT_c_gyro.rowRange(0, 3).colRange(0, 3);
+	// R_w_c * R_c_imu
+	return Twc.rowRange(0,3).colRange(0,3) * mImuCalib.mT_c_imu.rowRange(0, 3).colRange(0, 3);
 }
 
 cv::Mat KeyFrame::GetDvlPosition()

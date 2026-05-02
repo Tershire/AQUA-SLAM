@@ -157,8 +157,8 @@ public:
 	std::vector<Eigen::Matrix3d> Rcw;
 	//cj_t_cj_c0
 	std::vector<Eigen::Vector3d> tcw;
-	std::vector<Eigen::Matrix3d> R_c_gyro, R_gyro_c, R_c_dvl, R_dvl_c;
-	std::vector<Eigen::Vector3d> t_c_gyro, t_gyro_c, t_c_dvl, t_dvl_c;
+	std::vector<Eigen::Matrix3d> R_c_imu, R_imu_c, R_c_dvl, R_dvl_c;
+	std::vector<Eigen::Vector3d> t_c_imu, t_imu_c, t_c_dvl, t_dvl_c;
 	Eigen::Isometry3d T_r_l;
 	double bf;
 	std::vector<GeometricCamera *> pCamera;

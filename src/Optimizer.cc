@@ -1356,7 +1356,7 @@ void Optimizer::PoseOnlyOptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kf
     optimizer.addVertex(vT_d_c);
 
     g2o::VertexSE3Expmap *vT_g_d = new g2o::VertexSE3Expmap();
-    vT_g_d->setEstimate(Converter::toSE3Quat((*loss_kfs.begin())->mImuCalib.mT_gyro_dvl));
+    vT_g_d->setEstimate(Converter::toSE3Quat((*loss_kfs.begin())->mImuCalib.mT_imu_dvl));
     vT_g_d->setId((maxKFid + 1)*4+1);
     vT_g_d->setFixed(true);
     optimizer.addVertex(vT_g_d);
@@ -1701,7 +1701,7 @@ void Optimizer::OptimizationDVLIMU(set<KeyFrame*, KFComparator> &loss_kfs, Atlas
     optimizer.addVertex(vT_d_c);
 
     g2o::VertexSE3Expmap *vT_g_d = new g2o::VertexSE3Expmap();
-    vT_g_d->setEstimate(Converter::toSE3Quat((*loss_kfs.begin())->mImuCalib.mT_gyro_dvl));
+    vT_g_d->setEstimate(Converter::toSE3Quat((*loss_kfs.begin())->mImuCalib.mT_imu_dvl));
     vT_g_d->setId((maxKFid + 1)*4+1);
     vT_g_d->setFixed(true);
     optimizer.addVertex(vT_g_d);
@@ -10984,7 +10984,7 @@ int Optimizer::PoseDvlGyrosOPtimizationLastFrame(Frame *pFrame, double lamda_DVL
 	optimizer.addVertex(vT_d_c);
 
 	g2o::VertexSE3Expmap *vT_g_d = new g2o::VertexSE3Expmap();
-	vT_g_d->setEstimate(Converter::toSE3Quat(pFrame->GetExtrinsicParamters().mT_gyro_dvl));
+	vT_g_d->setEstimate(Converter::toSE3Quat(pFrame->GetExtrinsicParamters().mT_imu_dvl));
 	vT_g_d->setId(4);
 	vT_g_d->setFixed(true);
 	optimizer.addVertex(vT_g_d);
@@ -11258,7 +11258,7 @@ int Optimizer::PoseDvlGyrosOPtimizationLastFrame(Frame *pFrame, double lamda_DVL
 //	pFrame->SetImuPoseVelocity(Converter::toCvMat(VP->estimate().Rwb),
 //							   Converter::toCvMat(VP->estimate().twb),
 //							   Converter::toCvMat(VV->estimate()));
-		Eigen::Matrix3d R_w_g = VP->estimate().Rwc * VP->estimate().R_c_gyro[0];
+		Eigen::Matrix3d R_w_g = VP->estimate().Rwc * VP->estimate().R_c_imu[0];
 		Eigen::Vector3d t_w_d = VP->estimate().twc + VP->estimate().Rwc * VP->estimate().t_c_dvl[0];
 		Eigen::Isometry3d T_c_w = Eigen::Isometry3d::Identity();
 		T_c_w.pretranslate(VP->estimate().tcw[0]);
@@ -11321,7 +11321,7 @@ int Optimizer::PoseDvlGyrosOPtimizationLastKeyFrame(Frame *pFrame, double lamda_
 	optimizer.addVertex(vT_d_c);
 
 	g2o::VertexSE3Expmap *vT_g_d = new g2o::VertexSE3Expmap();
-	vT_g_d->setEstimate(Converter::toSE3Quat(pFrame->GetExtrinsicParamters().mT_gyro_dvl));
+	vT_g_d->setEstimate(Converter::toSE3Quat(pFrame->GetExtrinsicParamters().mT_imu_dvl));
 	vT_g_d->setId(4);
 	vT_g_d->setFixed(true);
 	optimizer.addVertex(vT_g_d);
@@ -11583,7 +11583,7 @@ int Optimizer::PoseDvlGyrosOPtimizationLastKeyFrame(Frame *pFrame, double lamda_
 //	pFrame->SetImuPoseVelocity(Converter::toCvMat(VP->estimate().Rwb),
 //							   Converter::toCvMat(VP->estimate().twb),
 //							   Converter::toCvMat(VV->estimate()));
-	Eigen::Matrix3d R_w_g = VP->estimate().Rwc * VP->estimate().R_c_gyro[0];
+	Eigen::Matrix3d R_w_g = VP->estimate().Rwc * VP->estimate().R_c_imu[0];
 	Eigen::Vector3d t_w_d = VP->estimate().twc + VP->estimate().Rwc * VP->estimate().t_c_dvl[0];
 	Eigen::Isometry3d T_c_w = Eigen::Isometry3d::Identity();
 	T_c_w.pretranslate(VP->estimate().tcw[0]);
@@ -12039,7 +12039,7 @@ void Optimizer::DvlGyroInitOptimization(Map *pMap,
 	optimizer.addVertex(vT_d_c);
 
 	g2o::VertexSE3Expmap *vT_g_d = new g2o::VertexSE3Expmap();
-	vT_g_d->setEstimate(Converter::toSE3Quat(vpKFs[0]->mImuCalib.mT_gyro_dvl));
+	vT_g_d->setEstimate(Converter::toSE3Quat(vpKFs[0]->mImuCalib.mT_imu_dvl));
 	vT_g_d->setId(maxKFid + 3);
 	vT_g_d->setFixed(true);
 	optimizer.addVertex(vT_g_d);
@@ -12308,7 +12308,7 @@ void Optimizer::DvlGyroInitOptimization2(Map *pMap,
 	optimizer.addVertex(vT_d_c);
 
 	g2o::VertexSE3Expmap *vT_g_d = new g2o::VertexSE3Expmap();
-	vT_g_d->setEstimate(Converter::toSE3Quat(vpKFs[0]->mImuCalib.mT_gyro_dvl));
+	vT_g_d->setEstimate(Converter::toSE3Quat(vpKFs[0]->mImuCalib.mT_imu_dvl));
 	vT_g_d->setId(maxKFid + 1 + maxKFid + 2);
 	vT_g_d->setFixed(true);
 	optimizer.addVertex(vT_g_d);
@@ -12554,7 +12554,7 @@ void Optimizer::DvlGyroInitOptimization3(Map *pMap,
 	optimizer.addVertex(vT_d_c);
 
 	g2o::VertexSE3Expmap *vT_g_d = new g2o::VertexSE3Expmap();
-	vT_g_d->setEstimate(Converter::toSE3Quat(vpKFs[0]->mImuCalib.mT_gyro_dvl));
+	vT_g_d->setEstimate(Converter::toSE3Quat(vpKFs[0]->mImuCalib.mT_imu_dvl));
 	vT_g_d->setId(maxKFid + 1 + maxKFid + 2);
 	vT_g_d->setFixed(true);
 	optimizer.addVertex(vT_g_d);
@@ -12827,7 +12827,7 @@ void Optimizer::DvlGyroInitOptimization5(Map *pMap, Eigen::Vector3d &bg, bool bM
 	optimizer.addVertex(vT_d_c);
 
 	g2o::VertexSE3Expmap *vT_g_d = new g2o::VertexSE3Expmap();
-	vT_g_d->setEstimate(Converter::toSE3Quat(vpKFs[0]->mImuCalib.mT_gyro_dvl));
+	vT_g_d->setEstimate(Converter::toSE3Quat(vpKFs[0]->mImuCalib.mT_imu_dvl));
 	vT_g_d->setId(maxKFid + 1 + maxKFid + 2);
 	vT_g_d->setFixed(true);
 	optimizer.addVertex(vT_g_d);
@@ -13124,7 +13124,7 @@ void Optimizer::DvlGyroInitOptimization6(Map *pMap, Eigen::Vector3d &bg, bool bM
 	optimizer.addVertex(vT_d_c);
 
 	g2o::VertexSE3Expmap *vT_g_d = new g2o::VertexSE3Expmap();
-	vT_g_d->setEstimate(Converter::toSE3Quat(vpKFs[0]->mImuCalib.mT_gyro_dvl));
+	vT_g_d->setEstimate(Converter::toSE3Quat(vpKFs[0]->mImuCalib.mT_imu_dvl));
 	vT_g_d->setId(maxKFid + 1 + maxKFid + 1 + maxKFid + 2);
 	vT_g_d->setFixed(true);
 	optimizer.addVertex(vT_g_d);
@@ -13336,7 +13336,7 @@ void Optimizer::DvlGyroInitOptimization4(Map *pMap,
 	optimizer.addVertex(vT_d_c);
 
 	g2o::VertexSE3Expmap *vT_g_d = new g2o::VertexSE3Expmap();
-	vT_g_d->setEstimate(Converter::toSE3Quat(vpKFs[0]->mImuCalib.mT_gyro_dvl));
+	vT_g_d->setEstimate(Converter::toSE3Quat(vpKFs[0]->mImuCalib.mT_imu_dvl));
 	vT_g_d->setId(maxKFid + 1 + maxKFid + 2);
 	vT_g_d->setFixed(true);
 	optimizer.addVertex(vT_g_d);
@@ -13586,7 +13586,7 @@ double Optimizer::DvlIMUInitOptimization(Map *pMap, double priori_g, double prio
 	optimizer.addVertex(vT_d_c);
 
 	g2o::VertexSE3Expmap *vT_g_d = new g2o::VertexSE3Expmap();
-	vT_g_d->setEstimate(Converter::toSE3Quat(vpKFs[0]->mImuCalib.mT_gyro_dvl));
+	vT_g_d->setEstimate(Converter::toSE3Quat(vpKFs[0]->mImuCalib.mT_imu_dvl));
 	vT_g_d->setId((maxKFid + 1)*4+1);
 	vT_g_d->setFixed(true);
 	optimizer.addVertex(vT_g_d);
@@ -13783,7 +13783,7 @@ void Optimizer::DvlIMURefineOptimization(Atlas* pAtlas)
     optimizer.addVertex(vT_d_c);
 
     g2o::VertexSE3Expmap *vT_g_d = new g2o::VertexSE3Expmap();
-    vT_g_d->setEstimate(Converter::toSE3Quat(pAtlas->GetAllMaps().front()->GetOriginKF()->mImuCalib.mT_gyro_dvl));
+    vT_g_d->setEstimate(Converter::toSE3Quat(pAtlas->GetAllMaps().front()->GetOriginKF()->mImuCalib.mT_imu_dvl));
     vT_g_d->setId((maxKFid + 1)*4+1);
     vT_g_d->setFixed(true);
     optimizer.addVertex(vT_g_d);

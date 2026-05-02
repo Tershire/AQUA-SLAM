@@ -774,17 +774,17 @@ bool Tracking::ParseIMUParamFile(cv::FileStorage &fSettings)
 //		b_miss_params = true;
 //	}
 
-	cv::Mat T_gyro_c;
-	node = fSettings["T_gyro_c"];
+	cv::Mat T_imu_c;
+	node = fSettings["T_imu_c"];
 	if (!node.empty()) {
-		T_gyro_c = node.mat();
-		if (T_gyro_c.rows != 4 || T_gyro_c.cols != 4) {
-			std::cerr << "*T_gyro_c matrix have to be a 4x4 transformation matrix*" << std::endl;
+		T_imu_c = node.mat();
+		if (T_imu_c.rows != 4 || T_imu_c.cols != 4) {
+			std::cerr << "*T_imu_c matrix have to be a 4x4 transformation matrix*" << std::endl;
 			b_miss_params = true;
 		}
 	}
 	else {
-		std::cerr << "*T_gyro_c matrix doesn't exist*" << std::endl;
+		std::cerr << "*T_imu_c matrix doesn't exist*" << std::endl;
 		b_miss_params = true;
 	}
 
@@ -904,16 +904,24 @@ bool Tracking::ParseIMUParamFile(cv::FileStorage &fSettings)
 	T_c_cm.convertTo(T_c_cm, CV_32FC1);
 	cv::Mat T_bi_be;
 	Eigen::AngleAxisd r_i_e(M_PI, Eigen::Vector3d::UnitY());
-	Eigen::Isometry3d T_bi_be_eiegn = Eigen::Isometry3d::Identity();
-	T_bi_be_eiegn.rotate(r_i_e);
-	cv::eigen2cv(T_bi_be_eiegn.matrix(), T_bi_be);
+	Eigen::Isometry3d T_bi_be_eigen = Eigen::Isometry3d::Identity();
+	T_bi_be_eigen.rotate(r_i_e);
+	cv::eigen2cv(T_bi_be_eigen.matrix(), T_bi_be);
 	T_bi_be.convertTo(T_bi_be, CV_32FC1);
-	Eigen::Isometry3d T_gyro_c_eigen;
-	cv::cv2eigen(T_gyro_c, T_gyro_c_eigen.matrix());
+	Eigen::Isometry3d T_imu_c_eigen;
+	cv::cv2eigen(T_imu_c, T_imu_c_eigen.matrix());
 	Eigen::Isometry3d T_dvl_c_eigen;
 	cv::cv2eigen(T_dvl_c, T_dvl_c_eigen.matrix());
 //    mpImuCalib = new IMU::Calib(Tbc,Ng*sf,Na*sf,Ngw/sf,Naw/sf);
-	mpImuCalib = new IMU::Calib(T_gyro_c, T_dvl_c, Ng*sf,Na*sf,Ngw/sf,Naw/sf);
+	mpImuCalib = new IMU::Calib(T_imu_c, T_dvl_c, Ng*sf,Na*sf,Ngw/sf,Naw/sf);
+
+	cv::FileNode T_body_imu_node = fSettings["T_body_imu"];
+	if (!T_body_imu_node.empty()) {
+		cv::Mat T_body_imu = T_body_imu_node.mat();
+		if (T_body_imu.rows == 4 && T_body_imu.cols == 4) {
+			mpImuCalib->mT_body_imu = T_body_imu.clone();
+		}
+	}
 //	IMU::Calib c_test=GetExtrinsicPara();
 //	IMU::Calib c_test2;
 //	SetExtrinsicPara(c_test2);
@@ -1719,7 +1727,7 @@ bool Tracking::PredictStateDvlGro()
             Eigen::Vector3d v_df;
             pKF->GetDvlVelocity(v_df);
             Eigen::Isometry3d T_b_d,T_d_c,T_c0_cf,T_b_c;
-            cv::Mat T_g_d_cv = GetExtrinsicPara().mT_gyro_dvl;
+            cv::Mat T_g_d_cv = GetExtrinsicPara().mT_imu_dvl;
             cv::Mat T_d_c_cv = GetExtrinsicPara().mT_dvl_c;
             cv::cv2eigen(T_g_d_cv, T_b_d.matrix());
             cv::cv2eigen(T_d_c_cv,T_d_c.matrix());
@@ -1816,7 +1824,7 @@ bool Tracking::PredictStateDvlGro()
     RCLCPP_DEBUG_STREAM(rclcpp::get_logger("aqua_slam"), "predict pose KF[" << pKF->mnId << "] dvl velocity: "<<v_df_mea.transpose()<<" opt velocity: "<<v_df.transpose());
 
     Eigen::Isometry3d T_b_d,T_d_c,T_c0_cf,T_b_c;
-    cv::Mat T_g_d_cv = GetExtrinsicPara().mT_gyro_dvl;
+    cv::Mat T_g_d_cv = GetExtrinsicPara().mT_imu_dvl;
     cv::Mat T_d_c_cv = GetExtrinsicPara().mT_dvl_c;
     cv::cv2eigen(T_g_d_cv, T_b_d.matrix());
     cv::cv2eigen(T_d_c_cv,T_d_c.matrix());
@@ -3649,7 +3657,7 @@ void Tracking::StereoInitializationKLT()
 			cv::Mat T_cj_d0 = T_cj_c0 * mCurrentFrame.mImuCalib.mT_c_dvl;
 			mCurrentFrame.SetPose(cv::Mat::eye(4, 4, CV_32F));
 //				mCurrentFrame.SetPose(T_cj_d0);
-//				cv::Mat Rwgyro0 = mCurrentFrame.mImuCalib.mT_c_gyro.rowRange(0, 3).colRange(0, 3).clone();
+//				cv::Mat Rwgyro0 = mCurrentFrame.mImuCalib.mT_c_imu.rowRange(0, 3).colRange(0, 3).clone();
 //				cv::Mat twdvl0 = mCurrentFrame.mImuCalib.mT_c_dvl.rowRange(0, 3).col(3).clone();
 //				mCurrentFrame.SetDvlPoseVelocity(Rwgyro0, twdvl0, cv::Mat::zeros(3, 1, CV_32F));
 		}
@@ -5550,10 +5558,10 @@ void Tracking::CreateNewKeyFrame()
 //     //     ROS_INFO_STREAM("Pose2 Rcw: \n"<<pose_test2.Rcw[0]);  // original
 //     //     ROS_INFO_STREAM("Pose1 tcw: \n"<<pose_test.tcw[0]);  // original
 //     //     ROS_INFO_STREAM("Pose2 tcw: \n"<<pose_test2.tcw[0]);  // original
-//     //     ROS_INFO_STREAM("Pose1 Rgc: \n"<<pose_test.R_gyro_c[0]);  // original
-//     //     ROS_INFO_STREAM("Pose2 Rgc: \n"<<pose_test2.R_gyro_c[0]);  // original
-//     //     ROS_INFO_STREAM("Pose1 tgc: \n"<<pose_test.t_gyro_c[0]);  // original
-//     //     ROS_INFO_STREAM("Pose2 tgc: \n"<<pose_test2.t_gyro_c[0]);  // original
+//     //     ROS_INFO_STREAM("Pose1 Rgc: \n"<<pose_test.R_imu_c[0]);  // original
+//     //     ROS_INFO_STREAM("Pose2 Rgc: \n"<<pose_test2.R_imu_c[0]);  // original
+//     //     ROS_INFO_STREAM("Pose1 tgc: \n"<<pose_test.t_imu_c[0]);  // original
+//     //     ROS_INFO_STREAM("Pose2 tgc: \n"<<pose_test2.t_imu_c[0]);  // original
 //     //     ROS_INFO_STREAM("Pose1 Rdc: \n"<<pose_test.R_dvl_c[0]);  // original
 //     //     ROS_INFO_STREAM("Pose2 Rdc: \n"<<pose_test2.R_dvl_c[0]);  // original
 //     //     ROS_INFO_STREAM("Pose1 tdc: \n"<<pose_test.t_dvl_c[0]);  // original
@@ -5562,10 +5570,10 @@ void Tracking::CreateNewKeyFrame()
 //     //     ROS_INFO_STREAM("Pose2 Rcd: \n"<<pose_test2.R_c_dvl[0]);  // original
 //     //     ROS_INFO_STREAM("Pose1 tcd: \n"<<pose_test.t_c_dvl[0]);  // original
 //     //     ROS_INFO_STREAM("Pose2 tcd: \n"<<pose_test2.t_c_dvl[0]);  // original
-//     //     ROS_INFO_STREAM("Pose1 Rcg: \n"<<pose_test.R_c_gyro[0]);  // original
-//     //     ROS_INFO_STREAM("Pose2 Rcg: \n"<<pose_test2.R_c_gyro[0]);  // original
-//     //     ROS_INFO_STREAM("Pose1 tcg: \n"<<pose_test.t_c_gyro[0]);  // original
-//     //     ROS_INFO_STREAM("Pose2 tcg: \n"<<pose_test2.t_c_gyro[0]);  // original
+//     //     ROS_INFO_STREAM("Pose1 Rcg: \n"<<pose_test.R_c_imu[0]);  // original
+//     //     ROS_INFO_STREAM("Pose2 Rcg: \n"<<pose_test2.R_c_imu[0]);  // original
+//     //     ROS_INFO_STREAM("Pose1 tcg: \n"<<pose_test.t_c_imu[0]);  // original
+//     //     ROS_INFO_STREAM("Pose2 tcg: \n"<<pose_test2.t_c_imu[0]);  // original
     //     auto pc1 = static_cast<Pinhole*>(pose_test.pCamera[0]);
     //     auto pc2 = static_cast<Pinhole*>(pose_test2.pCamera[0]);
 //     //     ROS_INFO_STREAM("Pose1 camera: param"<<pc1->mvParameters[0]<<","<<pc1->mvParameters[1]<<","<<pc1->mvParameters[2]<<","<<pc1->mvParameters[3]<<", type:"<<pc1->mnType<<", ID:"<<pc1->mnId);  // original
@@ -6458,7 +6466,7 @@ void Tracking::UpdateFrameDVLGyro(const IMU::Bias &b, KeyFrame *pCurrentKeyFrame
         DVLGroPreIntegration *pDvlPreintegratedFromKF = mLastFrame.mpDvlPreintegrationKeyFrame;
         cv::Mat T_c0_cf_cv = mLastFrame.mpLastKeyFrame->GetPoseInverse();
         Eigen::Isometry3d T_g_d,T_d_c,T_c0_cf;
-        cv::Mat T_g_d_cv = GetExtrinsicPara().mT_gyro_dvl;
+        cv::Mat T_g_d_cv = GetExtrinsicPara().mT_imu_dvl;
         cv::Mat T_d_c_cv = GetExtrinsicPara().mT_dvl_c;
         cv::cv2eigen(T_g_d_cv,T_g_d.matrix());
         cv::cv2eigen(T_d_c_cv,T_d_c.matrix());
@@ -6488,7 +6496,7 @@ void Tracking::UpdateFrameDVLGyro(const IMU::Bias &b, KeyFrame *pCurrentKeyFrame
         DVLGroPreIntegration *pDvlPreintegratedFromKF = mCurrentFrame.mpDvlPreintegrationKeyFrame;
         cv::Mat T_c0_cf_cv = mCurrentFrame.mpLastKeyFrame->GetPoseInverse();
         Eigen::Isometry3d T_g_d,T_d_c,T_c0_cf;
-        cv::Mat T_g_d_cv = GetExtrinsicPara().mT_gyro_dvl;
+        cv::Mat T_g_d_cv = GetExtrinsicPara().mT_imu_dvl;
         cv::Mat T_d_c_cv = GetExtrinsicPara().mT_dvl_c;
         cv::cv2eigen(T_g_d_cv,T_g_d.matrix());
         cv::cv2eigen(T_d_c_cv,T_d_c.matrix());

@@ -68,6 +68,8 @@ RosHandling::RosHandling(System *pSys, LocalMapping *pLocal, rclcpp::Node::Share
 // // 	ros::Publisher path_orb_pub = nh_.advertise<nav_msgs::msg::Path>("/aqua_slam/orb_path", 10);  // original  // original
 // // 	mp_path_orb_pub = std::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(path_orb_pub));  // original  // original
 	mp_path_orb_pub = mp_node->create_publisher<nav_msgs::msg::Path>("/aqua_slam/orb_path", 10);
+	mp_odom_orb_body_pub = mp_node->create_publisher<nav_msgs::msg::Odometry>("/aqua_slam/orb_odom_body", 10);
+	mp_path_orb_body_pub = mp_node->create_publisher<nav_msgs::msg::Path>("/aqua_slam/orb_path_body", 10);
 // // 	ros::Publisher pose_orb_camera_pub = nh_.advertise<nav_msgs::Odometry>("/aqua_slam/camera_pose", 10);  // original  // original
 // // 	mp_pose_orb_camera_pub = std::shared_ptr<ros::Publisher>(boost::make_shared<ros::Publisher>(pose_orb_camera_pub));  // original  // original
 	mp_pose_orb_camera_pub = mp_node->create_publisher<geometry_msgs::msg::PoseStamped>("/aqua_slam/camera_pose", 10);
@@ -141,6 +143,7 @@ RosHandling::RosHandling(System *pSys, LocalMapping *pLocal, rclcpp::Node::Share
         empty_path.header.stamp = stamp;
         empty_path.header.frame_id = "aqua_slam";
         mp_path_orb_pub->publish(empty_path);
+        mp_path_orb_body_pub->publish(empty_path);
         mp_integration_path_pub->publish(empty_path);
 
         sensor_msgs::msg::PointCloud2 empty_cloud;
@@ -280,6 +283,31 @@ void RosHandling::PublishOrb(const Eigen::Isometry3d &T_c0_cj_orb,
         odom.twist.twist.linear.z = Vwb_f.at<float>(2);
     }
     mp_odom_orb_pub->publish(odom);
+
+    if (mb_calib_initialized) {
+        Eigen::Isometry3d T_w_bj = T_w_cj * mT_imu_c.inverse() * mT_body_imu.inverse();
+        nav_msgs::msg::Odometry odom_body;
+        odom_body.header = pose_to_pub.header;
+        odom_body.child_frame_id = "base_link";
+        Eigen::Quaterniond q_body(T_w_bj.rotation());
+        odom_body.pose.pose.position.x = T_w_bj.translation().x();
+        odom_body.pose.pose.position.y = T_w_bj.translation().y();
+        odom_body.pose.pose.position.z = T_w_bj.translation().z();
+        odom_body.pose.pose.orientation.x = q_body.x();
+        odom_body.pose.pose.orientation.y = q_body.y();
+        odom_body.pose.pose.orientation.z = q_body.z();
+        odom_body.pose.pose.orientation.w = q_body.w();
+        if (!Vwb.empty() && Vwb.rows == 3) {
+            cv::Mat Vwb_f;
+            Vwb.convertTo(Vwb_f, CV_32F);
+            Eigen::Vector3d v_w(Vwb_f.at<float>(0), Vwb_f.at<float>(1), Vwb_f.at<float>(2));
+            Eigen::Vector3d v_b = T_w_bj.rotation().transpose() * v_w;
+            odom_body.twist.twist.linear.x = v_b.x();
+            odom_body.twist.twist.linear.y = v_b.y();
+            odom_body.twist.twist.linear.z = v_b.z();
+        }
+        mp_odom_orb_body_pub->publish(odom_body);
+    }
 }
 
 void RosHandling::UpdateMap(ORB_SLAM3::Atlas *pAtlas)
@@ -295,17 +323,39 @@ void RosHandling::UpdateMap(ORB_SLAM3::Atlas *pAtlas)
 	mp_octree->clear();
     Map* p_first_map = pAtlas->GetAllMaps().front();
     Eigen::Matrix3d R_b0_w = pAtlas->getRGravity();
-    cv::Mat T_b_c_cv = p_first_map->GetOriginKF()->mImuCalib.mT_gyro_c.clone();
+    cv::Mat T_imu_c_cv = p_first_map->GetOriginKF()->mImuCalib.mT_imu_c.clone();
     cv::Mat T_d_c = p_first_map->GetOriginKF()->mImuCalib.mT_dvl_c.clone();
-    Eigen::Isometry3d T_b_c = Eigen::Isometry3d::Identity();cv::cv2eigen(T_b_c_cv,T_b_c.matrix());
+    Eigen::Isometry3d T_imu_c = Eigen::Isometry3d::Identity();cv::cv2eigen(T_imu_c_cv,T_imu_c.matrix());
+    Eigen::Isometry3d T_body_imu = Eigen::Isometry3d::Identity();
+    cv::Mat T_body_imu_cv = p_first_map->GetOriginKF()->mImuCalib.mT_body_imu.clone();
+    if (!T_body_imu_cv.empty()) {
+        cv::cv2eigen(T_body_imu_cv, T_body_imu.matrix());
+    }
+    if (!mb_calib_initialized) {
+        mT_imu_c = T_imu_c;
+        mT_body_imu = T_body_imu;
+        mb_calib_initialized = true;
+    }
 
     // Eigen::Isometry3d T_b0_w;
     // T_b0_w.setIdentity();
     // T_b0_w.rotate(R_b0_w);
     Eigen::Isometry3d T_w_c0 = Eigen::Isometry3d::Identity();
-    Eigen::Matrix3d R_w_c0 = R_b0_w.inverse() * T_b_c.rotation();
+    Eigen::Matrix3d R_w_c0 = R_b0_w.inverse() * T_imu_c.rotation();
     T_w_c0.rotate(R_w_c0);
-    T_w_c0.pretranslate(T_b_c.translation());
+    T_w_c0.pretranslate(R_b0_w.inverse() * T_imu_c.translation());
+    // Correct initial body yaw: ORB-SLAM3 minimal-yaw may not align body Forward with world +x.
+    // R_world_body0 = R_b0_w.inverse() * T_body_imu.inverse().rotation() (T_imu_c cancels out).
+    {
+        Eigen::Matrix3d R_world_body0 = R_b0_w.inverse() * T_body_imu.inverse().rotation();
+        Eigen::Vector3d fwd_horiz = R_world_body0.col(0);
+        fwd_horiz.z() = 0.0;
+        if (fwd_horiz.norm() > 1e-6) {
+            fwd_horiz.normalize();
+            double yaw_err = atan2(fwd_horiz.y(), fwd_horiz.x());
+            T_w_c0.prerotate(Eigen::AngleAxisd(-yaw_err, Eigen::Vector3d::UnitZ()));
+        }
+    }
     mT_w_c0 = T_w_c0;
 // //    ROS_INFO_STREAM("pub T_w_c0: \n"<<T_w_c0.matrix());  // original
 
@@ -313,9 +363,9 @@ void RosHandling::UpdateMap(ORB_SLAM3::Atlas *pAtlas)
 	for (vector<Map *>::iterator it = allMaps.begin(); it != allMaps.end(); it++) {
 		Map *pMap = *it;
         // Eigen::Matrix3d R_b0_w = pAtlas->getRGravity();
-        // cv::Mat T_b_c_cv = pMap->GetOriginKF()->mImuCalib.mT_gyro_c.clone();
-        // Eigen::Isometry3d T_b_c = Eigen::Isometry3d::Identity();
-        // cv::cv2eigen(T_b_c_cv,T_b_c.matrix());
+        // cv::Mat T_imu_c_cv = pMap->GetOriginKF()->mImuCalib.mT_imu_c.clone();
+        // Eigen::Isometry3d T_imu_c = Eigen::Isometry3d::Identity();
+        // cv::cv2eigen(T_imu_c_cv,T_imu_c.matrix());
 		const vector<MapPoint *> &vpMPs = pMap->GetAllMapPoints();
 		const Eigen::Vector3d &color = pMap->mColor * 255;
 
@@ -367,7 +417,7 @@ void RosHandling::UpdateMap(ORB_SLAM3::Atlas *pAtlas)
 
 		}
         // Eigen::Isometry3d T_w_c0 = Eigen::Isometry3d::Identity();
-        // Eigen::Matrix3d R_w_c0 = R_b0_w.inverse() * T_b_c.rotation();
+        // Eigen::Matrix3d R_w_c0 = R_b0_w.inverse() * T_body_c.rotation();
         // T_w_c0.rotate(R_w_c0);
 
         Eigen::Isometry3d T_w_c0 = mT_w_c0;
@@ -571,9 +621,10 @@ void RosHandling::PublishIntegration(Atlas *pAtlas)
     visualization_msgs::msg::MarkerArray all_markers;
     m_integration_path.poses.clear();
     m_path_orb.poses.clear();
+    m_path_orb_body.poses.clear();
     m_ref_integration_path.poses.clear();
     cv::Mat T_d_c_cv = maps.front()->GetOriginKF()->mImuCalib.mT_dvl_c.clone();
-    cv::Mat T_g_d_cv = maps.front()->GetOriginKF()->mImuCalib.mT_gyro_dvl.clone();
+    cv::Mat T_g_d_cv = maps.front()->GetOriginKF()->mImuCalib.mT_imu_dvl.clone();
     Eigen::Isometry3d T_g_d = Eigen::Isometry3d::Identity();
     Eigen::Isometry3d T_d_c = Eigen::Isometry3d::Identity();
     cv::cv2eigen(T_g_d_cv, T_g_d.matrix());
@@ -814,9 +865,25 @@ void RosHandling::PublishIntegration(Atlas *pAtlas)
 		m_path_orb.header = pose_to_pub.header;
 		m_path_orb.poses.push_back(pose_to_pub);
 
+		if (!mb_calib_initialized) continue;
+		Eigen::Isometry3d T_w_bj = T_w_cj * mT_imu_c.inverse() * mT_body_imu.inverse();
+		geometry_msgs::msg::PoseStamped body_pose;
+		body_pose.header = pose_to_pub.header;
+		Eigen::Quaterniond q_bj(T_w_bj.rotation());
+		body_pose.pose.position.x = T_w_bj.translation().x();
+		body_pose.pose.position.y = T_w_bj.translation().y();
+		body_pose.pose.position.z = T_w_bj.translation().z();
+		body_pose.pose.orientation.x = q_bj.x();
+		body_pose.pose.orientation.y = q_bj.y();
+		body_pose.pose.orientation.z = q_bj.z();
+		body_pose.pose.orientation.w = q_bj.w();
+		m_path_orb_body.header = body_pose.header;
+		m_path_orb_body.poses.push_back(body_pose);
+
 	}
 	mp_integration_path_pub->publish(m_integration_path);
 	mp_path_orb_pub->publish(m_path_orb);
+	mp_path_orb_body_pub->publish(m_path_orb_body);
     mp_ref_integration_path_pub->publish(m_ref_integration_path);
     //publish all_marker
     mp_markers_pub->publish(all_markers);
@@ -832,15 +899,30 @@ void RosHandling::PublishLossKF(set<KeyFrame*, KFComparator> &loss_kfs)
         return;
     }
     visualization_msgs::msg::MarkerArray all_markers;
-    Eigen::Isometry3d T_b_c = Eigen::Isometry3d::Identity();
-    cv::cv2eigen((*loss_kfs.begin())->mImuCalib.mT_gyro_c, T_b_c.matrix());
+    Eigen::Isometry3d T_imu_c = Eigen::Isometry3d::Identity();
+    cv::cv2eigen((*loss_kfs.begin())->mImuCalib.mT_imu_c, T_imu_c.matrix());
+    Eigen::Isometry3d T_body_imu_lkf = Eigen::Isometry3d::Identity();
+    {
+        cv::Mat T_body_imu_cv = (*loss_kfs.begin())->mImuCalib.mT_body_imu.clone();
+        if (!T_body_imu_cv.empty())
+            cv::cv2eigen(T_body_imu_cv, T_body_imu_lkf.matrix());
+    }
     Eigen::Isometry3d T_w_c0 = Eigen::Isometry3d::Identity();
     Eigen::Matrix3d R_b0_w = (*loss_kfs.begin())->GetMap()->getRGravity();
     // ROS_DEBUG_STREAM("R_b0_w: " << R_b0_w);  // original
     RCLCPP_DEBUG_STREAM(mp_node->get_logger(), "R_b0_w: " << R_b0_w);
-    Eigen::Matrix3d R_w_b0 = R_b0_w.transpose();
-    Eigen::Matrix3d R_w_c0 = R_w_b0 * T_b_c.rotation();
+    Eigen::Matrix3d R_w_c0 = R_b0_w.inverse() * T_imu_c.rotation();
     T_w_c0.rotate(R_w_c0);
+    {
+        Eigen::Matrix3d R_world_body0 = R_b0_w.inverse() * T_body_imu_lkf.inverse().rotation();
+        Eigen::Vector3d fwd_horiz = R_world_body0.col(0);
+        fwd_horiz.z() = 0.0;
+        if (fwd_horiz.norm() > 1e-6) {
+            fwd_horiz.normalize();
+            double yaw_err = atan2(fwd_horiz.y(), fwd_horiz.x());
+            T_w_c0.prerotate(Eigen::AngleAxisd(-yaw_err, Eigen::Vector3d::UnitZ()));
+        }
+    }
 
     for (auto pKF: loss_kfs) {
         cv::Mat T_c0_cj_orb_cv = pKF->GetPoseInverse();

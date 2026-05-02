@@ -306,11 +306,12 @@ class Calib
 		// serializeMatrix(ar, Tbc, version);
 		// serializeMatrix(ar, Cov, version);
 		// serializeMatrix(ar, CovWalk, version);
-		serializeMatrix(ar, mT_gyro_c, version);
-		serializeMatrix(ar, mT_c_gyro, version);
+		serializeMatrix(ar, mT_imu_c, version);
+		serializeMatrix(ar, mT_c_imu, version);
 		serializeMatrix(ar, mT_dvl_c, version);
 		serializeMatrix(ar, mT_c_dvl, version);
-		serializeMatrix(ar, mT_gyro_dvl, version);
+		serializeMatrix(ar, mT_imu_dvl, version);
+		serializeMatrix(ar, mT_body_imu, version);
 	}
 
 public:
@@ -318,41 +319,44 @@ public:
 	{
 		Set(Tbc_, ng, na, ngw, naw);
 	}
-	Calib(cv::Mat T_gyro_c, cv::Mat T_dvl_c)
-		: mT_gyro_c(T_gyro_c), mT_dvl_c(T_dvl_c)
+	Calib(cv::Mat T_imu_c, cv::Mat T_dvl_c)
+		: mT_imu_c(T_imu_c), mT_dvl_c(T_dvl_c)
 	{
-		mT_c_gyro = cv::Mat::eye(4, 4, CV_32F);
-		mT_c_gyro.rowRange(0, 3).colRange(0, 3) = mT_gyro_c.rowRange(0, 3).colRange(0, 3).t();
-		mT_c_gyro.rowRange(0, 3).col(3) =
-			-mT_gyro_c.rowRange(0, 3).colRange(0, 3).t() * mT_gyro_c.rowRange(0, 3).col(3);
+		mT_c_imu = cv::Mat::eye(4, 4, CV_32F);
+		mT_c_imu.rowRange(0, 3).colRange(0, 3) = mT_imu_c.rowRange(0, 3).colRange(0, 3).t();
+		mT_c_imu.rowRange(0, 3).col(3) =
+			-mT_imu_c.rowRange(0, 3).colRange(0, 3).t() * mT_imu_c.rowRange(0, 3).col(3);
 
 		mT_c_dvl = cv::Mat::eye(4, 4, CV_32F);
 		mT_c_dvl.rowRange(0, 3).colRange(0, 3) = mT_dvl_c.rowRange(0, 3).colRange(0, 3).t();
 		mT_c_dvl.rowRange(0, 3).col(3) = -mT_dvl_c.rowRange(0, 3).colRange(0, 3).t() * mT_dvl_c.rowRange(0, 3).col(3);
 
-		mT_gyro_dvl = mT_gyro_c * mT_c_dvl;
+		mT_imu_dvl = mT_imu_c * mT_c_dvl;
+		mT_body_imu = cv::Mat::eye(4, 4, CV_32F);
 	}
-    Calib(cv::Mat T_gyro_c, cv::Mat T_dvl_c, const float &ng, const float &na, const float &ngw, const float &naw)
-            : mT_gyro_c(T_gyro_c.clone()), mT_dvl_c(T_dvl_c.clone())
+    Calib(cv::Mat T_imu_c, cv::Mat T_dvl_c, const float &ng, const float &na, const float &ngw, const float &naw)
+            : mT_imu_c(T_imu_c.clone()), mT_dvl_c(T_dvl_c.clone())
     {
-        mT_c_gyro = cv::Mat::eye(4, 4, CV_32F);
-        mT_c_gyro.rowRange(0, 3).colRange(0, 3) = mT_gyro_c.rowRange(0, 3).colRange(0, 3).t();
-        mT_c_gyro.rowRange(0, 3).col(3) =
-                -mT_gyro_c.rowRange(0, 3).colRange(0, 3).t() * mT_gyro_c.rowRange(0, 3).col(3);
+        mT_c_imu = cv::Mat::eye(4, 4, CV_32F);
+        mT_c_imu.rowRange(0, 3).colRange(0, 3) = mT_imu_c.rowRange(0, 3).colRange(0, 3).t();
+        mT_c_imu.rowRange(0, 3).col(3) =
+                -mT_imu_c.rowRange(0, 3).colRange(0, 3).t() * mT_imu_c.rowRange(0, 3).col(3);
 
         mT_c_dvl = cv::Mat::eye(4, 4, CV_32F);
         mT_c_dvl.rowRange(0, 3).colRange(0, 3) = mT_dvl_c.rowRange(0, 3).colRange(0, 3).t();
         mT_c_dvl.rowRange(0, 3).col(3) = -mT_dvl_c.rowRange(0, 3).colRange(0, 3).t() * mT_dvl_c.rowRange(0, 3).col(3);
 
-        mT_gyro_dvl = mT_gyro_c * mT_c_dvl;
+        mT_imu_dvl = mT_imu_c * mT_c_dvl;
+        mT_body_imu = cv::Mat::eye(4, 4, CV_32F);
 
-        Set(T_gyro_c, ng, na, ngw, naw);
+        Set(T_imu_c, ng, na, ngw, naw);
     }
 	Calib(const Calib &calib)
 		:
-		mT_gyro_c(calib.mT_gyro_c.clone()), mT_dvl_c(calib.mT_dvl_c.clone()), mT_c_gyro(calib.mT_c_gyro.clone()),
+		mT_imu_c(calib.mT_imu_c.clone()), mT_dvl_c(calib.mT_dvl_c.clone()), mT_c_imu(calib.mT_c_imu.clone()),
 		mT_c_dvl(calib.mT_c_dvl.clone()),
-		mT_gyro_dvl(calib.mT_gyro_dvl.clone())
+		mT_imu_dvl(calib.mT_imu_dvl.clone()),
+		mT_body_imu(calib.mT_body_imu.clone())
 	{
 		Tbc = calib.Tbc.clone();
 		Tcb = calib.Tcb.clone();
@@ -365,21 +369,21 @@ public:
 	}
 
 	void Set(const cv::Mat &Tbc_, const float &ng, const float &na, const float &ngw, const float &naw);
-    void SetExtrinsic(const cv::Mat& T_gyro_c, const cv::Mat& T_dvl_c);
+    void SetExtrinsic(const cv::Mat& T_imu_c, const cv::Mat& T_dvl_c);
 
 public:
 	cv::Mat Tcb;
 	cv::Mat Tbc;
 	cv::Mat Cov, CovWalk;
-	// transformation from gyroscope to camera
-	// set translation as 0 0 0
-	// only rotation
-	cv::Mat mT_gyro_c;
-	cv::Mat mT_c_gyro;
+	// transformation from IMU to camera
+	cv::Mat mT_imu_c;
+	cv::Mat mT_c_imu;
 	// transformation from dvl to camera
 	cv::Mat mT_dvl_c;
 	cv::Mat mT_c_dvl;
-	cv::Mat mT_gyro_dvl;
+	cv::Mat mT_imu_dvl;
+	// transformation from body frame to IMU frame (identity if body == IMU)
+	cv::Mat mT_body_imu;
 };
 
 //Integration of 1 gyro measurement

@@ -529,20 +529,20 @@ void Calib::Set(const cv::Mat &Tbc_, const float &ng, const float &na, const flo
     CovWalk.at<float>(5,5) = naw2;
 }
 
-void Calib::SetExtrinsic(const cv::Mat& T_gyro_c, const cv::Mat& T_dvl_c)
+void Calib::SetExtrinsic(const cv::Mat& T_imu_c, const cv::Mat& T_dvl_c)
 {
-    mT_gyro_c = T_gyro_c.clone();
+    mT_imu_c = T_imu_c.clone();
     mT_dvl_c = T_dvl_c.clone();
-    mT_c_gyro = cv::Mat::eye(4, 4, CV_32F);
-    mT_c_gyro.rowRange(0, 3).colRange(0, 3) = mT_gyro_c.rowRange(0, 3).colRange(0, 3).t();
-    mT_c_gyro.rowRange(0, 3).col(3) =
-            -mT_gyro_c.rowRange(0, 3).colRange(0, 3).t() * mT_gyro_c.rowRange(0, 3).col(3);
+    mT_c_imu = cv::Mat::eye(4, 4, CV_32F);
+    mT_c_imu.rowRange(0, 3).colRange(0, 3) = mT_imu_c.rowRange(0, 3).colRange(0, 3).t();
+    mT_c_imu.rowRange(0, 3).col(3) =
+            -mT_imu_c.rowRange(0, 3).colRange(0, 3).t() * mT_imu_c.rowRange(0, 3).col(3);
 
     mT_c_dvl = cv::Mat::eye(4, 4, CV_32F);
     mT_c_dvl.rowRange(0, 3).colRange(0, 3) = mT_dvl_c.rowRange(0, 3).colRange(0, 3).t();
     mT_c_dvl.rowRange(0, 3).col(3) = -mT_dvl_c.rowRange(0, 3).colRange(0, 3).t() * mT_dvl_c.rowRange(0, 3).col(3);
 
-    mT_gyro_dvl = mT_gyro_c * mT_c_dvl;
+    mT_imu_dvl = mT_imu_c * mT_c_dvl;
 
 }
 

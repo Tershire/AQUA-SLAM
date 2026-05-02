@@ -338,9 +338,9 @@ void Frame::SetDvlPoseVelocity(const cv::Mat &R_c0_gyroj, const cv::Mat &c0_t_c0
 {
 	std::lock_guard<std::mutex> lock(*mpExtrinsic_mutex);
 	cv::Mat R_c0_dj;
-	cv::Mat R_gyro_dvl;
-	R_gyro_dvl = mImuCalib.mT_gyro_dvl.rowRange(0, 3).colRange(0, 3).clone();
-	R_c0_dj = R_c0_gyroj * R_gyro_dvl;
+	cv::Mat R_imu_dvl;
+	R_imu_dvl = mImuCalib.mT_imu_dvl.rowRange(0, 3).colRange(0, 3).clone();
+	R_c0_dj = R_c0_gyroj * R_imu_dvl;
 	mVw = c0_V_di_dj.clone();
 	cv::Mat R_dj_c0 = R_c0_dj.t();
 	cv::Mat dj_t_dj_c0 = -R_dj_c0 * c0_t_c0_dj;
@@ -408,8 +408,8 @@ cv::Mat Frame::GetDvlVelocity()
 cv::Mat Frame::GetGyroRotation()
 {
 	std::lock_guard<std::mutex> lock(*mpExtrinsic_mutex);
-	// R_w_c * R_c_gyro
-	return mRwc * mImuCalib.mT_c_gyro.rowRange(0, 3).colRange(0, 3);
+	// R_w_c * R_c_imu
+	return mRwc * mImuCalib.mT_c_imu.rowRange(0, 3).colRange(0, 3);
 }
 
 cv::Mat Frame::GetImuPose()

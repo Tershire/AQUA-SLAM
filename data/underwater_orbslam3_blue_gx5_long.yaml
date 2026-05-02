@@ -123,9 +123,8 @@ EnableLoopDetection: 1
 IMUInitTranslation: 10.0 # 10.0 can calibrate well, but some sequence cannot reach 10
 IMUInitRotation: 1.0
 
-# IMU to orb
-# only use rotation
-T_gyro_c: !!opencv-matrix
+# IMU to camera (T_imu_c): transformation from camera frame to IMU frame
+T_imu_c: !!opencv-matrix
   rows: 4
   cols: 4
   dt: f

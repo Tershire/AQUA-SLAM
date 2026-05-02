@@ -91,8 +91,10 @@ This runs everything in Step 4, plus records the following topics to `results/sl
 
 | Topic | Description |
 |---|---|
-| `/aqua_slam/orb_odom` | SLAM pose + velocity |
-| `/aqua_slam/orb_path` | SLAM trajectory |
+| `/aqua_slam/orb_odom` | SLAM pose + velocity (camera frame) |
+| `/aqua_slam/orb_path` | SLAM trajectory (camera frame) |
+| `/aqua_slam/orb_odom_body` | SLAM pose + velocity (body FLU frame) |
+| `/aqua_slam/orb_path_body` | SLAM trajectory (body FLU frame) |
 | `/aqua_slam/dvl_imu_pose` | DVL+IMU dead-reckoning pose |
 | `/aqua_slam/dvl_imu_path` | DVL+IMU dead-reckoning trajectory |
 | `/aqua_slam/dvl_imu_pose_ref` | DVL+IMU reference pose |

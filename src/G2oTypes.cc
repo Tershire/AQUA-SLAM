@@ -1212,10 +1212,10 @@ DvlImuCamPose::DvlImuCamPose(Frame *pF)
 
 	tcw.resize(num_cams);
 	Rcw.resize(num_cams);
-	t_c_gyro.resize(num_cams);
-	R_c_gyro.resize(num_cams);
-	t_gyro_c.resize(num_cams);
-	R_gyro_c.resize(num_cams);
+	t_c_imu.resize(num_cams);
+	R_c_imu.resize(num_cams);
+	t_imu_c.resize(num_cams);
+	R_imu_c.resize(num_cams);
 	t_dvl_c.resize(num_cams);
 	R_dvl_c.resize(num_cams);
 	t_c_dvl.resize(num_cams);
@@ -1225,10 +1225,10 @@ DvlImuCamPose::DvlImuCamPose(Frame *pF)
 	// Left camera
 	tcw[0] = Converter::toVector3d(pF->mTcw.rowRange(0,3).col(3));
 	Rcw[0] = Converter::toMatrix3d(pF->mTcw.rowRange(0,3).colRange(0,3));
-	t_c_gyro[0] = Converter::toVector3d(pF->GetExtrinsicParamters().mT_c_gyro.rowRange(0,3).col(3));
-	R_c_gyro[0] = Converter::toMatrix3d(pF->GetExtrinsicParamters().mT_c_gyro.rowRange(0, 3).colRange(0, 3));
-	t_gyro_c[0] = Converter::toVector3d(pF->GetExtrinsicParamters().mT_gyro_c.rowRange(0,3).col(3));
-	R_gyro_c[0] = Converter::toMatrix3d(pF->GetExtrinsicParamters().mT_gyro_c.rowRange(0, 3).colRange(0, 3));
+	t_c_imu[0] = Converter::toVector3d(pF->GetExtrinsicParamters().mT_c_imu.rowRange(0,3).col(3));
+	R_c_imu[0] = Converter::toMatrix3d(pF->GetExtrinsicParamters().mT_c_imu.rowRange(0, 3).colRange(0, 3));
+	t_imu_c[0] = Converter::toVector3d(pF->GetExtrinsicParamters().mT_imu_c.rowRange(0,3).col(3));
+	R_imu_c[0] = Converter::toMatrix3d(pF->GetExtrinsicParamters().mT_imu_c.rowRange(0, 3).colRange(0, 3));
 	t_c_dvl[0] = Converter::toVector3d(pF->GetExtrinsicParamters().mT_c_dvl.rowRange(0,3).col(3));
 	R_c_dvl[0] = Converter::toMatrix3d(pF->GetExtrinsicParamters().mT_c_dvl.rowRange(0, 3).colRange(0, 3));
 	t_dvl_c[0] = Converter::toVector3d(pF->GetExtrinsicParamters().mT_dvl_c.rowRange(0,3).col(3));
@@ -1243,10 +1243,10 @@ DvlImuCamPose::DvlImuCamPose(Frame *pF)
 		Rcw[1] = Trl.block<3,3>(0,0)*Rcw[0];
 		tcw[1] = Trl.block<3,3>(0,0)*tcw[0]+Trl.block<3,1>(0,3);
 
-		t_c_gyro[1] = Trl.block<3,3>(0,0)*t_c_gyro[0]+Trl.block<3,1>(0,3);
-		R_c_gyro[1] = Trl.block<3,3>(0,0) * R_c_gyro[0];
-		R_gyro_c[1] = R_c_gyro[1].transpose();
-		t_gyro_c[1] = -R_gyro_c[1]*t_c_gyro[1];
+		t_c_imu[1] = Trl.block<3,3>(0,0)*t_c_imu[0]+Trl.block<3,1>(0,3);
+		R_c_imu[1] = Trl.block<3,3>(0,0) * R_c_imu[0];
+		R_imu_c[1] = R_c_imu[1].transpose();
+		t_imu_c[1] = -R_imu_c[1]*t_c_imu[1];
 
 		t_c_dvl[1] = Trl.block<3,3>(0,0)*t_c_dvl[1]+Trl.block<3,1>(0,3);
 		R_c_dvl[1] = Trl.block<3,3>(0,0) * R_c_dvl[0];
@@ -1275,10 +1275,10 @@ DvlImuCamPose::DvlImuCamPose(KeyFrame *pKF)
 
 	tcw.resize(num_cams);
 	Rcw.resize(num_cams);
-	t_c_gyro.resize(num_cams);
-	R_c_gyro.resize(num_cams);
-	t_gyro_c.resize(num_cams);
-	R_gyro_c.resize(num_cams);
+	t_c_imu.resize(num_cams);
+	R_c_imu.resize(num_cams);
+	t_imu_c.resize(num_cams);
+	R_imu_c.resize(num_cams);
 	t_dvl_c.resize(num_cams);
 	R_dvl_c.resize(num_cams);
 	t_c_dvl.resize(num_cams);
@@ -1292,10 +1292,10 @@ DvlImuCamPose::DvlImuCamPose(KeyFrame *pKF)
 	Rwc = Rcw[0].transpose();
 	twc = - Rwc * tcw[0];
 
-	t_c_gyro[0] = Converter::toVector3d(pKF->mImuCalib.mT_c_gyro.rowRange(0,3).col(3));
-	R_c_gyro[0] = Converter::toMatrix3d(pKF->mImuCalib.mT_c_gyro.rowRange(0, 3).colRange(0, 3));
-	t_gyro_c[0] = Converter::toVector3d(pKF->mImuCalib.mT_gyro_c.rowRange(0,3).col(3));
-	R_gyro_c[0] = Converter::toMatrix3d(pKF->mImuCalib.mT_gyro_c.rowRange(0, 3).colRange(0, 3));
+	t_c_imu[0] = Converter::toVector3d(pKF->mImuCalib.mT_c_imu.rowRange(0,3).col(3));
+	R_c_imu[0] = Converter::toMatrix3d(pKF->mImuCalib.mT_c_imu.rowRange(0, 3).colRange(0, 3));
+	t_imu_c[0] = Converter::toVector3d(pKF->mImuCalib.mT_imu_c.rowRange(0,3).col(3));
+	R_imu_c[0] = Converter::toMatrix3d(pKF->mImuCalib.mT_imu_c.rowRange(0, 3).colRange(0, 3));
 
 	t_c_dvl[0] = Converter::toVector3d(pKF->mImuCalib.mT_c_dvl.rowRange(0,3).col(3));
 	R_c_dvl[0] = Converter::toMatrix3d(pKF->mImuCalib.mT_c_dvl.rowRange(0, 3).colRange(0, 3));
@@ -1312,10 +1312,10 @@ DvlImuCamPose::DvlImuCamPose(KeyFrame *pKF)
 		Rcw[1] = Trl.block<3,3>(0,0)*Rcw[0];
 		tcw[1] = Trl.block<3,3>(0,0)*tcw[0]+Trl.block<3,1>(0,3);
 
-		t_c_gyro[1] = Trl.block<3,3>(0,0)*t_c_gyro[0]+Trl.block<3,1>(0,3);
-		R_c_gyro[1] = Trl.block<3,3>(0,0) * R_c_gyro[0];
-		R_gyro_c[1] = R_c_gyro[1].transpose();
-		t_gyro_c[1] = -R_gyro_c[1]*t_c_gyro[1];
+		t_c_imu[1] = Trl.block<3,3>(0,0)*t_c_imu[0]+Trl.block<3,1>(0,3);
+		R_c_imu[1] = Trl.block<3,3>(0,0) * R_c_imu[0];
+		R_imu_c[1] = R_c_imu[1].transpose();
+		t_imu_c[1] = -R_imu_c[1]*t_c_imu[1];
 
 		t_c_dvl[1] = Trl.block<3,3>(0,0)*t_c_dvl[1]+Trl.block<3,1>(0,3);
 		R_c_dvl[1] = Trl.block<3,3>(0,0) * R_c_dvl[0];
@@ -1392,14 +1392,14 @@ void DvlImuCamPose::write(ofstream &fout)
     fout << Rwc <<"\n";
     fout << twc <<"\n";
 
-    // t_c_gyro[0] = Converter::toVector3d(pKF->mImuCalib.mT_c_gyro.rowRange(0,3).col(3));
-    fout << t_c_gyro[0] <<"\n";
-    // R_c_gyro[0] = Converter::toMatrix3d(pKF->mImuCalib.mT_c_gyro.rowRange(0, 3).colRange(0, 3));
-    fout << R_c_gyro[0] <<"\n";
-    // t_gyro_c[0] = Converter::toVector3d(pKF->mImuCalib.mT_gyro_c.rowRange(0,3).col(3));
-    fout << t_gyro_c[0] <<"\n";
-    // R_gyro_c[0] = Converter::toMatrix3d(pKF->mImuCalib.mT_gyro_c.rowRange(0, 3).colRange(0, 3));
-    fout << R_gyro_c[0] <<"\n";
+    // t_c_imu[0] = Converter::toVector3d(pKF->mImuCalib.mT_c_imu.rowRange(0,3).col(3));
+    fout << t_c_imu[0] <<"\n";
+    // R_c_imu[0] = Converter::toMatrix3d(pKF->mImuCalib.mT_c_imu.rowRange(0, 3).colRange(0, 3));
+    fout << R_c_imu[0] <<"\n";
+    // t_imu_c[0] = Converter::toVector3d(pKF->mImuCalib.mT_imu_c.rowRange(0,3).col(3));
+    fout << t_imu_c[0] <<"\n";
+    // R_imu_c[0] = Converter::toMatrix3d(pKF->mImuCalib.mT_imu_c.rowRange(0, 3).colRange(0, 3));
+    fout << R_imu_c[0] <<"\n";
 
     // t_c_dvl[0] = Converter::toVector3d(pKF->mImuCalib.mT_c_dvl.rowRange(0,3).col(3));
     fout << t_c_dvl[0] <<"\n";
@@ -1424,14 +1424,14 @@ void DvlImuCamPose::write(ofstream &fout)
         // tcw[1] = Trl.block<3,3>(0,0)*tcw[0]+Trl.block<3,1>(0,3);
         fout << tcw[1] <<"\n";
 
-        // t_c_gyro[1] = Trl.block<3,3>(0,0)*t_c_gyro[0]+Trl.block<3,1>(0,3);
-        fout << t_c_gyro[1] <<"\n";
-        // R_c_gyro[1] = Trl.block<3,3>(0,0) * R_c_gyro[0];
-        fout << R_c_gyro[1] <<"\n";
-        // R_gyro_c[1] = R_c_gyro[1].transpose();
-        fout << R_gyro_c[1] <<"\n";
-        // t_gyro_c[1] = -R_gyro_c[1]*t_c_gyro[1];
-        fout << t_gyro_c[1] <<"\n";
+        // t_c_imu[1] = Trl.block<3,3>(0,0)*t_c_imu[0]+Trl.block<3,1>(0,3);
+        fout << t_c_imu[1] <<"\n";
+        // R_c_imu[1] = Trl.block<3,3>(0,0) * R_c_imu[0];
+        fout << R_c_imu[1] <<"\n";
+        // R_imu_c[1] = R_c_imu[1].transpose();
+        fout << R_imu_c[1] <<"\n";
+        // t_imu_c[1] = -R_imu_c[1]*t_c_imu[1];
+        fout << t_imu_c[1] <<"\n";
 
         // t_c_dvl[1] = Trl.block<3,3>(0,0)*t_c_dvl[1]+Trl.block<3,1>(0,3);
         fout << t_c_dvl[1] <<"\n";
@@ -1475,10 +1475,10 @@ void DvlImuCamPose::read(ifstream &fin)
 
     tcw.resize(num_cams);
     Rcw.resize(num_cams);
-    t_c_gyro.resize(num_cams);
-    R_c_gyro.resize(num_cams);
-    t_gyro_c.resize(num_cams);
-    R_gyro_c.resize(num_cams);
+    t_c_imu.resize(num_cams);
+    R_c_imu.resize(num_cams);
+    t_imu_c.resize(num_cams);
+    R_imu_c.resize(num_cams);
     t_dvl_c.resize(num_cams);
     R_dvl_c.resize(num_cams);
     t_c_dvl.resize(num_cams);
@@ -1500,10 +1500,10 @@ void DvlImuCamPose::read(ifstream &fin)
     // fin >> twc;
     ReadtoVector3D(fin, twc);
 
-    ReadtoVector3D(fin, t_c_gyro[0]);
-    ReadToEigen3D(fin, R_c_gyro[0]);
-    ReadtoVector3D(fin, t_gyro_c[0]);
-    ReadToEigen3D(fin, R_gyro_c[0]);
+    ReadtoVector3D(fin, t_c_imu[0]);
+    ReadToEigen3D(fin, R_c_imu[0]);
+    ReadtoVector3D(fin, t_imu_c[0]);
+    ReadToEigen3D(fin, R_imu_c[0]);
 
 
     ReadtoVector3D(fin, t_c_dvl[0]);
@@ -1525,10 +1525,10 @@ void DvlImuCamPose::read(ifstream &fin)
 
         ReadtoVector3D(fin, tcw[1]);
 
-        ReadtoVector3D(fin, t_c_gyro[1]);
-        ReadToEigen3D(fin, R_c_gyro[1]);
-        ReadToEigen3D(fin, R_gyro_c[1]);
-        ReadtoVector3D(fin, t_gyro_c[1]);
+        ReadtoVector3D(fin, t_c_imu[1]);
+        ReadToEigen3D(fin, R_c_imu[1]);
+        ReadToEigen3D(fin, R_imu_c[1]);
+        ReadtoVector3D(fin, t_imu_c[1]);
         ReadtoVector3D(fin, t_c_dvl[1]);
         ReadToEigen3D(fin, R_c_dvl[1]);
         ReadToEigen3D(fin, R_dvl_c[1]);
@@ -1573,10 +1573,10 @@ DvlImuCamPose::DvlImuCamPose(const DvlImuCamPose &dic)
 
     tcw.resize(num_cams);
     Rcw.resize(num_cams);
-    t_c_gyro.resize(num_cams);
-    R_c_gyro.resize(num_cams);
-    t_gyro_c.resize(num_cams);
-    R_gyro_c.resize(num_cams);
+    t_c_imu.resize(num_cams);
+    R_c_imu.resize(num_cams);
+    t_imu_c.resize(num_cams);
+    R_imu_c.resize(num_cams);
     t_dvl_c.resize(num_cams);
     R_dvl_c.resize(num_cams);
     t_c_dvl.resize(num_cams);
@@ -1586,10 +1586,10 @@ DvlImuCamPose::DvlImuCamPose(const DvlImuCamPose &dic)
     // Left camera
     tcw[0] = dic.tcw[0];
     Rcw[0] = dic.Rcw[0];
-    t_c_gyro[0] = dic.t_c_gyro[0];
-    R_c_gyro[0] = dic.R_c_gyro[0];
-    t_gyro_c[0] = dic.t_gyro_c[0];
-    R_gyro_c[0] = dic.R_gyro_c[0];
+    t_c_imu[0] = dic.t_c_imu[0];
+    R_c_imu[0] = dic.R_c_imu[0];
+    t_imu_c[0] = dic.t_imu_c[0];
+    R_imu_c[0] = dic.R_imu_c[0];
     t_c_dvl[0] = dic.t_c_dvl[0];
     R_c_dvl[0] = dic.R_c_dvl[0];
     t_dvl_c[0] = dic.t_dvl_c[0];
@@ -1603,10 +1603,10 @@ DvlImuCamPose::DvlImuCamPose(const DvlImuCamPose &dic)
         Rcw[1] = dic.Rcw[1];
         tcw[1] = dic.tcw[1];
 
-        t_c_gyro[1] = dic.t_c_gyro[1];
-        R_c_gyro[1] = dic.R_c_gyro[1];
-        R_gyro_c[1] = dic.R_gyro_c[1];
-        t_gyro_c[1] = dic.t_gyro_c[1];
+        t_c_imu[1] = dic.t_c_imu[1];
+        R_c_imu[1] = dic.R_c_imu[1];
+        R_imu_c[1] = dic.R_imu_c[1];
+        t_imu_c[1] = dic.t_imu_c[1];
 
         t_c_dvl[1] = dic.t_c_dvl[1];
         R_c_dvl[1] = dic.R_c_dvl[1];
@@ -1640,10 +1640,10 @@ void DvlImuCamPose::serialize(Archive &ar, const unsigned int version)
 
     tcw.resize(mCamNum);
     Rcw.resize(mCamNum);
-    t_c_gyro.resize(mCamNum);
-    R_c_gyro.resize(mCamNum);
-    t_gyro_c.resize(mCamNum);
-    R_gyro_c.resize(mCamNum);
+    t_c_imu.resize(mCamNum);
+    R_c_imu.resize(mCamNum);
+    t_imu_c.resize(mCamNum);
+    R_imu_c.resize(mCamNum);
     t_dvl_c.resize(mCamNum);
     R_dvl_c.resize(mCamNum);
     t_c_dvl.resize(mCamNum);
@@ -1657,10 +1657,10 @@ void DvlImuCamPose::serialize(Archive &ar, const unsigned int version)
         ar & pCamera[i];
         serializeEigenMatrix(ar,tcw[i], version);
         serializeEigenMatrix(ar,Rcw[i], version);
-        serializeEigenMatrix(ar,t_c_gyro[i], version);
-        serializeEigenMatrix(ar,R_c_gyro[i], version);
-        serializeEigenMatrix(ar,t_gyro_c[i], version);
-        serializeEigenMatrix(ar,R_gyro_c[i], version);
+        serializeEigenMatrix(ar,t_c_imu[i], version);
+        serializeEigenMatrix(ar,R_c_imu[i], version);
+        serializeEigenMatrix(ar,t_imu_c[i], version);
+        serializeEigenMatrix(ar,R_imu_c[i], version);
 
         serializeEigenMatrix(ar,t_c_dvl[i], version);
         serializeEigenMatrix(ar,R_c_dvl[i], version);

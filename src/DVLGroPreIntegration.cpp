@@ -22,14 +22,14 @@ DVLGroPreIntegration::DVLGroPreIntegration(const Bias &b_, const Calib &calib, b
     mVelocityThreshold = 0.6f;
     Initialize(b_);
     mCalib = calib;
-    calib.mT_gyro_dvl.rowRange(0, 3).colRange(0, 3).copyTo(mR_g_d);
+    calib.mT_imu_dvl.rowRange(0, 3).colRange(0, 3).copyTo(mR_g_d);
     mR_g_d.convertTo(mR_g_d, CV_64F);
 }
 
 DVLGroPreIntegration::DVLGroPreIntegration(const Bias &b_, const Calib &calib, const cv::Point3d &v_di,
                                            bool bDVL) : bDVL(bDVL)
 {
-    calib.mT_gyro_dvl.rowRange(0, 3).colRange(0, 3).copyTo(mR_g_d);
+    calib.mT_imu_dvl.rowRange(0, 3).colRange(0, 3).copyTo(mR_g_d);
     mR_g_d.convertTo(mR_g_d, CV_64F);
     Nga = calib.Cov.clone();
     NgaWalk = calib.CovWalk.clone();
@@ -43,7 +43,7 @@ DVLGroPreIntegration::DVLGroPreIntegration(const Bias &b_, const Calib &calib, c
                                            const Eigen::Vector4d &alpha, const Eigen::Vector4d &beta, bool bDVL)
         : bDVL(bDVL), mAlpha(alpha), mBeta(beta)
 {
-    calib.mT_gyro_dvl.rowRange(0, 3).colRange(0, 3).copyTo(mR_g_d);
+    calib.mT_imu_dvl.rowRange(0, 3).colRange(0, 3).copyTo(mR_g_d);
     mR_g_d.convertTo(mR_g_d, CV_64F);
     Nga = calib.Cov.clone();
     NgaWalk = calib.CovWalk.clone();
@@ -64,7 +64,7 @@ DVLGroPreIntegration::DVLGroPreIntegration(const Bias &b_, const Calib &calib, c
                                                                                    mVelocityThreshold(
                                                                                            velocity_threshold)
 {
-    calib.mT_gyro_dvl.rowRange(0, 3).colRange(0, 3).copyTo(mR_g_d);
+    calib.mT_imu_dvl.rowRange(0, 3).colRange(0, 3).copyTo(mR_g_d);
     mR_g_d.convertTo(mR_g_d, CV_64F);
     Nga = calib.Cov.clone();
     NgaWalk = calib.CovWalk.clone();

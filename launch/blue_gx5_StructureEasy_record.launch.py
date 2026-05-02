@@ -12,6 +12,8 @@ from ament_index_python.packages import get_package_share_directory
 RECORD_TOPICS = [
     '/aqua_slam/orb_odom',
     '/aqua_slam/orb_path',
+    '/aqua_slam/orb_odom_body',
+    '/aqua_slam/orb_path_body',
     '/aqua_slam/dvl_imu_pose',
     '/aqua_slam/dvl_imu_path',
     '/aqua_slam/dvl_imu_pose_ref',

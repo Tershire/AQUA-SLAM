@@ -169,6 +169,10 @@ protected:
 	nav_msgs::msg::Path m_path_orb;
 // // 	std::shared_ptr<ros::Publisher> mp_path_orb_pub;  // original  // original
 	rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr mp_path_orb_pub;
+	// body-frame (FLU) outputs — experimental
+	rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr mp_odom_orb_body_pub;
+	rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr mp_path_orb_body_pub;
+	nav_msgs::msg::Path m_path_orb_body;
 // // 	std::shared_ptr<ros::Publisher> mp_pose_orb_camera_pub;  // original  // original
 	rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr mp_pose_orb_camera_pub;
 
@@ -203,6 +207,11 @@ protected:
 
     // gravity dir of current map
     Eigen::Isometry3d mT_w_c0;
+    // IMU←camera extrinsic (T_imu_c), set once from calibration
+    Eigen::Isometry3d mT_imu_c;
+    // body←IMU extrinsic (T_body_imu), identity if body == IMU
+    Eigen::Isometry3d mT_body_imu;
+    bool mb_calib_initialized{false};
 
 public:
 	void setLocalMapping(LocalMapping *mpLocalMapping)

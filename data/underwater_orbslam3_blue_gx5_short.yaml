@@ -123,9 +123,8 @@ EnableLoopDetection: 1
 IMUInitTranslation: 3.0 # 10.0 can calibrate well, but some sequence cannot reach 10
 IMUInitRotation: 1.0
 
-# IMU to orb
-# only use rotation
-T_gyro_c: !!opencv-matrix
+# IMU to camera (T_imu_c): transformation from camera frame to IMU frame
+T_imu_c: !!opencv-matrix
   rows: 4
   cols: 4
   dt: f
@@ -134,6 +133,18 @@ T_gyro_c: !!opencv-matrix
           0.9998,    0.0103,   -0.0167,    -0.056238089,
           0,  0,   0,    1 ]
 
+
+# T_body_imu: !!opencv-matrix  (optional) transformation from IMU frame to body (FLU) frame
+# If absent, body frame == IMU frame (identity assumed).
+# Example for BDR IMU → FLU body
+T_body_imu: !!opencv-matrix
+  rows: 4
+  cols: 4
+  dt: f
+  data: [-1, 0, 0, 0,
+         0, 0, -1, 0,
+         0, -1, 0, 0,
+         0, 0, 0, 1]
 
 T_dvl_c: !!opencv-matrix
   rows: 4

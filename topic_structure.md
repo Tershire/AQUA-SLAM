@@ -16,6 +16,8 @@ Comparison of original ROS1 (`main` branch) and current ROS2 (`ros2_jazzy` branc
 | `orb_odom` | `orb_odom` | `nav_msgs/Odometry` | frame rate | Same pose as `orb_pose`; ROS2 adds `twist.twist.linear` = world-frame body velocity (`mVw`) from DVL+IMU propagation |
 | `orb_path` | `orb_path` | `nav_msgs/Path` | ~4 Hz | Keyframe trajectory rebuilt after `LocalDVLIMUBundleAdjustment` — **tightly coupled** DVL+IMU+visual BA result |
 | `camera_pose` | `camera_pose` | ~~`nav_msgs/Odometry`~~ → `geometry_msgs/PoseStamped` | — | **Not published** — publisher registered but function body is `#if 0`; type changed in ROS2 migration |
+| — | `orb_odom_body` | `nav_msgs/Odometry` | frame rate | `orb_odom` transformed to body FLU frame: `T_w_b = T_w_c * T_b_c⁻¹`; `twist` in body frame |
+| — | `orb_path_body` | `nav_msgs/Path` | ~4 Hz | `orb_path` keyframes transformed to body FLU frame |
 | `sparse_map` | `sparse_map` | `sensor_msgs/PointCloud2` | ~4 Hz | Visual map points |
 | `octomap` | `octomap` | `octomap_msgs/Octomap` | ~4 Hz | 3D occupancy map |
 | `integration_path` | `dvl_imu_path` | `nav_msgs/Path` | ~4 Hz | DVL+IMU dead-reckoning trajectory |
@@ -92,4 +94,4 @@ For robot control applications requiring the **body frame** (`b`), apply:
 T_w_b = T_w_c * T_gyro_c⁻¹
 ```
 
-where `T_gyro_c` (= `T_b_c`) is defined in the sensor YAML config file.
+where `T_imu_c` is defined in the sensor YAML config file, and `T_body_imu` is an optional YAML parameter (default identity if absent) for cases where the body and IMU frames differ.
