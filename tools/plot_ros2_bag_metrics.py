@@ -180,19 +180,53 @@ def quat_to_rpy(q: Any) -> tuple[float, float, float]:
 
 
 def normalize_times(series: dict[str, Any], t0: float | None) -> float | None:
-    # Each series is normalized to its own first timestamp (t=0 at first sample).
-    # Topics in the result bag can use different time references (e.g. GT uses
-    # relative bag time starting near 0, while SLAM outputs use ROS system time
-    # ~1.25e8 s), so a single global t0 would leave most series un-normalized.
-    any_data = False
-    for value in series.values():
+    """Normalize timestamps so that series sharing the same time base align on the same axis.
+
+    Series whose first timestamps are within GROUP_THRESHOLD seconds of each other are
+    treated as being on the same time reference and are all shifted by the same t0
+    (= the minimum first timestamp in the group).  Series that are far apart in time
+    (e.g. live-camera SLAM output vs. bag-replay ground truth) are normalized
+    independently, each starting at t = 0 relative to their own first sample.
+
+    Returns the t0 of the largest group, for callers that need to adjust ancillary
+    time series (e.g. loop events) that are known to be on the primary time base.
+    """
+    GROUP_THRESHOLD = 3600.0  # series within 1 hour → same time reference
+
+    keyed: list[tuple[str, float]] = []
+    for key, value in series.items():
         times = getattr(value, 't', None)
         if times:
-            any_data = True
-            series_t0 = times[0]
+            keyed.append((key, times[0]))
+
+    if not keyed:
+        return None
+
+    keyed.sort(key=lambda kv: kv[1])
+
+    groups: list[list[tuple[str, float]]] = []
+    current: list[tuple[str, float]] = [keyed[0]]
+    for kv in keyed[1:]:
+        if kv[1] - current[-1][1] <= GROUP_THRESHOLD:
+            current.append(kv)
+        else:
+            groups.append(current)
+            current = [kv]
+    groups.append(current)
+
+    primary_t0 = 0.0
+    primary_size = 0
+    for group in groups:
+        group_t0 = group[0][1]
+        if len(group) > primary_size:
+            primary_t0 = group_t0
+            primary_size = len(group)
+        for key, _ in group:
+            times = series[key].t
             for i in range(len(times)):
-                times[i] = times[i] - series_t0
-    return 0.0 if any_data else None
+                times[i] -= group_t0
+
+    return primary_t0
 
 
 def extract_pose(msg: Any) -> tuple[Any, Any, Any | None] | None:
