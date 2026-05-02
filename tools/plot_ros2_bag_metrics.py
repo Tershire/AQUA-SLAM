@@ -381,6 +381,7 @@ def plot_xyz(plt: Any, out: Path, title: str, ylabel: str, data: Series3, loop_e
     ax.set_title(title)
     ax.set_xlabel('time [s]')
     ax.set_ylabel(ylabel)
+    ax.set_xlim(left=0)
     ax.grid(True, alpha=0.3)
     ax.legend()
     fig.tight_layout()
@@ -426,6 +427,7 @@ def plot_pose(plt: Any, out: Path, topic: str, data: PoseSeries, loop_events: li
     for ax in axes[:row]:
         add_loop_lines(ax, loop_events)
         ax.set_xlabel('time [s]')
+        ax.set_xlim(left=0)
         ax.grid(True, alpha=0.3)
     axes[row].grid(True, alpha=0.3)
     fig.suptitle(f'Pose: {topic}')

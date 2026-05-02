@@ -162,3 +162,13 @@ python3 tools/plot_ros2_bag_metrics.py results/slam_YYYYMMDD_HHMMSS/
 ```
 
 Plots and CSVs are saved to `results/slam_YYYYMMDD_HHMMSS_plots/`.
+
+### What to expect in the plots
+
+**Time axis:** All topics are normalized to a **common t = 0** (minimum first timestamp across topics sharing the same time reference). The x-axis always starts from 0.
+
+**orb_path starts earlier than orb_odom** — `orb_path` contains the full keyframe history since SLAM initialization, while `orb_odom` is only recorded from when the bag recording begins. If recording starts a few seconds after SLAM init, orb_path data will appear at the left edge of the plot while orb_odom starts later (visible gap).
+
+**orb_odom vs orb_path position difference** — A small constant offset of ~5–20 mm is expected and normal. `orb_odom` comes from per-frame visual tracking (pre-BA), while `orb_path` uses BA-refined keyframe poses. Occasional larger spikes (~50 mm) near keyframe creation or loop closure events are also expected.
+
+**Timestamps** — All SLAM output topics use the left camera hardware timestamp as their header stamp. For bag replay this matches the bag's original sensor time; for a live camera it matches the camera's clock.
