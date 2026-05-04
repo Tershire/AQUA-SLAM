@@ -82,6 +82,8 @@ The [underwater tank dataset page](https://senseroboticslab.github.io/underwater
 
 ## Coordinate Frame Convention
 
+> Full per-sensor axis definitions and the complete transform chain are in [coordinate_frames.md](coordinate_frames.md).
+
 All SLAM pose topics (`orb_pose`, `orb_odom`, `orb_path`) express camera pose in a **world frame** `w` defined at SLAM initialization:
 
 ```
