@@ -369,6 +369,55 @@ def style_axis(ax: Any) -> None:
     ax.spines['right'].set_visible(False)
 
 
+def _plot_frame(
+    fig: Any,
+    gs: Any,
+    r0: int,
+    title: str,
+    odom: PoseSeries,
+    path: PoseSeries,
+    at: 'PoseSeries | None',
+) -> None:
+    """Render one frame block (3 rows) into the given GridSpec starting at row r0."""
+    ax_xy = fig.add_subplot(gs[r0:r0 + 3, 0])
+    ax_px, ax_py, ax_pz = [fig.add_subplot(gs[r0 + r, 1]) for r in range(3)]
+    ax_rr, ax_pp, ax_yw = [fig.add_subplot(gs[r0 + r, 2]) for r in range(3)]
+
+    # XY trajectory
+    if len(odom): ax_xy.plot(odom.x, odom.y, color='tab:blue', alpha=0.7, linewidth=1.6, label='odom')
+    if len(path): ax_xy.plot(path.x, path.y, color='tab:red',  alpha=0.7, linewidth=1.6, label='path')
+    if at:        ax_xy.plot(at.x,   at.y,   color=_APRILTAG_COLOR, alpha=0.7, linewidth=1.4, label='GT', zorder=0)
+    ax_xy.set_xlabel('x [m]'); ax_xy.set_ylabel('y [m]')
+    ax_xy.axis('equal'); ax_xy.set_title(f'{title}: XY')
+    ax_xy.legend(fontsize='small'); style_axis(ax_xy)
+
+    # Position over time — one subplot per axis
+    for ax, o_v, p_v, g_v, ylabel in [
+        (ax_px, odom.x, path.x, at.x if at else None, 'x [m]'),
+        (ax_py, odom.y, path.y, at.y if at else None, 'y [m]'),
+        (ax_pz, odom.z, path.z, at.z if at else None, 'z [m]'),
+    ]:
+        if len(odom): ax.plot(odom.t, o_v, color='tab:blue', alpha=0.8, linewidth=1.5, label='odom')
+        if len(path): ax.plot(path.t, p_v, color='tab:red',  alpha=0.8, linewidth=1.5, label='path')
+        if at:        ax.plot(at.t,   g_v, color=_APRILTAG_COLOR, alpha=0.8, linewidth=1.2, label='GT')
+        ax.set_ylabel(ylabel); ax.set_xlim(left=0); style_axis(ax)
+    ax_px.set_title(f'{title}: position'); ax_px.legend(fontsize='small')
+    ax_pz.set_xlabel('time [s]')
+
+    # Attitude over time — one subplot per axis
+    for ax, o_v, p_v, g_v, ylabel in [
+        (ax_rr, odom.roll,  path.roll,  at.roll  if at else None, 'roll [°]'),
+        (ax_pp, odom.pitch, path.pitch, at.pitch if at else None, 'pitch [°]'),
+        (ax_yw, odom.yaw,   path.yaw,   at.yaw   if at else None, 'yaw [°]'),
+    ]:
+        if len(odom): ax.plot(odom.t, o_v, color='tab:blue', alpha=0.8, linewidth=1.5, label='odom')
+        if len(path): ax.plot(path.t, p_v, color='tab:red',  alpha=0.8, linewidth=1.5, label='path')
+        if at:        ax.plot(at.t,   g_v, color=_APRILTAG_COLOR, alpha=0.8, linewidth=1.2, label='GT')
+        ax.set_ylabel(ylabel); ax.set_xlim(left=0); style_axis(ax)
+    ax_rr.set_title(f'{title}: attitude'); ax_rr.legend(fontsize='small')
+    ax_yw.set_xlabel('time [s]')
+
+
 def plot_pair(
     plt: Any,
     out: Path,
@@ -378,60 +427,14 @@ def plot_pair(
     apriltag: PoseSeries | None = None,
     body_frame: bool = False,
 ) -> None:
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-    ax_xy, ax_pos, ax_att = axes
-
-    if len(odom):
-        ax_xy.plot(odom.x, odom.y, color='tab:blue', alpha=0.58, linewidth=1.6, label='odom')
-        ax_pos.plot(odom.t, odom.x, color='tab:blue', alpha=0.62, linewidth=1.5, label='odom x')
-        ax_pos.plot(odom.t, odom.y, color='tab:blue', alpha=0.42, linewidth=1.5, label='odom y')
-        ax_pos.plot(odom.t, odom.z, color='tab:blue', alpha=0.25, linewidth=1.5, label='odom z')
-        ax_att.plot(odom.t, odom.roll, color='tab:blue', alpha=0.62, linewidth=1.5, label='odom roll')
-        ax_att.plot(odom.t, odom.pitch, color='tab:blue', alpha=0.42, linewidth=1.5, label='odom pitch')
-        ax_att.plot(odom.t, odom.yaw, color='tab:blue', alpha=0.25, linewidth=1.5, label='odom yaw')
-    if len(path):
-        ax_xy.plot(path.x, path.y, color='tab:red', alpha=0.58, linewidth=1.6, label='path')
-        ax_pos.plot(path.t, path.x, color='tab:red', alpha=0.62, linewidth=1.5, label='path x')
-        ax_pos.plot(path.t, path.y, color='tab:red', alpha=0.42, linewidth=1.5, label='path y')
-        ax_pos.plot(path.t, path.z, color='tab:red', alpha=0.25, linewidth=1.5, label='path z')
-        ax_att.plot(path.t, path.roll, color='tab:red', alpha=0.62, linewidth=1.5, label='path roll')
-        ax_att.plot(path.t, path.pitch, color='tab:red', alpha=0.42, linewidth=1.5, label='path pitch')
-        ax_att.plot(path.t, path.yaw, color='tab:red', alpha=0.25, linewidth=1.5, label='path yaw')
+    at: PoseSeries | None = None
     if apriltag is not None and len(apriltag):
-        ref = path if len(path) else odom
-        at = align_apriltag(apriltag, ref, body_frame=body_frame)
-        ax_xy.plot(at.x, at.y, color=_APRILTAG_COLOR, alpha=0.70, linewidth=1.4, label='AprilTag GT', zorder=0)
-        ax_pos.plot(at.t, at.x, color=_APRILTAG_COLOR, alpha=0.62, linewidth=1.2, label='GT x')
-        ax_pos.plot(at.t, at.y, color=_APRILTAG_COLOR, alpha=0.42, linewidth=1.2, label='GT y')
-        ax_pos.plot(at.t, at.z, color=_APRILTAG_COLOR, alpha=0.25, linewidth=1.2, label='GT z')
-        ax_att.plot(at.t, at.roll, color=_APRILTAG_COLOR, alpha=0.62, linewidth=1.2, label='GT roll')
-        ax_att.plot(at.t, at.pitch, color=_APRILTAG_COLOR, alpha=0.42, linewidth=1.2, label='GT pitch')
-        ax_att.plot(at.t, at.yaw, color=_APRILTAG_COLOR, alpha=0.25, linewidth=1.2, label='GT yaw')
+        at = align_apriltag(apriltag, path if len(path) else odom, body_frame=body_frame)
 
-    ax_xy.set_title('XY trajectory')
-    ax_xy.set_xlabel('x [m]')
-    ax_xy.set_ylabel('y [m]')
-    ax_xy.axis('equal')
-    ax_xy.legend()
-    style_axis(ax_xy)
-
-    ax_pos.set_title('Position over time')
-    ax_pos.set_xlabel('time [s]')
-    ax_pos.set_ylabel('position [m]')
-    ax_pos.set_xlim(left=0)
-    ax_pos.legend(ncol=2, fontsize='small')
-    style_axis(ax_pos)
-
-    ax_att.set_title('Attitude over time')
-    ax_att.set_xlabel('time [s]')
-    ax_att.set_ylabel('attitude [deg]')
-    ax_att.set_xlim(left=0)
-    ax_att.legend(ncol=2, fontsize='small')
-    style_axis(ax_att)
-
-    fig.suptitle(title)
-    fig.tight_layout()
-    fig.savefig(out, dpi=180)
+    fig = plt.figure(figsize=(18, 10))
+    gs = fig.add_gridspec(3, 3, hspace=0.42, wspace=0.30)
+    _plot_frame(fig, gs, 0, title, odom, path, at)
+    fig.savefig(out, dpi=180, bbox_inches='tight')
     print(f'Wrote {out}')
 
 
@@ -441,63 +444,17 @@ def plot_combined(
     data: dict[str, tuple[PoseSeries, PoseSeries, str]],
     apriltag: PoseSeries | None = None,
 ) -> None:
-    fig, axes = plt.subplots(2, 3, figsize=(18, 9))
+    fig = plt.figure(figsize=(18, 18))
+    gs = fig.add_gridspec(6, 3, hspace=0.42, wspace=0.30)
 
-    for row, key in enumerate(('orb', 'orb_body')):
+    for frame_idx, key in enumerate(('orb', 'orb_body')):
         odom, path, title = data[key]
-        ax_xy, ax_pos, ax_att = axes[row]
-
-        if len(odom):
-            ax_xy.plot(odom.x, odom.y, color='tab:blue', alpha=0.58, linewidth=1.5, label='odom')
-            ax_pos.plot(odom.t, odom.x, color='tab:blue', alpha=0.62, linewidth=1.2, label='odom x')
-            ax_pos.plot(odom.t, odom.y, color='tab:blue', alpha=0.42, linewidth=1.2, label='odom y')
-            ax_pos.plot(odom.t, odom.z, color='tab:blue', alpha=0.25, linewidth=1.2, label='odom z')
-            ax_att.plot(odom.t, odom.roll, color='tab:blue', alpha=0.62, linewidth=1.2, label='odom roll')
-            ax_att.plot(odom.t, odom.pitch, color='tab:blue', alpha=0.42, linewidth=1.2, label='odom pitch')
-            ax_att.plot(odom.t, odom.yaw, color='tab:blue', alpha=0.25, linewidth=1.2, label='odom yaw')
-        if len(path):
-            ax_xy.plot(path.x, path.y, color='tab:red', alpha=0.58, linewidth=1.5, label='path')
-            ax_pos.plot(path.t, path.x, color='tab:red', alpha=0.62, linewidth=1.2, label='path x')
-            ax_pos.plot(path.t, path.y, color='tab:red', alpha=0.42, linewidth=1.2, label='path y')
-            ax_pos.plot(path.t, path.z, color='tab:red', alpha=0.25, linewidth=1.2, label='path z')
-            ax_att.plot(path.t, path.roll, color='tab:red', alpha=0.62, linewidth=1.2, label='path roll')
-            ax_att.plot(path.t, path.pitch, color='tab:red', alpha=0.42, linewidth=1.2, label='path pitch')
-            ax_att.plot(path.t, path.yaw, color='tab:red', alpha=0.25, linewidth=1.2, label='path yaw')
+        at: PoseSeries | None = None
         if apriltag is not None and len(apriltag):
-            ref = path if len(path) else odom
-            at = align_apriltag(apriltag, ref, body_frame=(key == 'orb_body'))
-            ax_xy.plot(at.x, at.y, color=_APRILTAG_COLOR, alpha=0.70, linewidth=1.2, label='AprilTag GT', zorder=0)
-            ax_pos.plot(at.t, at.x, color=_APRILTAG_COLOR, alpha=0.62, linewidth=1.0, label='GT x')
-            ax_pos.plot(at.t, at.y, color=_APRILTAG_COLOR, alpha=0.42, linewidth=1.0, label='GT y')
-            ax_pos.plot(at.t, at.z, color=_APRILTAG_COLOR, alpha=0.25, linewidth=1.0, label='GT z')
-            ax_att.plot(at.t, at.roll, color=_APRILTAG_COLOR, alpha=0.62, linewidth=1.0, label='GT roll')
-            ax_att.plot(at.t, at.pitch, color=_APRILTAG_COLOR, alpha=0.42, linewidth=1.0, label='GT pitch')
-            ax_att.plot(at.t, at.yaw, color=_APRILTAG_COLOR, alpha=0.25, linewidth=1.0, label='GT yaw')
+            at = align_apriltag(apriltag, path if len(path) else odom, body_frame=(key == 'orb_body'))
+        _plot_frame(fig, gs, frame_idx * 3, title, odom, path, at)
 
-        ax_xy.set_title(f'{title}: XY')
-        ax_xy.set_xlabel('x [m]')
-        ax_xy.set_ylabel('y [m]')
-        ax_xy.axis('equal')
-        ax_xy.legend()
-        style_axis(ax_xy)
-
-        ax_pos.set_title(f'{title}: XYZ over time')
-        ax_pos.set_xlabel('time [s]')
-        ax_pos.set_ylabel('position [m]')
-        ax_pos.set_xlim(left=0)
-        ax_pos.legend(ncol=2, fontsize='small')
-        style_axis(ax_pos)
-
-        ax_att.set_title(f'{title}: RPY over time')
-        ax_att.set_xlabel('time [s]')
-        ax_att.set_ylabel('attitude [deg]')
-        ax_att.set_xlim(left=0)
-        ax_att.legend(ncol=2, fontsize='small')
-        style_axis(ax_att)
-
-    fig.suptitle('ORB odometry vs path comparison')
-    fig.tight_layout()
-    fig.savefig(out, dpi=180)
+    fig.savefig(out, dpi=180, bbox_inches='tight')
     print(f'Wrote {out}')
 
 

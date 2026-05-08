@@ -168,6 +168,20 @@ T_w_bj = T_w_cj * T_imu_c⁻¹ * T_body_imu⁻¹
 
 ---
 
+## Initial Body-Frame Attitude at SLAM Start
+
+At SLAM initialization the world frame is set by `mT_w_c0` (see `topic_structure.md`). Even so, the body-frame RPY reported in `orb_odom_body` / `orb_path_body` at the first keyframe is generally **not** (0°, 0°, 0°) for three reasons:
+
+1. **Actual robot tilt** — World Z is gravity-aligned via the IMU, so any physical roll/pitch of the robot at initialization shows up directly in the body-frame attitude. A few degrees of roll/pitch is normal in underwater operation (buoyancy not yet settled, uneven tank floor, etc.).
+
+2. **Yaw residual** — `mT_w_c0` yaw-aligns the ORB-SLAM3 internal frame (first camera keyframe) to the world X axis. After the cam→body transform (`T_imu_c`, `T_body_imu`) is applied, a small yaw residual can remain if the camera's initial forward direction is not exactly collinear with the body's X axis.
+
+3. **IMU initialization latency** — IMU gravity alignment and the first ORB keyframe may not be perfectly co-timed; any attitude change in that window propagates to the initial pose.
+
+This is normal behavior, not a bug. The world frame is an absolute reference anchored to gravity and the robot's heading at startup — it does not force the robot to start at identity.
+
+---
+
 ## Calibration Parameters (from YAML)
 
 | Parameter    | Meaning                                 | Convention |

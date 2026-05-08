@@ -172,3 +172,51 @@ Plots and CSVs are saved to `results/slam_YYYYMMDD_HHMMSS_plots/`.
 **orb_odom vs orb_path position difference** — A small constant offset of ~5–20 mm is expected and normal. `orb_odom` comes from per-frame visual tracking (pre-BA), while `orb_path` uses BA-refined keyframe poses. Occasional larger spikes (~50 mm) near keyframe creation or loop closure events are also expected.
 
 **Timestamps** — All SLAM output topics use the left camera hardware timestamp as their header stamp. For bag replay this matches the bag's original sensor time; for a live camera it matches the camera's clock.
+
+---
+
+## 8. Compare ORB Odometry vs Path (with AprilTag GT overlay)
+
+After Step 4a + Step 5, compare the ORB odometry and path topics side-by-side and overlay the AprilTag SLAM ground truth from the **host**:
+
+```bash
+cd src/AQUA-SLAM
+python3 tools/compare_odom_and_path.py results/slam_YYYYMMDD_HHMMSS/
+```
+
+Plots are saved to `results/slam_YYYYMMDD_HHMMSS_orb_compare/`:
+
+| File | Contents |
+|---|---|
+| `orb_odom_path_compare.png` | ORB camera frame: XY + per-axis position + per-axis attitude |
+| `orb_body_odom_path_compare.png` | ORB body frame (FLU): same layout |
+| `orb_odom_path_compare_all.png` | Both frames combined in one figure |
+
+Each figure uses a **3 × 3 grid**: the left column is the XY trajectory, the middle column shows x / y / z position over time (one subplot each), and the right column shows roll / pitch / yaw over time (one subplot each). AprilTag GT is drawn in dark gray on top of odom (blue) and path (red).
+
+### Options
+
+| Flag | Default | Description |
+|---|---|---|
+| `--apriltag-topic TOPIC` | `/apriltag_slam/GT` | GT topic to overlay; set to `""` to disable |
+| `--odom-topic TOPIC` | `/aqua_slam/orb_odom` | ORB odometry topic |
+| `--path-topic TOPIC` | `/aqua_slam/orb_path` | ORB path topic |
+| `--odom-body-topic TOPIC` | `/aqua_slam/orb_odom_body` | ORB body-frame odometry topic |
+| `--path-body-topic TOPIC` | `/aqua_slam/orb_path_body` | ORB body-frame path topic |
+| `--output-dir DIR` | `<bag>_orb_compare/` | Output directory for PNGs |
+| `--show` | off | Open matplotlib windows interactively after saving |
+
+### AprilTag GT alignment
+
+The GT topic (`nav_msgs/Odometry`) uses a different coordinate frame than AQUA-SLAM. The script applies the following transforms automatically:
+
+1. **Frame rotation** — R = Rz(+90°)·Rx(−90°): maps GT.x → AQUA.y, GT.z → −AQUA.x, GT.y → −AQUA.z (empirically confirmed by Pearson correlation on bag data).
+2. **Position alignment** — GT trajectory is translated so its first point coincides with the ORB trajectory's first point.
+3. **Orientation alignment** — a fixed delta rotation q_delta = q_ref[0] ⊗ q_gt[0]⁻¹ is applied so GT attitude starts at the same value as the ORB reference, absorbing any residual tilt between the AprilTag and AQUA-SLAM gravity-aligned world frames.
+4. **Body-frame orientation** — for the body-frame plot an additional cam→body rotation is applied so the GT attitude is expressed in the same FLU convention as `orb_odom_body`.
+
+### Notes
+
+- The script reads directly from the result bag; no running container is required.
+- Requires `matplotlib` and `rosbags` in the Python environment (see `~/Documents/virtual_environments/ros-py312/` on the host).
+- The virtual environment command: `/home/tershire/Documents/virtual_environments/ros-py312/bin/python3 tools/compare_odom_and_path.py results/slam_YYYYMMDD_HHMMSS/`
