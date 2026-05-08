@@ -102,6 +102,8 @@ VisualIntegration: 0
 #--------------------------------------------------------------------------------------------
 LeftImgTopic:  "/girona500/camera_left/image_color"
 RightImgTopic: "/girona500/camera_right/image_color"
+# stonefish_ros2 publishes cameras as <topic>/image_color and <topic>/camera_info.
+# scenario sets topic="/girona500/camera_left" → actual image on /girona500/camera_left/image_color
 ImuTopic:      "/girona500/imu/data"
 DvlTopic:      "/bluerov2/dvl"   # published by sim_dvl_converter
 
