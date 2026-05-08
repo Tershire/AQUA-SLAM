@@ -1,0 +1,170 @@
+%YAML:1.0
+
+# AQUA-SLAM settings for Stonefish simulation (aqua-slam-testbed / simple_tank.scn).
+# Based on underwater_orbslam3_blue_gx5_short.yaml; adjust camera/IMU params
+# to match sensor definitions in scenarios/simple_tank.scn.
+
+#--------------------------------------------------------------------------------------------
+# Camera Parameters
+# hfov=50° with 612px width → fx = (612/2) / tan(25°) ≈ 655 px  (matches real config)
+#--------------------------------------------------------------------------------------------
+Camera.type: "PinHole"
+
+Camera.fx: 655.0
+Camera.fy: 655.0
+Camera.cx: 306.0
+Camera.cy: 256.0
+
+Camera.k1: 0.0
+Camera.k2: 0.0
+Camera.p1: 0.0
+Camera.p2: 0.0
+
+Camera.bFishEye: 0
+
+Camera.width: 612
+Camera.height: 512
+
+Camera.fps: 20
+
+# Stereo baseline × fx: baseline = 0.12 m → bf = 0.12 × 655 = 78.6
+Camera.bf: 78.6
+
+# Stonefish renders BGR by default.
+Camera.RGB: 0
+
+ThDepth: 35.0
+ThFarDepth: 10.0
+ImageScale: 1.0
+
+#--------------------------------------------------------------------------------------------
+# ORB Parameters  (same as real config)
+#--------------------------------------------------------------------------------------------
+ORBextractor.nFeatures: 1000
+ORBextractor.scaleFactor: 1.2
+ORBextractor.nLevels: 8
+ORBextractor.iniThFAST: 15
+ORBextractor.minThFAST: 3
+
+#--------------------------------------------------------------------------------------------
+# Viewer
+#--------------------------------------------------------------------------------------------
+Viewer.KeyFrameSize: 0.05
+Viewer.KeyFrameLineWidth: 1
+Viewer.GraphLineWidth: 0.9
+Viewer.PointSize: 2
+Viewer.CameraSize: 0.08
+Viewer.CameraLineWidth: 3
+Viewer.ViewpointX: 0
+Viewer.ViewpointY: -0.7
+Viewer.ViewpointZ: -1.8
+Viewer.ViewpointF: 500
+
+#--------------------------------------------------------------------------------------------
+# Optimizer
+#--------------------------------------------------------------------------------------------
+Optimizer.visual_lamda: 1
+Optimizer.DVL_lamda: 1
+Optimizer.DVL_lamda_debug: 1
+Optimizer.DVL_func: 1
+Optimizer.KF_init_step: 0.25
+Optimizer.KF_num_for_init: 200
+Optimizer.calibrated: 1
+Optimizer.mergingThreshold: 3
+Tracker.KFThresholdForMap: 15
+Tracker.ReLocalTime: 5
+
+alpha: !!opencv-matrix
+  rows: 4
+  cols: 1
+  dt: f
+  data: [ 1.1780, 1.1780, 1.1780, 1.1780]
+beta: !!opencv-matrix
+  rows: 4
+  cols: 1
+  dt: f
+  data: [ 0.7854, 0.7854, 0.7854, 0.7854]
+
+#--------------------------------------------------------------------------------------------
+# IMU Parameters
+# Noise values kept from real config; adjust once Stonefish noise model is tuned.
+#--------------------------------------------------------------------------------------------
+IMU.NoiseGyro: 1e-3
+IMU.NoiseAcc: 1e-2
+IMU.GyroWalk: 1e-5
+IMU.AccWalk: 1e-4
+IMU.Frequency: 200
+
+VisualIntegration: 0
+
+#--------------------------------------------------------------------------------------------
+# Topics — must match ros_publisher topics in simple_tank.scn + sim_dvl_converter output.
+#--------------------------------------------------------------------------------------------
+LeftImgTopic:  "/girona500/camera_left/image_color"
+RightImgTopic: "/girona500/camera_right/image_color"
+ImuTopic:      "/girona500/imu/data"
+DvlTopic:      "/bluerov2/dvl"   # published by sim_dvl_converter
+
+EnableLoopDetection: 1
+IMUInitTranslation: 3.0
+IMUInitRotation: 1.0
+
+#--------------------------------------------------------------------------------------------
+# Extrinsics
+# Defined by sensor placement in simple_tank.scn:
+#   camera_left  origin: xyz="0.5 -0.06 0.0"  (body frame, NED)
+#   IMU          origin: xyz="0.0  0.0  0.0"
+#   DVL          origin: xyz="0.0  0.0  0.15"  rpy="0 π 0"  (bottom-facing)
+#
+# T_imu_c (camera_left → IMU): pure translation, identity rotation.
+# Refine after verifying sensor alignment in simulation.
+#--------------------------------------------------------------------------------------------
+T_imu_c: !!opencv-matrix
+  rows: 4
+  cols: 4
+  dt: f
+  data: [ 1.0,  0.0,  0.0, -0.5,
+          0.0,  1.0,  0.0,  0.06,
+          0.0,  0.0,  1.0,  0.0,
+          0.0,  0.0,  0.0,  1.0 ]
+
+T_body_imu: !!opencv-matrix
+  rows: 4
+  cols: 4
+  dt: f
+  data: [-1,  0,  0,  0,
+          0,  0, -1,  0,
+          0, -1,  0,  0,
+          0,  0,  0,  1]
+
+# T_dvl_c: camera_left → DVL.
+# DVL is 0.5 m behind and 0.15 m below camera_left, with 180° yaw (bottom-facing).
+# TODO: verify sign conventions with actual stonefish_ros2 DVL output frame.
+T_dvl_c: !!opencv-matrix
+  rows: 4
+  cols: 4
+  dt: f
+  data: [-1.0,  0.0,  0.0, -0.5,
+          0.0, -1.0,  0.0,  0.06,
+          0.0,  0.0,  1.0,  0.15,
+          0.0,  0.0,  0.0,  1.0 ]
+
+DenseMapper:
+  enable: 0
+  P1: 200.0
+  P2: 400.0
+  correlation_window_size: 15
+  disp12MaxDiff: 0
+  disparity_range: 64
+  fullDP: false
+  min_disparity: 0
+  prefilter_cap: 31
+  prefilter_size: 9
+  speckle_range: 1
+  speckle_size: 1000
+  stereo_algorithm: 0
+  texture_threshold: 1000
+  uniqueness_ratio: 30
+  leaf_size: 0.05
+  mean_k: 5
+  std_thred: 0.1

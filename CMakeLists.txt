@@ -577,5 +577,11 @@ install(PROGRAMS
   RENAME dvl_converter
 )
 
+install(PROGRAMS
+  scripts/sim_dvl_converter.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME sim_dvl_converter
+)
+
 ament_package()
 # -----------------------------------------------------------------------------
