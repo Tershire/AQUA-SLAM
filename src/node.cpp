@@ -237,20 +237,20 @@ int main(int argc, char **argv)
             dvlgb.GrabDVL(msg);
         });
 
-    // Stereo image subscribers via image_transport (compressed transport)
+    // Stereo image subscribers via image_transport (raw transport for Stonefish)
     auto it = image_transport::create_subscription(
         node.get(), img_l_topic,
         [&igb](const sensor_msgs::msg::Image::ConstSharedPtr &msg) {
             igb.GrabImageLeft(std::make_shared<sensor_msgs::msg::Image>(*msg));
         },
-        "compressed");
+        "raw");
 
     auto it_r = image_transport::create_subscription(
         node.get(), img_r_topic,
         [&igb](const sensor_msgs::msg::Image::ConstSharedPtr &msg) {
             igb.GrabImageRight(std::make_shared<sensor_msgs::msg::Image>(*msg));
         },
-        "compressed");
+        "raw");
 
     // Launch sync thread
     thread sync_thread(&ImageGrabber::SyncWithImu, &igb);
