@@ -4,8 +4,8 @@ services:
       context: ../..
       dockerfile: docker/ros2_jazzy/Dockerfile
 
-    image: tershire/aqua-slam:ros2-jazzy-dev
-    container_name: aqua_slam_ros2_dev
+    image: tershire/aqua-slam:ros2-jazzy-sim-dev
+    container_name: aqua_slam_ros2_sim_dev
     working_dir: /root/ros2_ws
 
     network_mode: host
