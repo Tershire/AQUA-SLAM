@@ -97,14 +97,20 @@ beta: !!opencv-matrix
   data: [ 0.7854, 0.7854, 0.7854, 0.7854]
 
 # IMU Parameters  -0.0539971  0.0286326
-Tbc: !!opencv-matrix
-  rows: 4
-  cols: 4
-  dt: f
-  data: [ 0,  0,   1,   0.4, # real rov
-          -1,  0,   0,    0,
-          0,  -1,  0,    0.1,
-          0,  0,   0,    1 ]
+
+# Tbc (camera → IMU/body, ORB-SLAM3 legacy) is NOT used in the DVL_STEREO pipeline.
+# The loader in Tracking.cc is commented out; T_imu_c below replaces it.
+# Tbc members in IMU::Calib are never populated in the Calib(T_imu_c, T_dvl_c) constructor,
+# and all code paths that read mImuCalib.Tbc are guarded by IMU_MONOCULAR / IMU_STEREO
+# sensor-type checks which are never entered in DVL_STEREO mode.
+#Tbc: !!opencv-matrix
+#  rows: 4
+#  cols: 4
+#  dt: f
+#  data: [ 0,  0,   1,   0.4,
+#          -1,  0,   0,    0,
+#          0,  -1,  0,    0.1,
+#          0,  0,   0,    1 ]
 IMU.NoiseGyro: 1e-3 # 2.44e-4 #1e-3 # rad/s^0.5
 IMU.NoiseAcc: 1e-2 # 1.47e-3 #1e-2 # m/s^1.5
 IMU.GyroWalk: 1e-5 # rad/s^1.5
