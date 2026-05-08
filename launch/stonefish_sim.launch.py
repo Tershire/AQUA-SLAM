@@ -31,13 +31,8 @@ def generate_launch_description():
         output='screen',
     )
 
-    # Converts /girona500/dvl (stonefish_ros2/DVL) → /bluerov2/dvl (nav_msgs/Odometry).
-    sim_dvl_converter = Node(
-        package='aqua_slam',
-        executable='sim_dvl_converter',
-        name='sim_dvl_converter',
-        output='screen',
-    )
+    # sim_dvl_converter runs in the testbed container (stonefish_ros2 installed there).
+    # It publishes /bluerov2/dvl (nav_msgs/Odometry) which this node subscribes to.
 
     static_tf = Node(
         package='tf2_ros',
@@ -73,7 +68,6 @@ def generate_launch_description():
         settings_arg,
         use_rviz_arg,
         static_tf,
-        sim_dvl_converter,
         slam_node,
         robot_state_pub,
         rviz2,
