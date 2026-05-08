@@ -57,6 +57,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--path-topic', default='/aqua_slam/orb_path')
     parser.add_argument('--odom-body-topic', default='/aqua_slam/orb_odom_body')
     parser.add_argument('--path-body-topic', default='/aqua_slam/orb_path_body')
+    parser.add_argument(
+        '--apriltag-topic',
+        default='/apriltag_slam/GT',
+        help='AprilTag SLAM GT topic to overlay as reference (dark gray). Set to empty string to disable.',
+    )
     parser.add_argument('--show', action='store_true', help='Show matplotlib windows after saving PNGs.')
     return parser.parse_args()
 
@@ -165,30 +170,38 @@ def print_topics(reader: Any, topics: set[str]) -> None:
             print(f'  {conn.topic:35s} {conn.msgtype}')
 
 
-def normalize_pair(odom: PoseSeries, path: PoseSeries) -> None:
+def normalize_pair(odom: PoseSeries, path: PoseSeries) -> float | None:
     first_times = []
     if odom.t:
         first_times.append(odom.t[0])
     if path.t:
         first_times.append(path.t[0])
     if not first_times:
-        return
+        return None
     t0 = min(first_times)
     odom.normalize(t0)
     path.normalize(t0)
+    return t0
 
 
-def read_bag(args: argparse.Namespace) -> dict[str, tuple[PoseSeries, PoseSeries, str]]:
+def read_bag(
+    args: argparse.Namespace,
+) -> tuple[dict[str, tuple[PoseSeries, PoseSeries, str]], PoseSeries | None]:
     AnyReader = require_bag_dep()
     configured_pairs = (
         ('orb', args.odom_topic, args.path_topic, 'ORB camera frame'),
         ('orb_body', args.odom_body_topic, args.path_body_topic, 'ORB body frame'),
     )
     wanted_topics = {topic for _, odom, path, _ in configured_pairs for topic in (odom, path)}
+    at_topic: str = getattr(args, 'apriltag_topic', '/apriltag_slam/GT')
+    if at_topic:
+        wanted_topics.add(at_topic)
 
     odom_series = {odom: PoseSeries() for _, odom, _, _ in configured_pairs}
     path_series = {path: PoseSeries() for _, _, path, _ in configured_pairs}
+    apriltag_series = PoseSeries()
     latest_path_msgs: dict[str, tuple[Any, float]] = {}
+    apriltag_path_msg: tuple[Any, float] | None = None
 
     bag_path = args.bag.expanduser().resolve()
     if not bag_path.exists():
@@ -210,9 +223,20 @@ def read_bag(args: argparse.Namespace) -> dict[str, tuple[PoseSeries, PoseSeries
                         odom_series[conn.topic].append(t, pose[0], pose[1])
                 elif conn.topic in path_series:
                     latest_path_msgs[conn.topic] = (msg, t)
+                elif at_topic and conn.topic == at_topic:
+                    if 'Path' in conn.msgtype:
+                        apriltag_path_msg = (msg, t)
+                    else:
+                        pose = extract_pose(msg)
+                        if pose is not None:
+                            apriltag_series.append(t, pose[0], pose[1])
 
             for topic, (msg, t) in latest_path_msgs.items():
                 append_path(path_series[topic], msg, t)
+
+            if apriltag_path_msg is not None:
+                append_path(apriltag_series, apriltag_path_msg[0], apriltag_path_msg[1])
+
     except SystemExit:
         raise
     except Exception as exc:
@@ -221,17 +245,122 @@ def read_bag(args: argparse.Namespace) -> dict[str, tuple[PoseSeries, PoseSeries
             'Use a bag that was stopped cleanly, or pass the bag directory containing metadata.yaml.'
         ) from exc
 
+    # Normalize ORB pairs and collect absolute t0 values for apriltag time alignment.
     result: dict[str, tuple[PoseSeries, PoseSeries, str]] = {}
+    pair_t0s: list[float] = []
     for key, odom_topic, path_topic, title in configured_pairs:
         odom = odom_series[odom_topic]
         path = path_series[path_topic]
-        normalize_pair(odom, path)
+        t0 = normalize_pair(odom, path)
+        if t0 is not None:
+            pair_t0s.append(t0)
         result[key] = (odom, path, title)
-    return result
+
+    # Normalize apriltag timestamps.  If from the same session (within 1 hour of the ORB
+    # data), use the same absolute t0 so the time axes align.  Otherwise normalize
+    # independently (both start at t = 0) since wall-clock synchronisation is meaningless.
+    apriltag: PoseSeries | None = None
+    if at_topic and len(apriltag_series):
+        main_t0 = min(pair_t0s) if pair_t0s else apriltag_series.t[0]
+        if abs(apriltag_series.t[0] - main_t0) <= 3600.0:
+            apriltag_series.normalize(main_t0)
+        else:
+            apriltag_series.normalize(apriltag_series.t[0])
+        apriltag = apriltag_series
+    elif at_topic:
+        print(f'warning: no AprilTag GT samples found on {at_topic}')
+
+    return result, apriltag
 
 
 def safe_name(name: str) -> str:
     return re.sub(r'[^A-Za-z0-9_.-]+', '_', name).strip('_')
+
+
+_APRILTAG_COLOR = '#444444'
+
+# Fixed rotation from AprilTag GT frame → AQUA-SLAM world frame.
+# Derived empirically (Pearson correlations on synchronized bag data):
+#   GT.x → +AQUA.y  (r=+0.998, primary forward axis, both decrease over trajectory)
+#   GT.z → -AQUA.x  (r=-0.654, lateral axis, ranges 0.12 m vs 0.16 m)
+#   GT.y → -AQUA.z  (r=-0.424, vertical axis, ranges 0.04 m vs 0.04 m)
+# Matrix: R = [[0, 0,-1],[1, 0, 0],[0,-1, 0]]  = Rz(+90°) * Rx(-90°)
+# Quaternion equivalent (x,y,z,w): (-0.5, -0.5, 0.5, 0.5)
+_Q_GT_TO_AQUA = (-0.5, -0.5, 0.5, 0.5)  # (x, y, z, w)
+# R_cam_body = [[0,-1,0],[0,0,-1],[1,0,0]]: right-multiply to convert cam→body orientation
+_Q_CAM_BODY = (0.5, -0.5, 0.5, 0.5)  # (x, y, z, w)
+
+
+def _quat_mul(q1: tuple, q2: tuple) -> tuple:
+    """Quaternion product q1 ⊗ q2, both (x, y, z, w)."""
+    x1, y1, z1, w1 = q1
+    x2, y2, z2, w2 = q2
+    return (
+        w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,
+        w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,
+        w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2,
+        w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,
+    )
+
+
+def _quat_conj(q: tuple) -> tuple:
+    """Quaternion conjugate = inverse for unit quaternions, (x,y,z,w) → (-x,-y,-z,w)."""
+    return (-q[0], -q[1], -q[2], q[3])
+
+
+def _rpy_to_quat(roll_deg: float, pitch_deg: float, yaw_deg: float) -> tuple:
+    """ZYX Euler angles (degrees) → quaternion (x, y, z, w)."""
+    r = math.radians(roll_deg) / 2.0
+    p = math.radians(pitch_deg) / 2.0
+    y = math.radians(yaw_deg) / 2.0
+    cr, sr = math.cos(r), math.sin(r)
+    cp, sp = math.cos(p), math.sin(p)
+    cy, sy = math.cos(y), math.sin(y)
+    return (
+        sr * cp * cy - cr * sp * sy,
+        cr * sp * cy + sr * cp * sy,
+        cr * cp * sy - sr * sp * cy,
+        cr * cp * cy + sr * sp * sy,
+    )
+
+
+def align_apriltag(src: PoseSeries, ref: PoseSeries, body_frame: bool = False) -> PoseSeries:
+    """Transform AprilTag GT poses into the AQUA-SLAM world frame and align to ref's start.
+
+    Position: apply R = Rz(+90°)*Rx(−90°), then translate so GT[0] == ref[0].
+    Orientation: apply frame rotation, then left-multiply by q_delta = q_ref[0] ⊗ q_gt[0]⁻¹
+      so that GT attitude starts at the same value as ref (analogous to position alignment).
+    """
+    if not len(src) or not len(ref):
+        return src
+    sx0, sy0, sz0 = src.x[0], src.y[0], src.z[0]
+    rx0, ry0, rz0 = ref.x[0], ref.y[0], ref.z[0]
+
+    # Frame-rotate all GT quaternions first, then compute orientation alignment delta.
+    quats: list[tuple] = []
+    for i in range(len(src.t)):
+        q_gt = _rpy_to_quat(src.roll[i], src.pitch[i], src.yaw[i])
+        q_cam = _quat_mul(_Q_GT_TO_AQUA, q_gt)
+        quats.append(_quat_mul(q_cam, _Q_CAM_BODY) if body_frame else q_cam)
+
+    q_ref_first = _rpy_to_quat(ref.roll[0], ref.pitch[0], ref.yaw[0])
+    q_delta = _quat_mul(q_ref_first, _quat_conj(quats[0]))
+
+    out = PoseSeries()
+    for i in range(len(src.t)):
+        dx = src.x[i] - sx0
+        dy = src.y[i] - sy0
+        dz = src.z[i] - sz0
+        out.t.append(src.t[i])
+        out.x.append(rx0 + (-dz))   # -GT.z
+        out.y.append(ry0 + dx)      # +GT.x
+        out.z.append(rz0 + (-dy))   # -GT.y
+        qx, qy, qz, qw = _quat_mul(q_delta, quats[i])
+        roll_r, pitch_r, yaw_r = quat_to_rpy(type('Q', (), {'x': qx, 'y': qy, 'z': qz, 'w': qw})())
+        out.roll.append(math.degrees(roll_r))
+        out.pitch.append(math.degrees(pitch_r))
+        out.yaw.append(math.degrees(yaw_r))
+    return out
 
 
 def style_axis(ax: Any) -> None:
@@ -240,7 +369,15 @@ def style_axis(ax: Any) -> None:
     ax.spines['right'].set_visible(False)
 
 
-def plot_pair(plt: Any, out: Path, title: str, odom: PoseSeries, path: PoseSeries) -> None:
+def plot_pair(
+    plt: Any,
+    out: Path,
+    title: str,
+    odom: PoseSeries,
+    path: PoseSeries,
+    apriltag: PoseSeries | None = None,
+    body_frame: bool = False,
+) -> None:
     fig, axes = plt.subplots(1, 3, figsize=(18, 5))
     ax_xy, ax_pos, ax_att = axes
 
@@ -260,6 +397,16 @@ def plot_pair(plt: Any, out: Path, title: str, odom: PoseSeries, path: PoseSerie
         ax_att.plot(path.t, path.roll, color='tab:red', alpha=0.62, linewidth=1.5, label='path roll')
         ax_att.plot(path.t, path.pitch, color='tab:red', alpha=0.42, linewidth=1.5, label='path pitch')
         ax_att.plot(path.t, path.yaw, color='tab:red', alpha=0.25, linewidth=1.5, label='path yaw')
+    if apriltag is not None and len(apriltag):
+        ref = path if len(path) else odom
+        at = align_apriltag(apriltag, ref, body_frame=body_frame)
+        ax_xy.plot(at.x, at.y, color=_APRILTAG_COLOR, alpha=0.70, linewidth=1.4, label='AprilTag GT', zorder=0)
+        ax_pos.plot(at.t, at.x, color=_APRILTAG_COLOR, alpha=0.62, linewidth=1.2, label='GT x')
+        ax_pos.plot(at.t, at.y, color=_APRILTAG_COLOR, alpha=0.42, linewidth=1.2, label='GT y')
+        ax_pos.plot(at.t, at.z, color=_APRILTAG_COLOR, alpha=0.25, linewidth=1.2, label='GT z')
+        ax_att.plot(at.t, at.roll, color=_APRILTAG_COLOR, alpha=0.62, linewidth=1.2, label='GT roll')
+        ax_att.plot(at.t, at.pitch, color=_APRILTAG_COLOR, alpha=0.42, linewidth=1.2, label='GT pitch')
+        ax_att.plot(at.t, at.yaw, color=_APRILTAG_COLOR, alpha=0.25, linewidth=1.2, label='GT yaw')
 
     ax_xy.set_title('XY trajectory')
     ax_xy.set_xlabel('x [m]')
@@ -288,7 +435,12 @@ def plot_pair(plt: Any, out: Path, title: str, odom: PoseSeries, path: PoseSerie
     print(f'Wrote {out}')
 
 
-def plot_combined(plt: Any, out: Path, data: dict[str, tuple[PoseSeries, PoseSeries, str]]) -> None:
+def plot_combined(
+    plt: Any,
+    out: Path,
+    data: dict[str, tuple[PoseSeries, PoseSeries, str]],
+    apriltag: PoseSeries | None = None,
+) -> None:
     fig, axes = plt.subplots(2, 3, figsize=(18, 9))
 
     for row, key in enumerate(('orb', 'orb_body')):
@@ -311,6 +463,16 @@ def plot_combined(plt: Any, out: Path, data: dict[str, tuple[PoseSeries, PoseSer
             ax_att.plot(path.t, path.roll, color='tab:red', alpha=0.62, linewidth=1.2, label='path roll')
             ax_att.plot(path.t, path.pitch, color='tab:red', alpha=0.42, linewidth=1.2, label='path pitch')
             ax_att.plot(path.t, path.yaw, color='tab:red', alpha=0.25, linewidth=1.2, label='path yaw')
+        if apriltag is not None and len(apriltag):
+            ref = path if len(path) else odom
+            at = align_apriltag(apriltag, ref, body_frame=(key == 'orb_body'))
+            ax_xy.plot(at.x, at.y, color=_APRILTAG_COLOR, alpha=0.70, linewidth=1.2, label='AprilTag GT', zorder=0)
+            ax_pos.plot(at.t, at.x, color=_APRILTAG_COLOR, alpha=0.62, linewidth=1.0, label='GT x')
+            ax_pos.plot(at.t, at.y, color=_APRILTAG_COLOR, alpha=0.42, linewidth=1.0, label='GT y')
+            ax_pos.plot(at.t, at.z, color=_APRILTAG_COLOR, alpha=0.25, linewidth=1.0, label='GT z')
+            ax_att.plot(at.t, at.roll, color=_APRILTAG_COLOR, alpha=0.62, linewidth=1.0, label='GT roll')
+            ax_att.plot(at.t, at.pitch, color=_APRILTAG_COLOR, alpha=0.42, linewidth=1.0, label='GT pitch')
+            ax_att.plot(at.t, at.yaw, color=_APRILTAG_COLOR, alpha=0.25, linewidth=1.0, label='GT yaw')
 
         ax_xy.set_title(f'{title}: XY')
         ax_xy.set_xlabel('x [m]')
@@ -351,12 +513,13 @@ def main() -> None:
     args = parse_args()
     plt = require_plot_deps()
     out_dir = output_dir_for(args.bag, args.output_dir)
-    data = read_bag(args)
+    data, apriltag = read_bag(args)
 
     warn_missing(data)
     for key, (odom, path, title) in data.items():
-        plot_pair(plt, out_dir / f'{safe_name(key)}_odom_path_compare.png', title, odom, path)
-    plot_combined(plt, out_dir / 'orb_odom_path_compare_all.png', data)
+        plot_pair(plt, out_dir / f'{safe_name(key)}_odom_path_compare.png', title, odom, path, apriltag,
+                  body_frame=key.endswith('_body'))
+    plot_combined(plt, out_dir / 'orb_odom_path_compare_all.png', data, apriltag)
 
     if args.show:
         plt.show()
