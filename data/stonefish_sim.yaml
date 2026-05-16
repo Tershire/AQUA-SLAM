@@ -151,6 +151,20 @@ T_dvl_c: !!opencv-matrix
           0.0,  0.0,  1.0,  0.15,
           0.0,  0.0,  0.0,  1.0 ]
 
+# T_sonar_c: camera_left → SONAR 3D-15.
+# Sonar origin in body NED: xyz="0.55 0 0"  rpy="π/2 0 π/2"  → orientation = RDF (same as camera).
+# Camera origin relative to sonar origin, expressed in sonar RDF frame:
+#   NED offset (cam - sonar): (-0.05, -0.06, 0)  →  sonar RDF: x=-0.06, y=0, z=-0.05
+# Rotation = identity (both sensors share RDF orientation in simulation).
+T_sonar_c: !!opencv-matrix
+  rows: 4
+  cols: 4
+  dt: f
+  data: [ 1.0,  0.0,  0.0, -0.06,
+          0.0,  1.0,  0.0,  0.00,
+          0.0,  0.0,  1.0, -0.05,
+          0.0,  0.0,  0.0,  1.0 ]
+
 DenseMapper:
   enable: 0
   P1: 200.0

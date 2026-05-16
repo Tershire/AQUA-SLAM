@@ -265,6 +265,38 @@ Visualization Manager:
           Value: false
       Enabled: true
       Name: DVL2.0
+    - Class: rviz_common/Group
+      Displays:
+        - Alpha: 1
+          Autocompute Intensity Bounds: true
+          Autocompute Value Bounds:
+            Max Value: 10
+            Min Value: -10
+            Value: true
+          Axis: Z
+          Channel Name: intensity
+          Class: rviz_default_plugins/PointCloud2
+          Color: 160; 32; 240
+          Color Transformer: FlatColor
+          Decay Time: 10.0
+          Enabled: true
+          Invert Rainbow: false
+          Max Color: 255; 255; 255
+          Min Color: 0; 0; 0
+          Name: PointCloud2
+          Position Transformer: XYZ
+          Queue Size: 5
+          Selectable: true
+          Size (Pixels): 2
+          Size (m): 0.009999999776482582
+          Style: Points
+          Topic: /sonar_3d15/points
+          Unreliable: false
+          Use Fixed Frame: false
+          Use rainbow: false
+          Value: true
+      Enabled: true
+      Name: Sonar 3D-15
     - Class: rviz_default_plugins/Image
       Enabled: true
       Topic: /aqua_slam/image/features
@@ -304,7 +336,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 11.132556915283203
+      Distance: 25.0
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -312,17 +344,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: -0.762427568435669
-        Y: -1.3599272966384888
-        Z: 0.017797987908124924
+        X: 8.0
+        Y: 0.0
+        Z: 0.0
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.149796962738037
+      Pitch: 1.5707963267948966
       Target Frame: <Fixed Frame>
-      Yaw: 0.808047890663147
+      Yaw: 1.5707963267948966
     Saved: ~
 Window Geometry:
   Displays:
