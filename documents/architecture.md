@@ -125,8 +125,9 @@ flowchart TD
     SYNC -->|"stereo images + IMU/DVL batch"| TRACK
     TRACK -->|"Keyframe"| LOCAL
     LOCAL <-->|"Map R/W"| ATLAS
-    LOCAL -->|"Global map"| LOOP
-    LOOP --> ROS
+    ATLAS <-->|"Map R/W"| LOOP
+    TRACK -->|"PublishOrb() direct call\n~20 Hz"| ROS
+    ATLAS -->|"polling ~4 Hz\nPublishIntegration()"| ROS
     ROS --> OUT
     LOCAL <-.->|"inactive"| CALIB
 
