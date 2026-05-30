@@ -1,22 +1,33 @@
 # VISO + AQUA-SLAM 통합 계획
 
 **작성일**: 2026-05-30  
-**참고 논문**: VISO: Robust Underwater Visual-Inertial-Sonar SLAM with Photometric Rendering for Dense 3D Reconstruction (arXiv:2601.01144v2, IEEE RA-L 2026)  
+**참고 논문**:
+- VISO: Robust Underwater Visual-Inertial-Sonar SLAM with Photometric Rendering for Dense 3D Reconstruction (arXiv:2601.01144v2, IEEE RA-L 2026)
+- RUSSO: Robust Underwater SLAM with Sonar Optimization against Visual Degradation (arXiv:2503.01434v1, 2025)
+
 **대상 코드**: AQUA-SLAM (IEEE TRO 2025), branch `simulation/stonefish`
 
 ---
 
 ## 1. 배경 및 목표
 
-### 두 시스템의 차이
+### 관련 논문 비교
 
-| 항목 | AQUA-SLAM | VISO |
-|---|---|---|
-| 센서 | DVL + stereo camera + IMU | 3D sonar + stereo camera + IMU |
-| 핵심 기여 | DVL tightly-coupled BA | 3D sonar tightly-coupled BA + dense mapping |
-| 지도 유형 | Sparse ORB feature map | Dense TSDF mesh (photometric rendering) |
-| Loop closure | DBoW2 visual | 없음 |
-| 온라인 교정 | 미구현 (논문에만 기술) | T_CSo coarse-to-fine 구현됨 |
+두 논문을 검토한 결과, VISO를 우선 통합 대상으로 선정하고 RUSSO의 아이디어 일부를 흡수한다.
+
+| 항목 | AQUA-SLAM | VISO | RUSSO |
+|---|---|---|---|
+| 소나 종류 | DVL (velocity) | **3D sonar** (WaterLinked 3D-15) | 2D imaging sonar (Oculus m750d) |
+| 소나 역할 | 항상 fusion | 항상 fusion (primary) | **시각 열화 시 fallback** |
+| 6-DoF (카메라 off) | DVL로 유지 | **full 6-DoF 유지** | **3-DoF만** (z·pitch·roll 불가) |
+| Dense mapping | Sparse + OctoMap | TSDF mesh | 없음 |
+| Loop closure | DBoW2 visual | 없음 | 없음 |
+| 온라인 교정 | 미구현 | T_CSo coarse-to-fine | 없음 |
+| 코드 공개 | GitHub (공개) | 미공개 | GitHub 있으나 **비어 있음** |
+
+**VISO 선택 근거**: 난파선 내부 SAR 미션에서 카메라가 꺼졌을 때 3-DoF로 축소되는 RUSSO는 z축과 자세 추정이 불가능해 치명적. VISO는 3D sonar로 full 6-DoF를 유지하며 dense map도 생성. RUSSO 코드가 공개되었다고 알려졌으나 저장소가 비어 있어 참고 불가.
+
+**RUSSO에서 흡수할 아이디어**: 시각 열화 감지 시 소나 잔차 가중치 α를 자동으로 높이는 adaptive weight 로직 (몇 줄짜리 조건문으로 구현 가능).
 
 ### 통합의 이점 (SAR AUV 미션 기준)
 
@@ -77,7 +88,7 @@ g_ij = C(π_s(T_WIi · T_ISo · P_Soi,j))   ← 소나 포인트에 카메라 �
 
 ## 3. 통합 계획 (단계별)
 
-### 1단계: Sonar Localisation — Local BA에 sonar residual 추가 ⬅ 우선순위 1
+### 1단계: Sonar Localisation — Local BA에 sonar residual 추가 ⬅ 우선순위 1 (VISO 기반)
 
 **목표**: `LocalDVLBundleAdjustment()`를 확장하여 3D sonar 측정을 추가 잔차로 포함
 
@@ -94,9 +105,15 @@ E_total = λ_v · E_visual  +  λ_d · E_DVL  +  λ_r · E_rot  +  λ_s · E_son
 
 **참고**: `EdgeDVLVelocity` (G2oTypes.h) 구조를 그대로 참고하여 `EdgeSonarPoint` 구현
 
+**RUSSO에서 흡수 (1단계 말미에 추가)**: 카메라 tracking feature 수가 임계값 이하로 떨어지면 λ_s를 자동으로 높여 소나 잔차에 더 의존하도록 adaptive weight 로직 추가.
+```cpp
+// 시각 열화 감지 → 소나 가중치 증가
+float lambda_s = (n_tracked_features < VISUAL_DEGRADE_THRESH) ? lambda_s_high : lambda_s_normal;
+```
+
 ---
 
-### 2단계: 3D Sonar 입력 파이프라인 ⬅ 1단계와 병행
+### 2단계: 3D Sonar 입력 파이프라인 ⬅ 1단계와 병행 (VISO 기반)
 
 **목표**: node.cpp에 `SonarGrabber` 스레드 추가, synchronizer에 sonar 통합
 
@@ -193,4 +210,5 @@ DVL ─────────────────┘                      
 - [architecture.md](../architecture.md) — 전체 시스템 구조도
 - [implementation_notes.md](../implementation_notes.md) — 논문-코드 갭 (online calibration 미구현 상세)
 - VISO 논문: arXiv:2601.01144v2
-- AQUA-SLAM 논문: IEEE TRO 2025 (AQUA-SLAM)
+- RUSSO 논문: arXiv:2503.01434v1 (코드 저장소 존재하나 현재 비어 있음)
+- AQUA-SLAM 논문: IEEE TRO 2025
