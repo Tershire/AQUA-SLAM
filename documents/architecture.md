@@ -64,98 +64,82 @@ aqua_slam_ws/
 
 ## 3. 전체 아키텍처 구조도
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                           입력 센서                                       │
-│                                                                          │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────────┐  │
-│  │  Left Camera │  │ Right Camera │  │  IMU 200 Hz  │  │ DVL (var.) │  │
-│  │  612×512 px  │  │  612×512 px  │  │ gyro + accel │  │ velocity   │  │
-│  │    ~20 Hz    │  │    ~20 Hz    │  └──────┬───────┘  └─────┬──────┘  │
-│  └──────┬───────┘  └──────┬───────┘         │                │         │
-└─────────┼─────────────────┼─────────────────┼────────────────┼─────────┘
-          │                 │                 │                │
-          └────────┬────────┘                 └───────┬────────┘
-                   │                                  │
-                   ▼                                  ▼
-   ┌───────────────────────────────────────────────────────────────┐
-   │              node.cpp  —  메시지 동기화 레이어                  │
-   │                                                               │
-   │  ImageGrabber          ImuGrabber          DVLGrabber         │
-   │  imuBuf □□□□□          imuBuf □□□□□        dvlBuf □□□         │
-   │                                                               │
-   │  SyncWithImu() 스레드:                                         │
-   │  1. 좌우 이미지 시간 정렬 (허용 오차 100 ms)                      │
-   │  2. 이미지 사이 구간의 IMU 묶음 수집                             │
-   │  3. DVL → GyroDvlPoint 변환, 최대 1개/프레임으로 제한           │
-   │  → System::TrackStereoGroDVL() 호출                            │
-   └──────────────────────────┬────────────────────────────────────┘
-                              │  (이미지 쌍 + IMU 배열 + DVL 배열)
-                              ▼
-   ┌───────────────────────────────────────────────────────────────┐
-   │                    Tracking  (프레임 단위)                      │
-   │                                                               │
-   │  GrabImageStereoDvlGyro()                                     │
-   │   ├─ ORBextractor: 좌·우 이미지에서 ORB 특징 1000개 추출        │
-   │   ├─ 에피폴라 제약으로 스테레오 매칭 → 깊이(disparity) 계산      │
-   │   └─ Integrator: IMU/DVL 프리인테그레이션 상태 갱신              │
-   │                                                               │
-   │  Track()                                                      │
-   │   ├─ 기준 키프레임 매칭 → 초기 포즈                              │
-   │   ├─ 로컬 맵 투영 매칭 → 포즈 정밀화                             │
-   │   ├─ PoseOptimization()  ← 시각 기반 포즈 (비긴밀 결합)          │
-   │   └─ 신규 키프레임 결정                                          │
-   │                                                               │
-   │  출력: T_c0_cj (카메라 포즈), 속도 추정치                        │
-   └──────────────────────────┬────────────────────────────────────┘
-                              │ 키프레임
-                              ▼
-   ┌───────────────────────────────────────────────────────────────┐
-   │                  LocalMapping  (키프레임 단위)                  │
-   │                                                               │
-   │  ProcessNewKeyframe()                                         │
-   │   ├─ 중복 키프레임 제거 (culling)                               │
-   │   ├─ 스테레오 삼각측량 → 새 MapPoint 생성                        │
-   │   └─ LocalDVLBundleAdjustment()  ◄──── 핵심 혁신               │
-   │        ┌────────────────────────────────────────────┐         │
-   │        │  최소화 목적 함수:                           │         │
-   │        │  E = λ_v·E_visual + λ_d·E_DVL + λ_r·E_rot │         │
-   │        │                                            │         │
-   │        │  E_visual: 시각 재투영 오차 (20 Hz 트랙)    │         │
-   │        │  E_DVL:    DVL 속도 프리인테그레이션 오차    │         │
-   │        │  E_rot:    자이로 회전 프리인테그레이션 오차  │         │
-   │        │                                            │         │
-   │        │  백엔드: g2o Levenberg-Marquardt            │         │
-   │        └────────────────────────────────────────────┘         │
-   │                                                               │
-   │  출력: 정제된 키프레임 포즈, MapPoint 좌표, 속도 추정            │
-   └──────────────────────────┬────────────────────────────────────┘
-                              │ 전역 지도
-                              ▼
-   ┌───────────────────────────────────────────────────────────────┐
-   │                  LoopClosing  (전역 단위)                       │
-   │                                                               │
-   │  DetectLoop()                                                 │
-   │   └─ KeyFrameDatabase(DBoW2): BoW 벡터 유사도 검색             │
-   │                                                               │
-   │  CorrectLoop() / MergeLocal()                                 │
-   │   ├─ Sim3Solver: 7-DoF 변환 추정 (루프 후보 검증)              │
-   │   ├─ 지도 병합 (필요 시 Atlas::MergeMaps())                    │
-   │   └─ OptimizeEssentialGraph(): 포즈 그래프 전역 최적화          │
-   │                                                               │
-   └──────────────────────────┬────────────────────────────────────┘
-                              │
-                              ▼
-   ┌───────────────────────────────────────────────────────────────┐
-   │                RosHandling  (ROS2 발행 레이어)                  │
-   │                                                               │
-   │  PublishOrb()    : 프레임 포즈 → /orb_pose, /orb_odom         │
-   │  PublishPath()   : 키프레임 궤적 → /orb_path                   │
-   │  PublishMap()    : MapPoint → /sparse_map, /octomap            │
-   │  TF broadcast    : aqua_slam → orb_slam                       │
-   │                                                               │
-   │  좌표 변환: mT_w_c0 (중력 정렬, 최초 헤딩 기반, 1회 설정)        │
-   └───────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph SENSORS["① Sensors"]
+        LC["Left Camera\n612×512 px · 20 Hz"]
+        RC["Right Camera\n612×512 px · 20 Hz"]
+        IMU["IMU\ngyro + accel · 200 Hz"]
+        DVL["DVL\nbody velocity · ~5 Hz"]
+    end
+
+    SYNC["② Synchronizer  (node.cpp)\nImageGrabber · ImuGrabber · DVLGrabber\nSyncWithImu() thread"]
+
+    subgraph TRACK["③ Tracking  — per frame, ~20 Hz"]
+        direction TB
+        T1["ORBextractor: 1000 features/image, 8-level pyramid"]
+        T2["Stereo matching (epipolar) → disparity → depth"]
+        T3["PoseOptimization()  — visual-only"]
+        T4["New keyframe decision"]
+        T1 --> T2 --> T3 --> T4
+    end
+
+    subgraph LOCAL["④ LocalMapping  — per keyframe"]
+        direction TB
+        L1["Keyframe culling"]
+        L2["MapPoint triangulation"]
+        L3["⭐ LocalDVLBundleAdjustment()\nE = λv·E_visual + λd·E_DVL + λr·E_rot\ng2o Levenberg-Marquardt"]
+        L1 --> L2 --> L3
+    end
+
+    ATLAS[("Atlas\nMulti-map management\nSub-map merging")]
+
+    subgraph LOOP["⑤ LoopClosing  — global"]
+        direction TB
+        LC1["DBoW2 place recognition"]
+        LC2["Sim3Solver — 7-DoF RANSAC"]
+        LC3["Atlas::MergeMaps()"]
+        LC4["OptimizeEssentialGraph()"]
+        LC1 --> LC2 --> LC3 --> LC4
+    end
+
+    subgraph ROS["⑥ RosHandling  — ROS2 publishing"]
+        direction TB
+        R1["PublishOrb() → /orb_pose, /orb_odom  (~20 Hz)"]
+        R2["PublishPath() → /orb_path  (~4 Hz, BA-refined)"]
+        R3["PublishMap() → /sparse_map, /octomap  (~4 Hz)"]
+        R4["TF broadcast  |  mT_w_c0 transform (set once)"]
+    end
+
+    subgraph OUT["⑦ Output Topics"]
+        direction LR
+        O1["/orb_pose\n/orb_odom"]
+        O2["/orb_path\n/orb_path_body"]
+        O3["/sparse_map\n/octomap"]
+        O4["TF\naqua_slam→orb_slam"]
+    end
+
+    CALIB["🔴 Sensor Calibration\nPaper only · NOT in code\n— T_ID, T_DC extrinsic (Sec. V-A)\n— DVL beam angles α,β (Sec. V-B)"]
+
+    SENSORS --> SYNC
+    SYNC -->|"stereo images + IMU/DVL batch"| TRACK
+    TRACK -->|"Keyframe"| LOCAL
+    LOCAL <-->|"Map R/W"| ATLAS
+    LOCAL -->|"Global map"| LOOP
+    LOOP --> ROS
+    ROS --> OUT
+    LOCAL <-.->|"inactive"| CALIB
+
+    style SENSORS fill:#3A7BD5,color:#fff,stroke:#2C6DB5
+    style SYNC fill:#6C63FF,color:#fff,stroke:#5A4BD1
+    style TRACK fill:#D4820A,color:#fff,stroke:#B06800
+    style LOCAL fill:#C0392B,color:#fff,stroke:#A03020
+    style ATLAS fill:#7F8C8D,color:#fff,stroke:#6A7778
+    style LOOP fill:#27AE60,color:#fff,stroke:#1E8E4E
+    style ROS fill:#2980B9,color:#fff,stroke:#1F6EA0
+    style OUT fill:#2ECC71,color:#fff,stroke:#25A85D
+    style CALIB fill:#8E44AD,color:#fff,stroke:#7D3C98
+    style L3 fill:#8B1A0A,color:#FFE566,stroke:#FF6644
 ```
 
 ---
