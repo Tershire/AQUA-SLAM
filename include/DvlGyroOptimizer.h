@@ -41,6 +41,8 @@ public:
     void static LocalDVLIMUPoseGraph(Atlas* pAtlas, KeyFrame* pKF, Map *pMap);
 	void static FullDVLGyroBundleAdjustment(bool *pbStopFlag, Map *pMap, double lamda_DVL);
 
+	// sonar integration (2026 JUN 20 ~)
+	void static LocalDVLIMUSonarBundleAdjustment(Atlas* pAtlas, KeyFrame* pKF, bool *pbStopFlag, Map *pMap, int& num_fixedKF, double lamda_DVL, double lamda_visual = 1.0);
 
 	int static PoseDvlGyrosOPtimizationLastFrame(Frame *pFrame, bool bRecInit = false);
 	int static PoseDvlGyrosOPtimizationLastKeyFrame(Frame *pFrame, bool bRecInit = false);
