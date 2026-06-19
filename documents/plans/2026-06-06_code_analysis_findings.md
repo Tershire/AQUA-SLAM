@@ -6,16 +6,41 @@
 
 ---
 
-## 1. TrackLocalMapWithDvlGyro() — 주석 처리된 미완성 함수
+## 1. 두 레벨 tightly-coupled 구조 — 현재 구현 gap
 
-**위치**: `src/Tracking.cc`  
-**상태**: 구현되어 있으나 두 곳 모두 주석 처리됨
+**이상적 구조**: sensor fusion은 per-frame tracking(20Hz)과 keyframe BA(~4Hz) 두 레벨에서 모두 tightly-coupled되어야 한다.
 
-현재 Tracking 수준에서는 순수 시각 `PoseOptimization()`만 사용한다. DVL+자이로를 포함한 tracking-level 최적화(`TrackLocalMapWithDvlGyro()`)가 작성되어 있으나 활성화되지 않았다.
+```
+센서 입력 (20Hz)
+    ↓
+[Per-frame tracking]  → /orb_pose, /orb_odom (20Hz)
+  E = λv·E_visual + λd·E_DVL + λr·E_rot
+    ↓ (키프레임 선별 ~4Hz)
+[Keyframe BA]          → /orb_path (~4Hz)
+  슬라이딩 윈도우, 바이어스·속도 최적화
+```
+
+**현재 AQUA-SLAM 구현 상태**:
+
+| 레벨 | 이상 | 현재 | 출력 토픽 |
+|---|---|---|---|
+| Per-frame (~20Hz) | camera + DVL + gyro tightly-coupled | **시각 전용** `PoseOptimization()` | /orb_pose, /orb_odom |
+| Keyframe BA (~4Hz) | camera + DVL + IMU tightly-coupled | **구현됨** `LocalDVLIMUBundleAdjustment()` | /orb_path |
+
+**per-frame 레벨 gap 원인**:  
+`TrackLocalMapWithDvlGyro()`가 작성되어 있으나 두 곳 모두 주석 처리됨 (`src/Tracking.cc` L.2410, L.5111).  
+내부의 `PoseDvlGyrosOPtimizationLastFrame/LastKeyFrame()`은 카메라·DVL·gyro 잔차를 하나의 그래프에서 최적화하는 구조이나 미완성:
+- 자이로 바이어스 고정 (추정 안 함)
+- 속도 상태 없음 (`//todo_tightly: maybe add velocity`)
+- IMU prior edge 주석 처리
+- Jacobian 주석 → 수치 미분 fallback
+
+개발자 코멘트: `"use them make visual tracking easy to lose"` — DVL 노이즈가 tracking을 불안정하게 만들어 비활성화. 미완성 구현 문제도 있음.
 
 **통합 시 의미**:
-- sonar residual을 Tracking 수준에 추가하려면 이 함수를 먼저 활성화하고 sonar 항을 붙이는 것이 자연스러운 경로
-- 단, LocalMapping의 BA에만 추가하는 단순한 경로도 가능 (1단계 통합 계획 기준)
+- **/orb_path는 이미 tightly-coupled** — sonar를 `LocalDVLIMUBundleAdjustment()`에 추가하는 것이 가장 완성도 높고 즉시 적용 가능한 경로 (통합 계획 1단계)
+- per-frame에 sonar를 추가하려면 `TrackLocalMapWithDvlGyro()`의 미완성 항목(바이어스, 속도, Jacobian)을 먼저 완성해야 함 — 선결 과제가 많아 후순위
+- `/orb_pose`가 visual-only라는 사실은 SAR 미션에서 큰 문제가 아님: keyframe BA 결과인 `/orb_path`가 핵심 위치 추정 출력이기 때문
 
 ---
 

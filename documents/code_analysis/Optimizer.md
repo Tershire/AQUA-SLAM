@@ -253,6 +253,8 @@ for (auto sonarPt : pKFi->mvpSonarPoints) {
 
 시각 edge 추가 블록 이후, 최적화 시작(`optimizer.initializeOptimization`) 전에 삽입.
 
+> 상세 분석은 아래 별도 섹션 참조 → [PoseDvlGyrosOPtimizationLastFrame/LastKeyFrame 상세](#posedvlgyrosoptimizationlastframelastkeyframe--단일-프레임-포즈-추적-dvlgyro)
+
 ### 3. 초기화 전 경로: `LocalBundleAdjustment` — `Optimizer.cc` L.3354
 
 MapPoint loop 이후 (L.3664 직후)에 삽입. 단, 초기화 전에는 `VertexPoseDvlIMU` 대신 `VertexSE3Expmap`을 사용하므로 edge vertex 타입 주의.
@@ -262,6 +264,62 @@ MapPoint loop 이후 (L.3664 직후)에 삽입. 단, 초기화 전에는 `Vertex
 DVL edge 추가 블록 (L.4249–4266) 이후에 삽입.
 
 > **인자 추가 필요**: `LocalDVLIMUBundleAdjustment`에 `double lamda_sonar`를 추가하고, `LocalMapping::Run()`에서 `mpTracker->mlamda_sonar`를 함께 전달해야 함.
+
+---
+
+### `PoseDvlGyrosOPtimizationLastFrame/LastKeyFrame` — 단일 프레임 포즈 추적 (DVL+Gyro)
+
+**위치**: `Optimizer.cc` L.10945 (LastFrame), L.11288 (LastKeyFrame)  
+**호출 시점**: `TrackLocalMapWithDvlGyro()` 내부 — 현재 **주석 처리**되어 호출되지 않음.  
+**차이**: LastFrame은 이전 프레임(pFrame->mpPrevFrame)을 기준으로, LastKeyFrame은 이전 키프레임을 기준으로 DVL+Gyro 잔차를 구성.
+
+**g2o 그래프 구성**:
+
+| vertex | 타입 | fixed 여부 |
+|---|---|---|
+| 현재 프레임 포즈 | `VertexPoseDvlIMU` | **최적화 대상** |
+| 이전 프레임/KF 포즈 | `VertexPoseDvlIMU` | **고정** |
+| 자이로 바이어스 | `VertexGyroBias` | **고정** (추정 안 함) |
+| T_dvl_c 외부 교정 | `g2o::VertexSE3Expmap` | 고정 |
+| T_imu_dvl 외부 교정 | `g2o::VertexSE3Expmap` | 고정 |
+
+**edge 구성**:
+
+| edge | 잔차 | 비고 |
+|---|---|---|
+| `EdgeMonoOnlyPose_DvlGyros` | 2D 재투영 | 시각 edge |
+| `EdgeStereoOnlyPose_DvlGyros` | 3D 재투영 | 시각 edge |
+| `EdgeDvlGyroTrack` | 6D (rot 3 + trans 3) | DVL+Gyro 상대 포즈 구속 |
+
+**`EdgeDvlGyroTrack` 잔차 내용** (`G2oTypes.cc` L.2520):
+```
+R_est  = R_gyros_dvl · R_dvl_c · R_ci_cj · R_c_dvl · R_dvl_gyros  ← 카메라 기반 상대 회전
+t_est  = R_dvl_c · (R_ci_cj · R_c_dvl · t_dvl_c - t_dvl_c + R_ci_cj · Δt_c)  ← 카메라 기반 상대 이동
+
+e_R = LogSO3(dR_gyro.T · R_est)  ← gyro preintegration vs. 카메라 회전 불일치
+e_t = t_est - dP_dvl             ← DVL preintegration vs. 카메라 이동 불일치
+```
+
+DVL+gyro 측정과 카메라 추정 간 상대 포즈 불일치를 하나의 g2o 그래프에서 시각 잔차와 함께 최소화 → **구조상 tightly-coupled**.
+
+**미완성 항목** (`//todo_tightly` 주석 3곳):
+
+| 항목 | 현재 상태 |
+|---|---|
+| 자이로 바이어스 | 고정 — 갱신 안 됨 |
+| 속도 상태 | 없음 ("maybe add velocity to optimization" 주석) |
+| IMU prior edge | `EdgePriorPoseImu` 주석 처리 — 이전 프레임의 공분산 전파 없음 |
+| Jacobian (linearizeOplus) | 주석 처리 → 수치 미분 fallback |
+
+**`LocalDVLIMUBundleAdjustment`와 비교**:
+
+| 항목 | PoseDvlGyrosOPtimization | LocalDVLIMUBundleAdjustment |
+|---|---|---|
+| 범위 | 단일 프레임 | 슬라이딩 윈도우 (최대 10 KF) |
+| 자이로 바이어스 | 고정 | **최적화** |
+| 속도 상태 | 없음 | **최적화** |
+| 공분산 전파 | 없음 | preintegration 공분산 사용 |
+| 활성 상태 | 미활성 (주석) | **활성** |
 
 ---
 
