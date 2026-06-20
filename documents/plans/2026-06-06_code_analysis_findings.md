@@ -38,7 +38,7 @@
 개발자 코멘트: `"use them make visual tracking easy to lose"` — DVL 노이즈가 tracking을 불안정하게 만들어 비활성화. 미완성 구현 문제도 있음.
 
 **통합 시 의미**:
-- **/orb_path는 이미 tightly-coupled** — sonar를 `LocalDVLIMUBundleAdjustment()`에 추가하는 것이 가장 완성도 높고 즉시 적용 가능한 경로 (통합 계획 1단계)
+- **/orb_path는 이미 tightly-coupled** — sonar를 `LocalDVLIMUSonarBundleAdjustment()`에 추가하는 것이 가장 완성도 높고 즉시 적용 가능한 경로 (통합 계획 1단계)
 - per-frame에 sonar를 추가하려면 `TrackLocalMapWithDvlGyro()`의 미완성 항목(바이어스, 속도, Jacobian)을 먼저 완성해야 함 — 선결 과제가 많아 후순위
 - `/orb_pose`가 visual-only라는 사실은 SAR 미션에서 큰 문제가 아님: keyframe BA 결과인 `/orb_path`가 핵심 위치 추정 출력이기 때문
 
@@ -52,7 +52,7 @@
 수치 미분은 해석 미분보다 느리고 정밀도도 낮다. 특히 sonar residual처럼 새 edge를 추가할 때 같은 방식으로 구현하면 성능 저하가 누적된다.
 
 **통합 시 의미**:
-- `EdgeSonarPoint` 구현 시 **해석 Jacobian을 직접 유도해서 작성**하는 것이 권장됨
+- `EdgeSonar` 구현 시 **해석 Jacobian을 직접 유도해서 작성**하는 것이 권장됨
 - 기존 `EdgeDvlIMU`의 수치 미분도 장기적으로는 해석 Jacobian으로 교체 검토 필요
 
 ---
@@ -65,7 +65,7 @@
 `EdgeDvlIMU`는 초기화(`DvlIMUInitOptimization`) 등에서 사용되고, Local BA에서는 `EdgeSE3DVLBA`가 DVL 구속 조건을 담당한다.
 
 **통합 시 의미**:
-- `EdgeSonarPoint`를 Local BA에 추가할 때 참고해야 할 구조는 `EdgeDvlIMU`가 아닌 **`EdgeSE3DVLBA`**
+- `EdgeSonar`를 Local BA에 추가할 때 참고해야 할 구조는 `EdgeDvlIMU`가 아닌 **`EdgeSE3DVLBA`**
 - `include/G2oTypes.h`에서 `EdgeSE3DVLBA` 구조를 먼저 파악할 것
 
 ---
@@ -104,7 +104,6 @@ KF가 제거되지 않아 장시간 운용 시 메모리와 BA 계산량이 계�
 RUSSO의 adaptive weight 아이디어(시각 열화 시 sonar 가중치 λ_s 증가)를 구현하려면 이 플래그를 확인하거나, 직접 tracked feature 수를 체크하면 된다.
 
 ```cpp
-// 구현 예시 (DvlGyroOptimizer.cpp 내 LocalDVLIMUBundleAdjustment 진입부)
 float lambda_s = (n_tracked_features < VISUAL_DEGRADE_THRESH)
                  ? lambda_s_high : lambda_s_normal;
 ```
@@ -130,13 +129,23 @@ sonar 입력을 추가할 때 동일한 벡터에 혼합하는 방식은 지양�
 
 ---
 
+## 9. sonar edge 네이밍 및 설계 방향
+
+기존 코드 컨벤션에 맞춰 sonar BA edge는 **`EdgeSonar`** 로 명명한다.
+
+카메라 edge가 BA / Pose-only / DVL-gyro variant 세 축으로 분화된 것과 달리, sonar는 현재 keyframe BA(`LocalDVLIMUSonarBundleAdjustment`)에만 추가하므로 `EdgeSonar` 하나로 충분하다. per-frame tracking(`TrackLocalMapWithDvlGyro`)이 활성화될 때 `EdgeSonarOnlyPose`가 추가로 필요해진다.
+
+소나 점은 fixed anchor로 처리 (map point처럼 vertex로 올리지 않음) — VISO Eq.10 스타일.
+
+---
+
 ## 요약 — 통합 작업 전 확인 사항
 
 | 항목 | 파일 | 조치 필요 여부 |
 |---|---|---|
 | `TrackLocalMapWithDvlGyro()` 활성화 | `Tracking.cc` | 선택 (1단계 이후) |
-| `EdgeSE3DVLBA` 구조 파악 | `G2oTypes.h` | **필수** (EdgeSonarPoint 설계 전) |
-| `EdgeSonarPoint` Jacobian 해석 유도 | 신규 | **필수** |
+| `EdgeSonar` 정의 및 Jacobian 유도 | `G2oTypes.h` (신규) | **필수** |
+| `LocalDVLIMUSonarBundleAdjustment` sonar edge 삽입 | `DvlGyroOptimizer.cpp` | **필수** |
 | `KeyFrameCulling()` 재활성화 검토 | `LocalMapping.cc` | 권장 |
 | sonar 입력을 별도 큐로 분리 | `node.cpp` | **권장** |
 | `mPoorVision` 플래그 기반 adaptive λ_s | `Tracking.cc` / `DvlGyroOptimizer.cpp` | 선택 (RUSSO 아이디어) |

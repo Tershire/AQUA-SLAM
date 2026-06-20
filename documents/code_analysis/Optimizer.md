@@ -58,7 +58,35 @@
 | `FullDVLGyroBundleAdjustment(pbStopFlag, pMap, lamda_DVL)` | 전체 맵 DVL+Gyro BA |
 | `PoseDvlGyrosOPtimizationLastFrame(pFrame, ...)` | 단일 프레임 포즈 추적 (DVL+Gyro) |
 | `PoseDvlGyrosOPtimizationLastKeyFrame(pFrame, ...)` | 단일 프레임 포즈 추적 (DVL+Gyro, 마지막 KF 기준) |
+| `LocalDVLIMUSonarBundleAdjustment(pAtlas, pKF, ...)` | sonar residual 추가 예정 BA (현재 메인 BA와 동일, EdgeSonar 미삽입) |
 | `DvlGyroInitOptimization(pMap, bg, ...)` | DVL+Gyro 초기화: 외부 파라미터 T_dvl_c 추정 |
+
+---
+
+## BA 함수별 edge 구성 비교
+
+각 BA 함수에서 실제로 `new Edge*()`로 생성되는 edge 목록. 호출 여부와 무관하게 코드 상 존재하는 것 기준.
+
+| 함수 | 시각 | DVL/IMU | 바이어스 | 활성 여부 |
+|---|---|---|---|---|
+| `LocalDVLBundleAdjustment` | EdgeMonoBA_DvlGyros / EdgeStereoBA_DvlGyros | **EdgeSE3DVLBA** (KF간 상대변환) | — | 초기화 전 |
+| `LocalDVLGyroBundleAdjustment` | EdgeMonoBA_DvlGyros / EdgeStereoBA_DvlGyros | **EdgeDvlGyroBA** | — | 미확인 |
+| **`LocalDVLIMUBundleAdjustment`** | EdgeMonoBA_DvlGyros / EdgeStereoBA_DvlGyros | **EdgeDvlIMU** + **EdgeDvlIMU2** | EdgeAccRW + EdgeGyroRW | **메인 (활성)** |
+| `LocalDVLIMUBundleAdjustment2` | EdgeMonoBA_DvlGyros / EdgeStereoBA_DvlGyros | **EdgeDvlVelocity** ×2 + **EdgeDvlGyroBA** | EdgeAccRW | 변형 버전 |
+| `FullDVLIMUBundleAdjustment` | EdgeMonoBA_DvlGyros / EdgeStereoBA_DvlGyros | EdgeDvlIMU + EdgeDvlIMU2 | EdgeAccRW + EdgeGyroRW | 전체맵 BA |
+| `LocalDVLIMUSonarBundleAdjustment` | EdgeMonoBA_DvlGyros / EdgeStereoBA_DvlGyros | EdgeDvlIMU + EdgeDvlIMU2 | EdgeAccRW + EdgeGyroRW | **EdgeSonar 추가 예정** |
+
+### DVL/IMU edge 역할 구분
+
+| edge | 잔차 내용 | 비고 |
+|---|---|---|
+| `EdgeSE3DVLBA` | KF 쌍 간 DVL 상대변환 (6D) | IMU 없음, 초기화 전 전용 |
+| `EdgeDvlIMU` | DVL+IMU preintegration: 회전·속도·위치 (9D) | IMU 공분산 사용 |
+| `EdgeDvlIMU2` | DVL 속도(vi, vj) + DVL 위치 preintegration (9D) | 고정 정보행렬 diag(1e5) |
+| `EdgeDvlGyroBA` | DVL+Gyro preintegration (6D) | LocalDVLIMUBundleAdjustment2 전용 |
+| `EdgeDvlVelocity` | DVL 측정 속도 → VertexVelocity 직접 구속 (3D) | LocalDVLIMUBundleAdjustment2 전용 |
+
+> **메인 BA(`LocalDVLIMUBundleAdjustment`)는 `EdgeDvlIMU`와 `EdgeDvlIMU2`를 동일 KF 쌍에 동시 추가**한다. 두 edge가 서로 다른 residual(IMU preintegration vs. DVL 속도·위치)을 제공하는 의도적 중복.
 
 ---
 
