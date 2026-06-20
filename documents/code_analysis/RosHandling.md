@@ -6,6 +6,23 @@
 
 ---
 
+## 핵심 토픽 발행 방식 비교
+
+두 발행 경로는 방식과 의미가 근본적으로 다르다.
+
+| 항목 | `/orb_pose` (`/orb_odom`) | `/orb_path` |
+|---|---|---|
+| **발행 방식** | 이벤트 (push) | polling (pull) |
+| **발행 주체** | Tracking 스레드 → `PublishOrb()` 직접 호출 | RosHandling::Run() 스레드 (`sleep(250ms)`) |
+| **주기** | ~20Hz (카메라 프레임 속도) | ~4Hz (고정) |
+| **내용** | **현재 프레임 포즈 1개** (가장 최신) | **지금까지의 전체 KF 경로** (누적, 매번 재구성) |
+| **최적화 반영** | visual-only `PoseOptimization()` 결과 | BA-refined KF 포즈 (LocalDVLIMUBundleAdjustment 결과) |
+| **메시지 타입** | `PoseStamped` / `Odometry` | `nav_msgs/Path` |
+
+> `/orb_path`는 "현재 BA 결과"가 아니라 **Atlas의 모든 KF 포즈를 매 polling마다 전부 재구성해 발행**한다. BA가 과거 KF 포즈를 소급 수정하면 다음 polling 때 자동으로 반영된다.
+
+---
+
 ## 전체 구조
 
 ```
