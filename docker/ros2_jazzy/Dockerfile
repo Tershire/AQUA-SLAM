@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-tf2-sensor-msgs \
     ros-jazzy-tf2-geometry-msgs \
     ros-jazzy-pcl-conversions \
+    ros-jazzy-foxglove-bridge \
     && rm -rf /var/lib/apt/lists/*
 
 # install dependencies
