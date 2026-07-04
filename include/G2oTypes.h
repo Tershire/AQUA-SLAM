@@ -2038,6 +2038,12 @@ public:
 
 };
 
+// sonar integration (2026 JUN 20 ~)
+class EdgeSonar
+{
+    // TODO
+};
+
 } // namespace ORB_SLAM3
 
 #endif // G2OTYPES_H
