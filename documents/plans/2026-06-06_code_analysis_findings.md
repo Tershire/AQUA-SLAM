@@ -139,6 +139,28 @@ sonar 입력을 추가할 때 동일한 벡터에 혼합하는 방식은 지양�
 
 ---
 
+## 10. ROS1(upstream) vs ROS2 포팅 검증 결과
+
+**배경**: EdgeSonar 작업을 이어가기 전에, 포팅된 코드(`migration/ros2` 브랜치, 현재 `simulation/stonefish`의 기반)가 원본 ROS1 코드(`upstream/main`, SenseRoboticsLab 공식 저장소, `main` 브랜치와 byte-identical)와 알고리즘적으로 동일하게 동작하는지 검증. `upstream` remote를 추가/fetch하여 핵심 파일 diff를 비교.
+
+**결론**: 포팅은 거의 전부 기계적 변환(ROS1→ROS2 로깅/메시지, OpenCV3→4 enum, `mT_gyro_dvl`→`mT_imu_dvl` 등 필드 리네이밍)이며, 핵심 SLAM 알고리즘(`Optimizer.cc`, `g2o_BA.cpp`)은 로직 변경 없음. 발견된 예외 3건:
+
+1. **`PnPsolver.cc::find_betas_approx_1` 부호 버그 — 영향 없음**
+   upstream은 `b4[0] < 0`일 때 `betas[1..3]`에도 부호 반전을 적용하는데, 포팅본은 `betas[0] = sqrt(fabs(b4[0]))`만 남기고 나머지 반전이 누락됨 (`find_betas_approx_2/3`는 정상 보존). `PnPsolver` 클래스는 upstream·포팅본 모두 인스턴스화되지 않는 dead code (relocalization은 `MLPnPsolver` 사용) → 현재 영향 없음. 이 클래스를 나중에 재사용할 경우에만 한 줄 수정 필요.
+
+2. **`Tracking.cc::StereoInitialization()` — mpLastKeyFrame NULL assert 제거: 검증됨, 정당한 완화**
+   upstream: `else if (pKFini->mnId != 0) { assert(mpLastKeyFrame); }` → 포팅본: 주석으로 대체.
+   `KeyFrame::nNextId`(`src/KeyFrame.cc:31`)는 프로세스 전역 static 카운터. tracking LOST 시(`Tracking.cc:2305-2325`) `CreateMapInAtlas()`로 새 서브맵을 만들며 `mpLastKeyFrame`을 명시적으로 NULL 처리하는데(`Tracking.cc:2318-2319`), 이때 새로 생성되는 KF의 `mnId`는 전역 카운터를 이어받으므로 0이 아님. 즉 "mnId≠0인데 mpLastKeyFrame==NULL"은 **멀티맵 재초기화의 정상 경로**이며, upstream의 assert는 이 정상 경로에서 (디버그 빌드라면) 매번 실패했을 것으로 보임. 포팅본의 제거는 버그가 아니라 원본의 과도한 체크를 고친 것으로 판단.
+
+3. **`Tracking.cc::CreateNewKeyFrame()` — mpLastKeyFrame NULL assert 제거: 미해결**
+   동일 패턴의 assert 제거이나, 이 함수는 `NeedNewKeyFrame()`을 통해 트래킹이 이미 `[OK]` 상태(= `StereoInitialization()`이 `mpLastKeyFrame`을 이미 세팅한 이후)에만 호출됨. 2번과 달리 이 조건이 실제로 발생하는 정상 경로를 아직 확인하지 못함 (loss-integration 분기까지는 추적 안 함). sonar 통합과 직접 관련 없어 보류하되, 추후 KF 연결 관련 문제가 관찰되면 재확인 대상.
+
+참고로 `Tracking.cc`에 추가된 `T_body_imu` 파라미터, `LocalMapping.cc::GetTravelDistance()`의 SVD 재직교화는 검토 결과 의도적이고 정당한 개선으로 확인됨 (각각 [coordinate_frames.md](../coordinate_frames.md), float→double 변환 시 `Sophus::SO3` assert 방지).
+
+**통합 작업 관점에서 결론**: 위 3건 모두 sonar 통합이 딛고 설 기반 함수(`Optimizer.cc`, `g2o_BA.cpp`, DVL/IMU 관련 로직)에는 영향 없음 → **알고리즘 기반은 원본과 동일하다고 보고 다음 단계(EdgeSonar 구현) 진행 가능**.
+
+---
+
 ## 요약 — 통합 작업 전 확인 사항
 
 | 항목 | 파일 | 조치 필요 여부 |
@@ -149,3 +171,4 @@ sonar 입력을 추가할 때 동일한 벡터에 혼합하는 방식은 지양�
 | `KeyFrameCulling()` 재활성화 검토 | `LocalMapping.cc` | 권장 |
 | sonar 입력을 별도 큐로 분리 | `node.cpp` | **권장** |
 | `mPoorVision` 플래그 기반 adaptive λ_s | `Tracking.cc` / `DvlGyroOptimizer.cpp` | 선택 (RUSSO 아이디어) |
+| ROS1 upstream 포팅 검증 (항목 10) | `Tracking.cc`, `PnPsolver.cc` | 완료 — 알고리즘 기반 동일 확인, `CreateNewKeyFrame()` 케이스만 미해결 보류 |
